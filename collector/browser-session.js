@@ -229,6 +229,7 @@ async function createBrowserSession(browser_args, browser_logger) {
         await page.screenshot({
           path: path.join(args.output, "screenshot-top.png"),
         });
+        // TODO: consider using some other method that the website can't prevent on runtime by redefining functions.
         await page.evaluate(() => {
           window.scrollTo(0, document.body.scrollHeight);
         });

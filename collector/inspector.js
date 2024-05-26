@@ -14,6 +14,7 @@ const {
 
 async function collectLinks(page, logger) {
   // get all links from page
+  // TODO: Use another method for doing this. A website redefining Array.from may cause an error.
   const links_all_with_duplicates = await page.evaluate(() => {
     return Array.from(document.querySelectorAll("a[href]"), (a) => {
         return {
@@ -94,6 +95,7 @@ async function filterKeywords(links) {
 }
 
 async function unsafeWebforms(page) {
+  // TODO: Use another method for doing this. A website redefining Array.from may cause an error.
   return await page.evaluate(() => {
     return [].map
       .call(Array.from(document.querySelectorAll("form")), (form) => {
