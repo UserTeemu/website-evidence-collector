@@ -22,7 +22,9 @@ async function run(args, logger) {
   await collect.createSession();
 
   //test the ssl and https connection
-  await collect.testConnection();
+  if (new URL(args.url).protocol !== "file:") {
+    await collect.testConnection();
+  }
 
   // go to the target url specified in the args - also possible to overload with a custom url.
   await collect.getPage();
