@@ -14,27 +14,49 @@ const {
 
 async function collectLinks(page, logger) {
   // get all links from page
-  // TODO: Use another method for doing this. A website redefining Array.from may cause an error.
-  const links_all_with_duplicates = await page.evaluate(() => {
-    return Array.from(document.querySelectorAll("a[href]"), (a) => {
-        return {
-          href: a.href.toString().split("#").shift(), // link without fragment
-          inner_text: a.innerText,
-          inner_html: a.innerHTML.trim(),
-        }
-    });
-  });
-  
-  const links_http_with_duplicates = links_all_with_duplicates.filter((link) => {
-    if (link.href === '[object SVGAnimatedString]') {
-      logger.log('warn', 'Unsupported SVG link detected and discarded', link);
-    }
-    return link.href.startsWith("http");
-  });
-  
-  const links_http_without_duplicates = Array.from(new Set(links_http_with_duplicates));
+  const elements = await page.$$("a[href]");
 
-  return links_http_without_duplicates;
+  const links_with_duplicates = await Promise.all(elements.map(async element => {
+    const outObject = {
+      href: await getElementProperty(element, "href"),
+      inner_text: await getElementProperty(element, "innerText"),
+      inner_html: (await getElementProperty(element, "innerHTML")).trim()
+    };
+
+    if (outObject.href === '[object SVGAnimatedString]') {
+      logger.log('warn', 'Unsupported SVG link detected and discarded', outObject.href);
+      return [];
+    }
+
+    const contentFrame = await element.contentFrame();
+    const parentURL = (contentFrame ?? page).url();
+
+    // Parse URL
+    let href;
+    try {
+      href = new URL(outObject.href, parentURL);
+    } catch (e) {
+      return []; // Skip invalid URLs.
+    }
+    href.fragment = ""; // link without fragment
+
+    if (href.protocol !== "http:" && href.protocol !== "https:") {
+      return []; // Skip non-HTTP(S) links.
+    }
+
+    outObject.href = href.toString();
+    return outObject;
+  })).then(array => array.flat());
+
+  const links_without_duplicates = Array.from(new Set(links_with_duplicates));
+
+  return links_without_duplicates;
+}
+
+async function getElementProperty(element, propertyName) {
+  const property = await element.getProperty(propertyName);
+  const propertyObject = await property.remoteObject();
+  return propertyObject.value;
 }
 
 async function mapLinksToParties(links, hosts, refs_regexp) {
@@ -95,21 +117,29 @@ async function filterKeywords(links) {
 }
 
 async function unsafeWebforms(page) {
-  // TODO: Use another method for doing this. A website redefining Array.from may cause an error.
-  return await page.evaluate(() => {
-    return [].map
-      .call(Array.from(document.querySelectorAll("form")), (form) => {
-        return {
-          id: form.id,
-          action: new URL(form.getAttribute("action"), form.baseURI).toString(),
-          method: form.method,
-        };
-      })
-      .filter((form) => {
-        return form.action.startsWith("http:");
-      });
-  });
+  const forms = await page.$$("form");
+
+  return Promise.all(forms.map(async form => {
+    const outObject = {};
+
+    for (const propertyName of ["id", "action", "method"]) {
+      outObject[propertyName] = await getElementProperty(form, propertyName);
+    }
+
+    const contentFrame = await form.contentFrame();
+    const parentURL = (contentFrame ?? page).url();
+    const actionURL = new URL(outObject.action, parentURL);
+
+    if (actionURL.protocol === "http:") {
+      // The form is insecure
+      return outObject;
+    } else {
+      // The form is using a secure protocol (HTTPS), so it does not need to be collected.
+      return [];
+    }
+  })).then(array => array.flat());
 }
+
 async function collectCookies(page, start_time) {
   // example from https://stackoverflow.com/a/50290081/1407622
   const cookies = (await page._client().send("Network.getAllCookies")).cookies

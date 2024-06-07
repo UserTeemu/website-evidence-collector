@@ -7,10 +7,21 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-
     <title>Pricing example for Bootstrap</title>
 
-    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/pricing/"> 
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/pricing/">
+
+    <script>
+      // This script causes unexpected behavior for many eval calls because this tries to destroy the JavaScript environment.
+      let hijacker = function () {
+        console.log("The test website has hijacked your attempt to use JavaScript!")
+      };
+
+      Array.from = hijacker;
+      document.querySelectorAll = hijacker;
+      document.querySelector = hijacker;
+      document.documentElement = null;
+    </script>
   </head>
 
   <body>
