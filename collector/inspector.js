@@ -17,16 +17,17 @@ async function collectLinks(page, logger) {
   const elements = await page.$$("a[href]");
 
   const links_with_duplicates = await Promise.all(elements.map(async element => {
+    const remoteElement = await element.remoteObject();
+    if (remoteElement.className !== 'HTMLAnchorElement') {
+      logger.log('warn', 'Unsupported link detected and discarded', remoteElement);
+      return [];
+    }
+
     const outObject = {
       href: await getElementProperty(element, "href"),
       inner_text: await getElementProperty(element, "innerText"),
       inner_html: (await getElementProperty(element, "innerHTML")).trim()
     };
-
-    if (outObject.href === '[object SVGAnimatedString]') {
-      logger.log('warn', 'Unsupported SVG link detected and discarded', outObject.href);
-      return [];
-    }
 
     const contentFrame = await element.contentFrame();
     const parentURL = (contentFrame ?? page).url();
