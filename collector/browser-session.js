@@ -26,6 +26,7 @@ const {
   isFirstParty,
   getLocalStorage,
 } = require("../lib/tools");
+const {TimeoutError} = require("puppeteer");
 
 async function createBrowserSession(browser_args, browser_logger) {
   let page, hosts, har, webSocketLog, browser_context, logger, args;
@@ -185,11 +186,20 @@ async function createBrowserSession(browser_args, browser_logger) {
           timeout: args.pageTimeout,
           waitUntil: "networkidle2",
         });
-
-        await page.waitForNetworkIdle();
       } catch (error) {
         logger.log("error", error.message, { type: "Browser" });
         process.exit(2);
+      }
+
+      try {
+        await page.waitForNetworkIdle();
+      } catch (error) {
+        if (error instanceof TimeoutError) {
+          logger.log("warn", "The network did not become idle within the expected time period. Continuing anyway...")
+        } else {
+          // We only catch TimeoutErrors here.
+          throw error;
+        }
       }
 
       return page_response;
