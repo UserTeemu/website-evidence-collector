@@ -164,8 +164,7 @@ function reporter(args) {
         }
       } else {
         if(filename.endsWith(".odt")) {
-          console.error("To generate .odt, you must have pandoc installed and specify --use-pandoc.");
-          process.exit(1);
+          throw new Error("To generate .odt, you must have pandoc installed and specify --use-pandoc.");
         }
         
         // console.warn("Using NPM html-to-docx to generate", filename);

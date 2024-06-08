@@ -188,7 +188,7 @@ async function createBrowserSession(browser_args, browser_logger) {
         });
       } catch (error) {
         logger.log("error", error.message, { type: "Browser" });
-        process.exit(2);
+        throw error;
       }
 
       try {
@@ -197,7 +197,7 @@ async function createBrowserSession(browser_args, browser_logger) {
         if (error instanceof TimeoutError) {
           logger.log("warn", "The network did not become idle within the expected time period. Continuing anyway...")
         } else {
-          // We only catch TimeoutErrors here.
+          logger.log("error", error.message, { type: "Browser" });
           throw error;
         }
       }
