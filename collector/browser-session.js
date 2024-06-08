@@ -133,12 +133,12 @@ async function createBrowserSession(browser_args, browser_logger) {
     page.on("request", (request) => {
       const l = url.parse(request.url());
       // note that hosts may appear as first and third party depending on the path
+      if (l.protocol === "data:" || l.protocol === "blob:") return;
+
       if (isFirstParty(refs_regexp, l)) {
         hosts.requests.firstParty.add(l.hostname);
       } else {
-        if (l.protocol != "data:") {
-          hosts.requests.thirdParty.add(l.hostname);
-        }
+        hosts.requests.thirdParty.add(l.hostname);
       }
     });
     
