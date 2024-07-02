@@ -81,7 +81,9 @@ async function inspector(args, logger, pageSession, output) {
           expires: event_cookie.expires,
           log: event_cookie.log,
         };
-        if(!event_cookie.expires) {
+        // ToughCookie library defaults session cookies to infinity
+        // https://github.com/salesforce/tough-cookie/blob/master/lib/cookie/cookie.ts#L406
+        if(!event_cookie.expires || event_cookie.expires == 'Infinity') {
           cookie.expires = -1;
           cookie.session = true;
         } else {
