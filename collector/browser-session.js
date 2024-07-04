@@ -34,7 +34,7 @@ async function createBrowserSession(browser_args, browser_logger) {
   logger = browser_logger;
 
   const browser = await puppeteer.launch({
-    // https://developer.chrome.com/articles/new-headless/.
+    // https://developer.chrome.com/articles/new-headless/
     headless: args.headless ? 'new' : false,
     defaultViewport: {
       width: WindowSize.width,
