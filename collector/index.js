@@ -65,7 +65,7 @@ async function collector(args, logger) {
     c.output.uri_dest = c.pageSession.page.url();
     c.source = await c.pageSession.page.content();
 
-    await c.pageSession.page.waitForTimeout(args.sleep); // in ms
+    await new Promise(resolve => setTimeout(resolve, args.sleep)); // in ms
 
     // record screenshots
     if (c.args.output && c.args.screenshots) {
