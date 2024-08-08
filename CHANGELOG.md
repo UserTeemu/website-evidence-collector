@@ -6,6 +6,7 @@
 * fix: fix wrong classification of session cookies as permanent cookies in the logs and for those cookies deleted during the scan also in the inspection data
 * dependencies: update puppeteer and use Chromium 126.0.6478.126
 * refactor: it seems that a call of `page.waitForNetworkIdle()` has no effect in tests and can be removed
+* fix: for deduplication of links, consider only the `href` attribute (truncated from anchor) and not `inner_text` or `inner_html`
 
 ## 2.1.2 / 2024-04-25
 

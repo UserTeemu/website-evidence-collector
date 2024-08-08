@@ -31,7 +31,8 @@ async function collectLinks(page, logger) {
     return link.href.startsWith("http");
   });
   
-  const links_http_without_duplicates = Array.from(new Set(links_http_with_duplicates));
+  // https://stackoverflow.com/a/70406623/1407622
+  const links_http_without_duplicates = Array.from(new Map(links_http_with_duplicates.map(v => [v.href, v])).values())
 
   return links_http_without_duplicates;
 }
