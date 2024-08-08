@@ -8,6 +8,7 @@
 * refactor: it seems that a call of `page.waitForNetworkIdle()` has no effect in tests and can be removed
 * fix: for deduplication of links, consider only the `href` attribute (truncated from anchor) and not `inner_text` or `inner_html`
 * node version: bump minimum required node version to v20, which is the active LTS (long term support) version
+* fix: avoid rescanning of start page when scanning random subset of links with `--max`
 
 ## 2.1.2 / 2024-04-25
 

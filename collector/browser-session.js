@@ -205,14 +205,12 @@ async function createBrowserSession(browser_args, browser_logger) {
       firstPartyLinks,
       userSet
     ) {
-      let browse_links = sampleSize(firstPartyLinks, args.max - userSet.length - 1);
+      const preset_links = [page.url(), ...userSet];
+      const extra_links  = (firstPartyLinks.map(l => l.href)).filter(l => !preset_links.includes(l));
+      const random_links = sampleSize(extra_links, args.max - preset_links.length); // can be empty!
+      const browsing_history = [root_uri,...userSet,...random_links];
 
-      let browsing_history = [root_uri].concat(
-        userSet,
-        browse_links.map((l) => l.href)
-      );
-
-      for (const link of browsing_history.slice(1)) {
+      for (const link of browsing_history.slice(1)) { // can have zero iterations!
         try {
           // check mime-type and skip if not html
           const head = await got(link, {
