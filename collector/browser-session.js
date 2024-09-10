@@ -154,6 +154,8 @@ async function createBrowserSession(browser_args, browser_logger) {
               if (match == null || match.length == 0 || match[0].match(refs_regexp)) {
                 if(hostname.startsWith('\'nonce-')) {
                   hosts.contentSecurityPolicy.firstParty.add('\'nonce-...\'');
+                } else if(hostname.startsWith('\'sha256-')) {
+                  hosts.contentSecurityPolicy.firstParty.add('\'sha256-...\'');
                 } else {
                   hosts.contentSecurityPolicy.firstParty.add(hostname);
                 }
