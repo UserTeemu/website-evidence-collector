@@ -93,6 +93,8 @@ function reporter(args) {
     if (log && c.args.html) {
       console.log(html_dump);
     }
+
+    return html_dump;
   };
 
   c.convertHtmlToPdf = async function (htmlfilename = "inspection.html", pdffilename = "inspection.pdf") {

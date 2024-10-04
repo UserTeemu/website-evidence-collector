@@ -89,7 +89,7 @@ async function run(args, logger) {
   report.saveYaml(collect.output, "inspection.yml");
 
   // store html on disk
-  report.generateHtml(collect.output);
+  let html_output=report.generateHtml(collect.output);
   
   // store docx on disk
   await report.generateOfficeDoc(collect.output);
@@ -100,7 +100,8 @@ async function run(args, logger) {
   // store source on disk
   report.saveSource(collect.source);
 
-  return collect.output;
+  //return collect.output;
+  return html_output;
 }
 
 module.exports = run;

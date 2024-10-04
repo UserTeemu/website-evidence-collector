@@ -15,6 +15,6 @@ const argv = require("../lib/argv");
 const logger = require("../lib/logger");
 
 (async () => {
-  let args = argv.parse();
-  await collector(args, logger.create({}, args));
+    let args = argv.parse();
+    await collector(args, logger.create({}, args));
 })();
