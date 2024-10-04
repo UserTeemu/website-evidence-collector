@@ -163,11 +163,11 @@ html(xmlns='http://www.w3.org/1999/xhtml', xml:lang='en', lang='en')
 
     if script.config.screenshots
       figure
-        img(src=`${jsondir}/screenshot-top.png` alt="Webpage Top Screenshot" id="fig:screenshot-top" style="width:100.0%")
+        img(src=`data:image/png;base64,${screenshots.screenshot_top}` alt="Webpage Top Screenshot" id="fig:screenshot-top" style="width:100.0%")
         figcaption Webpage Top Screenshot
 
       figure
-        img(src=`${jsondir}/screenshot-bottom.png` alt="Webpage Bottom Screenshot" id="fig:screenshot-bottom" style="width:100.0%")
+        img(src=`data:image/png;base64,${screenshots.screenshot_bottom}` alt="Webpage Bottom Screenshot" id="fig:screenshot-bottom" style="width:100.0%")
         figcaption Webpage Bottom Screenshot
 
     h2(id="sec:use-of-httpsssl") Use of HTTPS/SSL

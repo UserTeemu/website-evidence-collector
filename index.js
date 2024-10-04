@@ -30,6 +30,7 @@ async function run(args, logger) {
   // ########################################################
   // Collect Links, Forms and Cookies to populate the output
   // ########################################################
+  await collect.collectScreenshots();
   await collect.collectLinks();
   await collect.collectForms();
   await collect.collectCookies();

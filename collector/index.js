@@ -6,7 +6,7 @@ const collector_connection = require("./connection");
 const collector_inspect = require("./inspector");
 
 const browsersession = require("./browser-session");
-const { isFirstParty, getLocalStorage } = require("../lib/tools");
+const {isFirstParty, getLocalStorage} = require("../lib/tools");
 
 async function collector(args, logger) {
   // create the root folder structure
@@ -27,8 +27,8 @@ async function collector(args, logger) {
 
   c.createSession = async function () {
     c.browserSession = await browsersession.createBrowserSession(
-      c.args,
-      c.logger
+        c.args,
+        c.logger
     );
 
     c.output.browser.version = await c.browserSession.browser.version();
@@ -39,10 +39,10 @@ async function collector(args, logger) {
   c.testConnection = async function () {
     await collector_connection.testHttps(c.output.uri_ins, c.output);
     await collector_connection.testSSL(
-      c.output.uri_ins,
-      c.args,
-      c.logger,
-      c.output
+        c.output.uri_ins,
+        c.args,
+        c.logger,
+        c.output
     );
   };
 
@@ -55,11 +55,11 @@ async function collector(args, logger) {
 
     // log redirects
     c.output.uri_redirects = response
-      .request()
-      .redirectChain()
-      .map((req) => {
-        return req.url();
-      });
+        .request()
+        .redirectChain()
+        .map((req) => {
+          return req.url();
+        });
 
     // log the destination uri after redirections
     c.output.uri_dest = c.pageSession.page.url();
@@ -67,29 +67,31 @@ async function collector(args, logger) {
 
     await new Promise(resolve => setTimeout(resolve, args.sleep)); // in ms
 
-    // record screenshots
-    if (c.args.output && c.args.screenshots) {
-      await c.pageSession.screenshot();
-    }
-
     return response;
   };
+
+  c.collectScreenshots = async function () {
+    // record screenshots
+    if (c.args.screenshots) {
+      c.output.screenshots = await c.pageSession.screenshot();
+    }
+  }
 
   c.collectLinks = async function () {
     // get all links from page
     const links = await collector_inspect.collectLinks(c.pageSession.page, c.logger);
 
     var mappedLinks = await collector_inspect.mapLinksToParties(
-      links,
-      c.pageSession.hosts,
-      c.pageSession.refs_regexp
+        links,
+        c.pageSession.hosts,
+        c.pageSession.refs_regexp
     );
 
     c.output.links.firstParty = mappedLinks.firstParty;
     c.output.links.thirdParty = mappedLinks.thirdParty;
 
     c.output.links.social = await collector_inspect.filterSocialPlatforms(
-      links
+        links
     );
 
     // prepare regexp to match links by their href or their caption
@@ -98,15 +100,15 @@ async function collector(args, logger) {
 
   c.collectCookies = async function () {
     c.output.cookies = await collector_inspect.collectCookies(
-      c.pageSession.page,
-      c.output.start_time
+        c.pageSession.page,
+        c.output.start_time
     );
   };
 
   c.collectForms = async function () {
     // unsafe webforms
     c.output.unsafeForms = await collector_inspect.unsafeWebforms(
-      c.pageSession.page
+        c.pageSession.page
     );
   };
 
@@ -120,27 +122,27 @@ async function collector(args, logger) {
 
   c.browseSamples = async function (localStorage, user_set = []) {
     c.output.browsing_history = await c.pageSession.browseSamples(
-      c.pageSession.page,
-      localStorage,
-      c.output.uri_dest,
-      c.output.links.firstParty,
-      user_set
+        c.pageSession.page,
+        localStorage,
+        c.output.uri_dest,
+        c.output.links.firstParty,
+        user_set
     );
   };
 
   c.endSession = async function () {
-    if(c.browserSession){
+    if (c.browserSession) {
       await c.browserSession.end();
       c.browserSession = null;
     }
-  
+
     c.output.end_time = new Date();
   };
 
   c.endPageSession = function () {
     c.pageSession = null;
   };
-  
+
   return c;
 }
 

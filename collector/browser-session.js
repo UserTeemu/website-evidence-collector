@@ -8,20 +8,20 @@ const sampleSize = require("lodash/sampleSize");
 const parseContentSecurityPolicy = require("content-security-policy-parser").default;
 
 const UserAgent =
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.126 Safari/537.36";
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.126 Safari/537.36";
 
 const WindowSize = {
   width: 1680,
   height: 927, // arbitrary value close to 1050
 };
 
-const { setup_cookie_recording } = require("../lib/setup-cookie-recording");
-const { setup_beacon_recording } = require("../lib/setup-beacon-recording");
+const {setup_cookie_recording} = require("../lib/setup-cookie-recording");
+const {setup_beacon_recording} = require("../lib/setup-beacon-recording");
 const {
   setup_websocket_recording,
 } = require("../lib/setup-websocket-recording");
 
-const { set_cookies } = require("../lib/set-cookies");
+const {set_cookies} = require("../lib/set-cookies");
 const {
   isFirstParty,
   getLocalStorage,
@@ -41,10 +41,10 @@ async function createBrowserSession(browser_args, browser_logger) {
       height: WindowSize.height,
     },
     userDataDir: args.browserProfile
-      ? args.browserProfile
-      : args.output
-      ? path.join(args.output, "browser-profile")
-      : undefined,
+        ? args.browserProfile
+        : args.output
+            ? path.join(args.output, "browser-profile")
+            : undefined,
     args: [
       `--user-agent=${UserAgent}`,
       `--window-size=${WindowSize.width},${WindowSize.height}`,
@@ -57,10 +57,10 @@ async function createBrowserSession(browser_args, browser_logger) {
     let uri_refs_stripped = output.uri_refs.map((uri_ref) => {
       let uri_ref_parsed = url.parse(uri_ref);
       return escapeRegExp(
-        `${uri_ref_parsed.hostname}${uri_ref_parsed.pathname.replace(
-          /\/$/,
-          ""
-        )}`
+          `${uri_ref_parsed.hostname}${uri_ref_parsed.pathname.replace(
+              /\/$/,
+              ""
+          )}`
       );
     });
 
@@ -79,20 +79,20 @@ async function createBrowserSession(browser_args, browser_logger) {
       // source: https://stackoverflow.com/a/47973485/1407622 (setting extra headers)
       // source: https://stackoverflow.com/a/5259004/1407622 (headers are case-insensitive)
       output.browser.extra_headers.dnt = 1;
-      page.setExtraHTTPHeaders({ dnt: "1" });
+      page.setExtraHTTPHeaders({dnt: "1"});
 
       // do not use by default, as it is not implemented by all major browsers,
       // see: https://caniuse.com/#feat=do-not-track
       if (args.dntJs) {
         await page.evaluateOnNewDocument(() => {
-          Object.defineProperty(navigator, "doNotTrack", { value: "1" });
+          Object.defineProperty(navigator, "doNotTrack", {value: "1"});
         });
       }
     }
 
     // forward logs from the browser console
     page.on("console", (msg) =>
-      logger.log("debug", msg.text(), { type: "Browser.Console" })
+        logger.log("debug", msg.text(), {type: "Browser.Console"})
     );
 
     // setup tracking
@@ -140,30 +140,30 @@ async function createBrowserSession(browser_args, browser_logger) {
         }
       }
     });
-    
+
     page.on("response", (response) => {
       const l = url.parse(response.url());
       // WEC only records CSPs from first-party responses
       if (isFirstParty(refs_regexp, l)) {
         const csp = response.headers()['content-security-policy'];
-        if(csp) {
+        if (csp) {
           parseContentSecurityPolicy(csp)
-          .forEach((hostnames) => {
-            hostnames.forEach((hostname) => {
-              let match = hostname.match(/[^:\/']+$/) // strip possible schemas and exclude quoted words
-              if (match == null || match.length == 0 || match[0].match(refs_regexp)) {
-                if(hostname.startsWith('\'nonce-')) {
-                  hosts.contentSecurityPolicy.firstParty.add('\'nonce-...\'');
-                } else if(hostname.startsWith('\'sha256-')) {
-                  hosts.contentSecurityPolicy.firstParty.add('\'sha256-...\'');
-                } else {
-                  hosts.contentSecurityPolicy.firstParty.add(hostname);
-                }
-              } else {
-                hosts.contentSecurityPolicy.thirdParty.add(hostname);
-              }
-            });
-          });
+              .forEach((hostnames) => {
+                hostnames.forEach((hostname) => {
+                  let match = hostname.match(/[^:\/']+$/) // strip possible schemas and exclude quoted words
+                  if (match == null || match.length == 0 || match[0].match(refs_regexp)) {
+                    if (hostname.startsWith('\'nonce-')) {
+                      hosts.contentSecurityPolicy.firstParty.add('\'nonce-...\'');
+                    } else if (hostname.startsWith('\'sha256-')) {
+                      hosts.contentSecurityPolicy.firstParty.add('\'sha256-...\'');
+                    } else {
+                      hosts.contentSecurityPolicy.firstParty.add(hostname);
+                    }
+                  } else {
+                    hosts.contentSecurityPolicy.thirdParty.add(hostname);
+                  }
+                });
+              });
         }
       }
     });
@@ -178,7 +178,7 @@ async function createBrowserSession(browser_args, browser_logger) {
     });
 
     async function gotoPage(u) {
-      logger.log("info", `browsing now to ${u}`, { type: "Browser" });
+      logger.log("info", `browsing now to ${u}`, {type: "Browser"});
 
       let page_response;
 
@@ -193,7 +193,7 @@ async function createBrowserSession(browser_args, browser_logger) {
           page_response = await page.waitForResponse(() => true);
         }
       } catch (error) {
-        logger.log("error", error.message, { type: "Browser" });
+        logger.log("error", error.message, {type: "Browser"});
         process.exit(2);
       }
 
@@ -201,16 +201,16 @@ async function createBrowserSession(browser_args, browser_logger) {
     }
 
     async function browseSamples(
-      page,
-      localStorage,
-      root_uri,
-      firstPartyLinks,
-      userSet
+        page,
+        localStorage,
+        root_uri,
+        firstPartyLinks,
+        userSet
     ) {
       const preset_links = [page.url(), ...userSet];
-      const extra_links  = (firstPartyLinks.map(l => l.href)).filter(l => !preset_links.includes(l));
+      const extra_links = (firstPartyLinks.map(l => l.href)).filter(l => !preset_links.includes(l));
       const random_links = sampleSize(extra_links, args.max - preset_links.length); // can be empty!
-      const browsing_history = [root_uri,...userSet,...random_links];
+      const browsing_history = [root_uri, ...userSet, ...random_links];
 
       for (const link of browsing_history.slice(1)) { // can have zero iterations!
         try {
@@ -226,21 +226,21 @@ async function createBrowserSession(browser_args, browser_logger) {
 
           if (!head.headers["content-type"].startsWith("text/html")) {
             logger.log(
-              "info",
-              `skipping now ${link} of mime-type ${head["content-type"]}`,
-              { type: "Browser" }
+                "info",
+                `skipping now ${link} of mime-type ${head["content-type"]}`,
+                {type: "Browser"}
             );
             continue;
           }
 
-          logger.log("info", `browsing now to ${link}`, { type: "Browser" });
+          logger.log("info", `browsing now to ${link}`, {type: "Browser"});
 
           await page.goto(link, {
             timeout: args.pageTimeout,
             waitUntil: "networkidle2",
           });
         } catch (error) {
-          logger.log("warn", error.message, { type: "Browser" });
+          logger.log("warn", error.message, {type: "Browser"});
           continue;
         }
 
@@ -254,25 +254,32 @@ async function createBrowserSession(browser_args, browser_logger) {
     async function screenshot() {
       // record screenshots
       try {
-        await page.screenshot({
-          path: path.join(args.output, "screenshot-top.png"),
+        let screenshot_top = await page.screenshot({
+          path: args.output ? path.join(args.output, "screenshot-top.png") : undefined,
         });
         await page.evaluate(() => {
           window.scrollTo(0, document.body.scrollHeight);
         });
-        await page.screenshot({
-          path: path.join(args.output, "screenshot-bottom.png"),
+        let screenshot_bottom = await page.screenshot({
+          path: args.output ? path.join(args.output, "screenshot-bottom.png") : undefined,
         });
-        await page.screenshot({
-          path: path.join(args.output, "screenshot-full.png"),
+        let screenshot_full = await page.screenshot({
+          path: args.output ? path.join(args.output, "screenshot-full.png") : undefined,
           fullPage: true,
         });
+
+        return {
+          screenshot_top: Buffer.from(screenshot_top, 'binary').toString('base64'),
+          screenshot_bottom: Buffer.from(screenshot_bottom, 'binary').toString('base64'),
+          screenshot_full: Buffer.from(screenshot_full, 'binary').toString('base64'),
+        };
+
       } catch (error) {
         // see: https://github.com/EU-EDPS/website-evidence-collector/issues/21 and https://github.com/puppeteer/puppeteer/issues/2569
         logger.log(
-          "info",
-          `not saving some screenshots due to software limitations`,
-          { type: "Browser" }
+            "info",
+            `not saving some screenshots due to software limitations`,
+            {type: "Browser"}
         );
       }
     }
@@ -299,7 +306,7 @@ async function createBrowserSession(browser_args, browser_logger) {
     await browser.close();
   }
 
-  return { browser, page, har, hosts, start, end };
+  return {browser, page, har, hosts, start, end};
 }
 
-module.exports = { createBrowserSession };
+module.exports = {createBrowserSession};
