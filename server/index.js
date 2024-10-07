@@ -5,9 +5,15 @@ async function run(args, logger) {
   const app = express();
   const port = 8080;
 
+  let cors= {
+    origin: ["localhost:5173","http://localhost:3000  "],
+    default: "http://localhost:5173"
+  }
+
   app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // update to match the domain you will make the request from
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept",);
+    const origin = cors.origin.includes(req.header('origin').toLowerCase()) ? req.headers.origin : cors.default;
+    res.header("Access-Control-Allow-Origin", origin);
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept",);
     next();
   });
 
