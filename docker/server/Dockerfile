@@ -2,14 +2,14 @@
 #
 # Usage:
 #
-# build from source code folder: docker build -t website-evidence-collector .
+# build from source code folder: docker build -t website-evidence-collector-server -f docker/server/Dockerfile .
 # run container with e.g.:
-# docker run --rm -it --cap-add=SYS_ADMIN -v $(pwd)/output:/output \
-#   website-evidence-collector http://example.com/about
+# docker run --rm -it --cap-add=SYS_ADMIN \
+#   website-evidence-collector-server http://example.com/about
 # If you hit the Error: EACCES: permission denied,
 # then try "mkdir output && chown 1000 output"
 
-FROM alpine:3.15.0
+FROM alpine:3.20.0
 
 LABEL maintainer="Robert Riemann <robert.riemann@edps.europa.eu>"
 
@@ -29,7 +29,7 @@ RUN apk add --no-cache \
       harfbuzz \
       ca-certificates \
       ttf-freefont \
-      nodejs \
+      nodejs  \
       yarn~=1.22 \
 # Packages linked to testssl.sh
       bash procps drill coreutils libidn curl \
@@ -65,6 +65,7 @@ ENV PATH="/home/collector/bin:/opt/testssl.sh-3.0.6:${PATH}"
 # Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
 # Configure default command in Docker container
-ENTRYPOINT ["/home/collector/bin/website-evidence-collector"]
+ENTRYPOINT ["/home/collector/bin/website-evidence-collector","serve"]
+
 WORKDIR /output
 VOLUME /output
