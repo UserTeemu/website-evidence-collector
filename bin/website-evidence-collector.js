@@ -10,11 +10,17 @@
  * @example ./bin/website-evidence-collector.js http://example.com
  */
 
-const collector = require("..");
+
 const argv = require("../lib/argv");
 const logger = require("../lib/logger");
 
 (async () => {
-    let args = argv.parse();
+  let args = argv.parse();
+  if (args._[0] === 'serve') {
+    const server = require('../server')
+    await server(args, logger.create({}, args))
+  } else {
+    const collector = require("..");
     await collector(args, logger.create({}, args));
+  }
 })();
