@@ -4,18 +4,20 @@ const bodyParser = require('body-parser')
 const Collector = require("../collector");
 const Reporter = require("../reporter");
 
+const corsDefault= "http://localhost:5173"
+
 async function run(port, logger) {
   const app = express();
   let jsonParser = bodyParser.json()
-  let cors = {
-    origin: ["localhost:5173", "http://localhost:3000"],
-    default: "http://localhost:5173"
-  }
+
 
   app.use(function (req, res, next) {
-    const origin = cors.origin.includes(req.header('origin').toLowerCase()) ? req.headers.origin : cors.default;
+    console.log('Origin')
+    console.log(req.header('origin'))
+    const origin = cors.origin.includes('localhost') ? req.headers.origin : corsDefault;
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept",);
+    console.log(res.headers)
     next();
   });
 
