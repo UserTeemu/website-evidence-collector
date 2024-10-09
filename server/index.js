@@ -6,7 +6,7 @@ const Reporter = require("../reporter");
 
 async function run(port, logger) {
   const app = express();
-  var jsonParser = bodyParser.json()
+  let jsonParser = bodyParser.json()
   let cors = {
     origin: ["localhost:5173", "http://localhost:3000"],
     default: "http://localhost:5173"
@@ -29,7 +29,6 @@ async function run(port, logger) {
 
     console.log(`Running collection for: ${website_url}`);
 
-    const collector = require("..");
     const logger = require("../lib/logger");
     args = {
       _: [website_url],
@@ -94,7 +93,7 @@ async function run(port, logger) {
     let inspectionOutput = await inspector.run();
 
     const reporter = new Reporter(args);
-    return reporter.generateHtml(inspectionOutput.output);
+    return reporter.generateHtml(inspectionOutput);
   }
 
 }

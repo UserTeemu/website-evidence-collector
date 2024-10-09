@@ -37,8 +37,8 @@ async function run(args, logger) {
   const reporter = new Reporter(args);
   // args.output - determines if anything is stored on disk
   // args.html - determines if html is sent to console
-  // args.json - determins if json is sent to console
-  // args.yaml - determins if yaml is sent to console
+  // args.json - determines if json is sent to console
+  // args.yaml - determines if yaml is sent to console
 
   //websockets
   reporter.saveJson(inspectionResult.websocketLog, "websockets-log.json", false);
