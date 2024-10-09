@@ -80,7 +80,7 @@ async function handleSubmit(form$, _) {
     console.log('success', response.data)
     sanitizedHtml.value = response.data
 
-  } catch (error) {
+  } catch (error: any) {
     if (error.response.status === 400) {
       const errorData = error.response.data.reason;
       console.log(errorData)// Assuming error.response.data contains the data you want to interpolate
