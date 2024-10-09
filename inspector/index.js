@@ -10,66 +10,66 @@ const {
   safeJSONParse,
 } = require("../lib/tools");
 
-async function inspector(args, logger, pageSession, output) {
-  const c = {
-    eventData: null,
-    logger: logger,
-    args: args,
-    output: output,
-    pageSession: pageSession,
-  };
+class Inspector {
+  constructor(args, logger, pageSession, output) {
+    this.eventData = null;
+    this.logger = logger;
+    this.args = args;
+    this.output = output;
+    this.pageSession = pageSession;
+  }
 
-  let event_data_all = await new Promise((resolve, reject) => {
-    logger.query(
-      {
-        start: 0,
-        order: "desc",
-        limit: Infinity,
-      },
-      (err, results) => {
-        if (err) return reject(err);
-        return resolve(results.file);
-      }
-    );
-  });
+  async init() {
+    let event_data_all = await new Promise((resolve, reject) => {
+      this.logger.query(
+          {
+            start: 0,
+            order: "desc",
+            limit: Infinity,
+          },
+          (err, results) => {
+            if (err) return reject(err);
+            return resolve(results.file);
+          }
+      );
+    });
 
-  // filter only events with type set
-  c.eventData = event_data_all.filter((event) => {
-    return !!event.type;
-  });
+    // filter only events with type set
+    this.eventData = event_data_all.filter((event) => {
+      return !!event.type;
+    });
+  }
 
-  c.inspectCookies = async function () {
+  async inspectCookies() {
     // we get all cookies from the log, which can be both JS and http cookies
     let cookies_from_events = flatten(
-      c.eventData
-        .filter((event) => {
-          return event.type.startsWith("Cookie");
-        })
-        .map((event) => {
-          event.data.forEach((cookie) => {
-            cookie.log = {
-              stack: event.stack,
-              type: event.type,
-              timestamp: event.timestamp,
-              location: event.location,
-            };
-          });
-          return event.data;
-        })
-    ).filter(cookie => cookie.value); // don't consider deletion events with no value defined
+        this.eventData
+            .filter((event) => event.type.startsWith("Cookie"))
+            .map((event) => {
+              event.data.forEach((cookie) => {
+                cookie.log = {
+                  stack: event.stack,
+                  type: event.type,
+                  timestamp: event.timestamp,
+                  location: event.location,
+                };
+              });
+              return event.data;
+            })
+    ).filter((cookie) => cookie.value); // don't consider deletion events with no value defined
 
     cookies_from_events.forEach((event_cookie) => {
       // we compare the eventlog with what was collected
-      let matched_cookie = c.output.cookies.find((cookie) => {
+      let matched_cookie = this.output.cookies.find((cookie) => {
         return (
-          cookie.name == event_cookie.key &&
-          cookie.domain == event_cookie.domain &&
-          cookie.path == event_cookie.path
+            cookie.name == event_cookie.key &&
+            cookie.domain == event_cookie.domain &&
+            cookie.path == event_cookie.path
         );
       });
 
       // if there is a match, we enrich with the log entry
-      // else we add a nww entry to the output.cookies array
+      // else we add a new entry to the output.cookies array
       if (matched_cookie) {
         matched_cookie.log = event_cookie.log;
       } else {
@@ -83,65 +83,65 @@ async function inspector(args, logger, pageSession, output) {
         };
         // ToughCookie library defaults session cookies to infinity
         // https://github.com/salesforce/tough-cookie/blob/master/lib/cookie/cookie.ts#L406
-        if(!event_cookie.expires || event_cookie.expires == 'Infinity') {
+        if (!event_cookie.expires || event_cookie.expires == 'Infinity') {
           cookie.expires = -1;
           cookie.session = true;
         } else {
           cookie.expiresDays = Math.round((new Date(event_cookie.expires).getTime() - new Date(event_cookie.creation).getTime()) / (10 * 60 * 60 * 24)) / 100;
           cookie.session = false;
         }
-        c.output.cookies.push(cookie);
+        this.output.cookies.push(cookie);
       }
     });
 
-    c.output.cookies.forEach((cookie) => {
+    this.output.cookies.forEach((cookie) => {
       // after the sync, we determine if its first party or 3rd
       // if a domain is empty, its a JS cookie setup as first party
       if (
-        isFirstParty(
-          c.pageSession.refs_regexp,
-          `cookie://${cookie.domain}${cookie.path}`
-        ) ||
-        cookie.domain === ""
+          isFirstParty(
+              this.pageSession.refs_regexp,
+              `cookie://${cookie.domain}${cookie.path}`
+          ) ||
+          cookie.domain === ""
       ) {
         cookie.firstPartyStorage = true;
-        c.pageSession.hosts.cookies.firstParty.add(cookie.domain);
+        this.pageSession.hosts.cookies.firstParty.add(cookie.domain);
       } else {
         cookie.firstPartyStorage = false;
-        c.pageSession.hosts.cookies.thirdParty.add(cookie.domain);
+        this.pageSession.hosts.cookies.thirdParty.add(cookie.domain);
       }
     });
 
     // finally we sort the cookies based on expire data - because ?
-    c.output.cookies = c.output.cookies.sort(function (a, b) {
+    this.output.cookies = this.output.cookies.sort(function (a, b) {
       return b.expires - a.expires;
     });
-  };
+  }
 
-  c.inspectLocalStorage = async function () {
-    let storage_from_events = c.eventData.filter((event) => {
+  async inspectLocalStorage() {
+    let storage_from_events = this.eventData.filter((event) => {
       return event.type.startsWith("Storage");
     });
 
-    Object.keys(c.output.localStorage).forEach((origin) => {
+    Object.keys(this.output.localStorage).forEach((origin) => {
       let hostname = new url.URL(origin).hostname;
-      let isFirstPartyStorage = isFirstParty(c.pageSession.refs_regexp, origin);
+      let isFirstPartyStorage = isFirstParty(this.pageSession.refs_regexp, origin);
 
       if (isFirstPartyStorage) {
-        c.pageSession.hosts.localStorage.firstParty.add(hostname);
+        this.pageSession.hosts.localStorage.firstParty.add(hostname);
       } else {
-        c.pageSession.hosts.localStorage.thirdParty.add(hostname);
+        this.pageSession.hosts.localStorage.thirdParty.add(hostname);
       }
 
       //
-      let originStorage = c.output.localStorage[origin];
+      let originStorage = this.output.localStorage[origin];
       Object.keys(originStorage).forEach((key) => {
         // add if entry is linked to first-party host
         originStorage[key].firstPartyStorage = isFirstPartyStorage;
         // find log for a given key
         let matched_event = storage_from_events.find((event) => {
           return (
-            origin == event.origin && Object.keys(event.data).includes(key)
+              origin == event.origin && Object.keys(event.data).includes(key)
           );
         });
 
@@ -155,33 +155,33 @@ async function inspector(args, logger, pageSession, output) {
         }
       });
     });
-  };
+  }
 
-  c.inspectBeacons = async function () {
+  async inspectBeacons() {
     let beacons_from_events = flatten(
-      c.eventData
-        .filter((event) => {
-          return event.type.startsWith("Request.Tracking");
-        })
-        .map((event) => {
-          return Object.assign({}, event.data, {
-            log: {
-              stack: event.stack,
-              // type: event.type,
-              timestamp: event.timestamp,
-            },
-          });
-        })
+        this.eventData
+            .filter((event) => {
+              return event.type.startsWith("Request.Tracking");
+            })
+            .map((event) => {
+              return Object.assign({}, event.data, {
+                log: {
+                  stack: event.stack,
+                  // type: event.type,
+                  timestamp: event.timestamp,
+                },
+              });
+            })
     );
 
     for (const beacon of beacons_from_events) {
       const l = url.parse(beacon.url);
 
-      if (beacon.listName == "easyprivacy.txt") {
-        if (isFirstParty(c.pageSession.refs_regexp, l)) {
-          c.pageSession.hosts.beacons.firstParty.add(l.hostname);
+      if (beacon.listName === "easyprivacy.txt") {
+        if (isFirstParty(this.pageSession.refs_regexp, l)) {
+          this.pageSession.hosts.beacons.firstParty.add(l.hostname);
         } else {
-          c.pageSession.hosts.beacons.thirdParty.add(l.hostname);
+          this.pageSession.hosts.beacons.thirdParty.add(l.hostname);
         }
       }
     }
@@ -194,12 +194,12 @@ async function inspector(args, logger, pageSession, output) {
 
     let beacons_summary = [];
     for (const [key, beacon_group] of Object.entries(
-      beacons_from_events_grouped
+        beacons_from_events_grouped
     )) {
       beacons_summary.push(
-        Object.assign({}, beacon_group[0], {
-          occurrances: beacon_group.length,
-        })
+          Object.assign({}, beacon_group[0], {
+            occurrances: beacon_group.length,
+          })
       );
     }
 
@@ -207,10 +207,10 @@ async function inspector(args, logger, pageSession, output) {
       return b2.occurances - b1.occurances;
     });
 
-    c.output.beacons = beacons_summary;
-  };
+    this.output.beacons = beacons_summary;
+  }
 
-  c.inspectHosts = async function () {
+  async inspectHosts() {
     // Hosts Inspection
     let arrayFromParties = function (array) {
       return {
@@ -219,17 +219,15 @@ async function inspector(args, logger, pageSession, output) {
       };
     };
 
-    c.output.hosts = {
-      requests: arrayFromParties(c.pageSession.hosts.requests),
-      beacons: arrayFromParties(c.pageSession.hosts.beacons),
-      cookies: arrayFromParties(c.pageSession.hosts.cookies),
-      localStorage: arrayFromParties(c.pageSession.hosts.localStorage),
-      links: arrayFromParties(c.pageSession.hosts.links),
-      contentSecurityPolicy: arrayFromParties(c.pageSession.hosts.contentSecurityPolicy),
+    this.output.hosts = {
+      requests: arrayFromParties(this.pageSession.hosts.requests),
+      beacons: arrayFromParties(this.pageSession.hosts.beacons),
+      cookies: arrayFromParties(this.pageSession.hosts.cookies),
+      localStorage: arrayFromParties(this.pageSession.hosts.localStorage),
+      links: arrayFromParties(this.pageSession.hosts.links),
+      contentSecurityPolicy: arrayFromParties(this.pageSession.hosts.contentSecurityPolicy),
     };
-  };
-
-  return c;
+  }
 }
 
-module.exports = inspector;
+module.exports = Inspector;

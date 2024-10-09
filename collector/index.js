@@ -1,149 +1,181 @@
-// jshint esversion: 8
-
 const collector_io = require("./io");
 const output_lib = require("./output");
 const collector_connection = require("./connection");
 const collector_inspect = require("./inspector");
 
 const browsersession = require("./browser-session");
-const {isFirstParty, getLocalStorage} = require("../lib/tools");
+const { isFirstParty, getLocalStorage } = require("../lib/tools");
 
-async function collector(args, logger) {
-  // create the root folder structure
-  collector_io.init(args);
+class Collector {
+  constructor(args, logger) {
+    // create the root folder structure
+    collector_io.init(args);
 
-  // create the output hash...
-  const output = await output_lib.createOutput(args);
+    // create the output hash...
+    this.output = output_lib.createOutput(args);
 
-  const c = {
-    browserSession: null,
-    pageSession: null,
-    logger: logger,
+    this.browserSession = null;
+    this.pageSession = null;
+    this.logger = logger;
 
-    args: args,
-    output: output,
-    source: null,
-  };
+    this.args = args;
+    this.source = null;
+  }
 
-  c.createSession = async function () {
-    c.browserSession = await browsersession.createBrowserSession(
-        c.args,
-        c.logger
-    );
+  async run() {
+    // create browser, session, har, pagesession etc to be able to collect
+    await this.#createSession();
 
-    c.output.browser.version = await c.browserSession.browser.version();
-    c.output.browser.user_agent = await c.browserSession.browser.userAgent();
-    c.pageSession = await c.browserSession.start(c.output);
-  };
+    //test the ssl and https connection
+    await this.#testConnection();
 
-  c.testConnection = async function () {
-    await collector_connection.testHttps(c.output.uri_ins, c.output);
-    await collector_connection.testSSL(
-        c.output.uri_ins,
-        c.args,
-        c.logger,
-        c.output
-    );
-  };
+    // go to the target url specified in the args - also possible to overload with a custom url.
+    await this.#getPage();
 
-  c.getPage = async function (url = null) {
-    if (!url) {
-      url = c.output.uri_ins;
-    }
+    // ########################################################
+    // Collect Links, Forms and Cookies to populate the output
+    // ########################################################
+    await this.#collectScreenshots();
+    await this.#collectLinks();
+    await this.#collectForms();
+    await this.#collectCookies();
+    await this.#collectLocalStorage();
+    await this.#collectWebsocketLog();
 
-    const response = await c.pageSession.gotoPage(url);
+    // browse sample history and log to localstorage
+    let browse_user_set = this.args.browseLink || [];
+    await this.#browseSamples(this.output.localStorage, browse_user_set);
 
-    // log redirects
-    c.output.uri_redirects = response
-        .request()
-        .redirectChain()
-        .map((req) => {
-          return req.url();
-        });
+    // END OF BROWSING - discard the browser and page
+    await this.#endSession();
 
-    // log the destination uri after redirections
-    c.output.uri_dest = c.pageSession.page.url();
-    c.source = await c.pageSession.page.content();
-
-    await new Promise(resolve => setTimeout(resolve, args.sleep)); // in ms
-
-    return response;
-  };
-
-  c.collectScreenshots = async function () {
-    // record screenshots
-    if (c.args.screenshots) {
-      c.output.screenshots = await c.pageSession.screenshot();
+    return {
+      output:this.output,
+      pageSession:this.pageSession,
     }
   }
 
-  c.collectLinks = async function () {
-    // get all links from page
-    const links = await collector_inspect.collectLinks(c.pageSession.page, c.logger);
-
-    var mappedLinks = await collector_inspect.mapLinksToParties(
-        links,
-        c.pageSession.hosts,
-        c.pageSession.refs_regexp
+  async #createSession() {
+    this.browserSession = await browsersession.createBrowserSession(
+        this.args,
+        this.logger
     );
 
-    c.output.links.firstParty = mappedLinks.firstParty;
-    c.output.links.thirdParty = mappedLinks.thirdParty;
+    this.output.browser.version = await this.browserSession.browser.version();
+    this.output.browser.user_agent = await this.browserSession.browser.userAgent();
+    this.pageSession = await this.browserSession.start(this.output);
+  }
 
-    c.output.links.social = await collector_inspect.filterSocialPlatforms(
+  async #testConnection() {
+    await collector_connection.testHttps(this.output.uri_ins, this.output);
+    await collector_connection.testSSL(
+        this.output.uri_ins,
+        this.args,
+        this.logger,
+        this.output
+    );
+  }
+
+  async #getPage(url = null) {
+    if (!url) {
+      url = this.output.uri_ins;
+    }
+
+    const response = await this.pageSession.gotoPage(url);
+
+    // log redirects
+      this.output.uri_redirects = response
+          .request()
+          .redirectChain()
+          .map((req) => req.url());
+
+    // log the destination uri after redirections
+    this.output.uri_dest = this.pageSession.page.url();
+    this.source = await this.pageSession.page.content();
+
+    await new Promise((resolve) => setTimeout(resolve, this.args.sleep)); // in ms
+
+    return response;
+  }
+
+  async #collectScreenshots() {
+    // record screenshots
+    if (this.args.screenshots) {
+      this.output.screenshots = await this.pageSession.screenshot();
+    }
+  }
+
+  async #collectLinks() {
+    // get all links from page
+    const links = await collector_inspect.collectLinks(
+        this.pageSession.page,
+        this.logger
+    );
+
+    let mappedLinks = await collector_inspect.mapLinksToParties(
+        links,
+        this.pageSession.hosts,
+        this.pageSession.refs_regexp
+    );
+
+    this.output.links.firstParty = mappedLinks.firstParty;
+    this.output.links.thirdParty = mappedLinks.thirdParty;
+
+    this.output.links.social = await collector_inspect.filterSocialPlatforms(
         links
     );
 
     // prepare regexp to match links by their href or their caption
-    c.output.links.keywords = await collector_inspect.filterKeywords(links);
-  };
+    this.output.links.keywords = await collector_inspect.filterKeywords(links);
+  }
 
-  c.collectCookies = async function () {
-    c.output.cookies = await collector_inspect.collectCookies(
-        c.pageSession.page,
-        c.output.start_time
+  async #collectCookies() {
+    this.output.cookies = await collector_inspect.collectCookies(
+        this.pageSession.page,
+        this.output.start_time
     );
-  };
+  }
 
-  c.collectForms = async function () {
+  async #collectForms() {
     // unsafe webforms
-    c.output.unsafeForms = await collector_inspect.unsafeWebforms(
-        c.pageSession.page
+    this.output.unsafeForms = await collector_inspect.unsafeWebforms(
+        this.pageSession.page
     );
-  };
+  }
 
-  c.collectLocalStorage = async function () {
-    c.output.localStorage = await getLocalStorage(c.pageSession.page, c.logger);
-  };
+  async #collectLocalStorage() {
+    this.output.localStorage = await getLocalStorage(
+        this.pageSession.page,
+        this.logger
+    );
+  }
 
-  c.collectWebsocketLog = async function () {
-    c.output.websocketLog = c.pageSession.webSocketLog;
-  };
+  async #collectWebsocketLog() {
+    this.output.websocketLog = this.pageSession.webSocketLog;
+  }
 
-  c.browseSamples = async function (localStorage, user_set = []) {
-    c.output.browsing_history = await c.pageSession.browseSamples(
-        c.pageSession.page,
+  async #browseSamples(localStorage, user_set = []) {
+    this.output.browsing_history = await this.pageSession.browseSamples(
+        this.pageSession.page,
         localStorage,
-        c.output.uri_dest,
-        c.output.links.firstParty,
+        this.output.uri_dest,
+        this.output.links.firstParty,
         user_set
     );
-  };
+  }
 
-  c.endSession = async function () {
-    if (c.browserSession) {
-      await c.browserSession.end();
-      c.browserSession = null;
+  async #endSession() {
+    if (this.browserSession) {
+      await this.browserSession.end();
+      this.browserSession = null;
     }
 
-    c.output.end_time = new Date();
-  };
+    this.output.end_time = new Date();
+  }
 
-  c.endPageSession = function () {
-    c.pageSession = null;
-  };
-
-  return c;
+  endPageSession() {
+    this.pageSession = null;
+  }
 }
 
-module.exports = collector;
+module.exports = Collector;

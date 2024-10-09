@@ -8,57 +8,31 @@
  */
 
 //const argv = require('./lib/argv');
-const collector = require("./collector/index");
-const inspector = require("./inspector/index");
-const reporter = require("./reporter/index");
+  const reporter = require("./reporter/index");
+const Collector = require("./collector");
+const Inspector = require("./inspector");
 
 async function run(args, logger) {
-  // ########################################################
-  // create a new collection instance
-  // ########################################################
-  const collect = await collector(args, logger);
-
-  // create browser, session, har, pagesession etc to be able to collect
-  await collect.createSession();
-
-  //test the ssl and https connection
-  await collect.testConnection();
-
-  // go to the target url specified in the args - also possible to overload with a custom url.
-  await collect.getPage();
-
-  // ########################################################
-  // Collect Links, Forms and Cookies to populate the output
-  // ########################################################
-  await collect.collectScreenshots();
-  await collect.collectLinks();
-  await collect.collectForms();
-  await collect.collectCookies();
-  await collect.collectLocalStorage();
-  await collect.collectWebsocketLog();
-
-  // browse sample history and log to localstorage
-  let browse_user_set = args.browseLink || [];
-  await collect.browseSamples(collect.output.localStorage, browse_user_set);
-
-  // END OF BROWSING - discard the browser and page
-  await collect.endSession();
+  const collector = new Collector(args, logger);
+  let collectionResult = await collector.run();
 
   // ########################################################
   //  inspecting - this will process the collected data and place it in a structured format in the output object
   // ########################################################
 
-  const inspect = await inspector(
-    args,
-    logger,
-    collect.pageSession,
-    collect.output
+  const inspector = new Inspector(
+      args,
+      logger,
+      collectionResult.pageSession,
+      collectionResult.output
   );
 
-  await inspect.inspectCookies();
-  await inspect.inspectLocalStorage();
-  await inspect.inspectBeacons();
-  await inspect.inspectHosts();
+  await inspector.init();
+
+  await inspector.inspectCookies();
+  await inspector.inspectLocalStorage();
+  await inspector.inspectBeacons();
+  await inspector.inspectHosts();
 
   // ########################################################
   //  Reporting - this will process the output object into different formats, yaml, json, html
@@ -72,37 +46,37 @@ async function run(args, logger) {
   // args.yaml - determins if yaml is sent to console
 
   //websockets
-  report.saveJson(collect.output.websocketLog, "websockets-log.json", false);
+  report.saveJson(inspector.output.websocketLog, "websockets-log.json", false);
 
   // all
-  report.saveJson(collect.output, "inspection.json");
+  report.saveJson(inspector.output, "inspection.json");
 
   // cookies reporting
-  report.saveYaml(collect.output.cookies, "cookies.yml", false);
+  report.saveYaml(inspector.output.cookies, "cookies.yml", false);
 
   // local storage reporting
-  report.saveYaml(collect.output.localStorage, "local-storage.yml", false);
+  report.saveYaml(inspector.output.localStorage, "local-storage.yml", false);
 
   // beacons
-  report.saveYaml(collect.output.beacons, "beacons.yml", false);
+  report.saveYaml(inspector.output.beacons, "beacons.yml", false);
 
   // all
-  report.saveYaml(collect.output, "inspection.yml");
+  report.saveYaml(inspector.output, "inspection.yml");
 
   // store html on disk
-  let html_output=report.generateHtml(collect.output);
+  let html_output=report.generateHtml(inspector.output);
   
   // store docx on disk
-  await report.generateOfficeDoc(collect.output);
+  await report.generateOfficeDoc(inspector.output);
 
   // convert html to pdf
   await report.convertHtmlToPdf();
 
   // store source on disk
-  report.saveSource(collect.source);
+  report.saveSource(collector.source);
 
-  //return collect.output;
-  return collect.output;
+  //return collector.output;
+  return inspector.output;
 }
 
 module.exports = run;

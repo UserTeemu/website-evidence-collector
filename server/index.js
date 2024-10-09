@@ -1,8 +1,8 @@
-const collector = require("../collector");
 const reporter = require("../reporter");
-const inspector = require("../inspector");
+const Inspector = require("../inspector");
 const express = require("express");
 const bodyParser = require('body-parser')
+const Collector = require("../collector");
 
 async function  run(port, logger) {
     const app = express();
@@ -81,52 +81,25 @@ async function  run(port, logger) {
       // ########################################################
       // create a new collection instance
       // ########################################################
-      const collect = await collector(args, logger);
+      const collector = new Collector(args, logger);
+      let collectionResult = await collector.run();
 
-      // create browser, session, har, pagesession etc to be able to collect
-      await collect.createSession();
-
-      //test the ssl and https connection
-      await collect.testConnection();
-
-      // go to the target url specified in the args - also possible to overload with a custom url.
-      await collect.getPage();
-
-      // ########################################################
-      // Collect Links, Forms and Cookies to populate the output
-      // ########################################################
-      await collect.collectScreenshots();
-      await collect.collectLinks();
-      await collect.collectForms();
-      await collect.collectCookies();
-      await collect.collectLocalStorage();
-      await collect.collectWebsocketLog();
-
-      // browse sample history and log to localstorage
-      let browse_user_set = args.browseLink || [];
-      await collect.browseSamples(collect.output.localStorage, browse_user_set);
-
-      // END OF BROWSING - discard the browser and page
-      await collect.endSession();
-
-      // ########################################################
-      //  inspecting - this will process the collected data and place it in a structured format in the output object
-      // ########################################################
-
-      const inspect = await inspector(
+      const inspector = new Inspector(
           args,
           logger,
-          collect.pageSession,
-          collect.output
+          collectionResult.pageSession,
+          collectionResult.output
       );
 
-      await inspect.inspectCookies();
-      await inspect.inspectLocalStorage();
-      await inspect.inspectBeacons();
-      await inspect.inspectHosts();
+      await inspector.init();
+
+      await inspector.inspectCookies();
+      await inspector.inspectLocalStorage();
+      await inspector.inspectBeacons();
+      await inspector.inspectHosts();
 
       const report = reporter(args);
-      return report.generateHtml(collect.output);
+      return report.generateHtml(inspector.output);
     }
 
   }

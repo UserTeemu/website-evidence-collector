@@ -6,7 +6,7 @@ const os = require("os");
 const url = require("url");
 const { gitDescribeSync } = require("git-describe");
 
-async function createOutput(args) {
+function createOutput(args) {
   // configuring url and hosts
   const uri_ins = args.url;
   const uri_ins_host = url.parse(uri_ins).hostname; // hostname does not include port unlike host
