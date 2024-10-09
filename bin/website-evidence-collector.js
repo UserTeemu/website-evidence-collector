@@ -20,7 +20,7 @@ const logger = require("../lib/logger");
     const server = require('../server')
     await server(args.port, logger.create({}, args))
   } else {
-    const collector = require("..");
-    await collector(args, logger.create({}, args));
+    const localCollector = require("..");
+    await localCollector(args, logger.create({}, args));
   }
 })();

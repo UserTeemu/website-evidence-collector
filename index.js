@@ -102,7 +102,7 @@ async function run(args, logger) {
   report.saveSource(collect.source);
 
   //return collect.output;
-  return html_output;
+  return collect.output;
 }
 
 module.exports = run;
