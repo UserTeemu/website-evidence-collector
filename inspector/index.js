@@ -19,7 +19,17 @@ class Inspector {
     this.pageSession = pageSession;
   }
 
-  async init() {
+  async run() {
+    await this.#init();
+    await this.#inspectCookies();
+    await this.#inspectLocalStorage();
+    await this.#inspectBeacons();
+    await this.#inspectHosts();
+
+    return this.output;
+  }
+
+  async #init() {
     let event_data_all = await new Promise((resolve, reject) => {
       this.logger.query(
           {
@@ -40,7 +50,7 @@ class Inspector {
     });
   }
 
-  async inspectCookies() {
+  async #inspectCookies() {
     // we get all cookies from the log, which can be both JS and http cookies
     let cookies_from_events = flatten(
         this.eventData
@@ -118,7 +128,7 @@ class Inspector {
     });
   }
 
-  async inspectLocalStorage() {
+  async #inspectLocalStorage() {
     let storage_from_events = this.eventData.filter((event) => {
       return event.type.startsWith("Storage");
     });
@@ -157,7 +167,7 @@ class Inspector {
     });
   }
 
-  async inspectBeacons() {
+  async #inspectBeacons() {
     let beacons_from_events = flatten(
         this.eventData
             .filter((event) => {
@@ -210,7 +220,7 @@ class Inspector {
     this.output.beacons = beacons_summary;
   }
 
-  async inspectHosts() {
+  async #inspectHosts() {
     // Hosts Inspection
     let arrayFromParties = function (array) {
       return {

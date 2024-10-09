@@ -8,9 +8,9 @@
  */
 
 //const argv = require('./lib/argv');
-  const reporter = require("./reporter/index");
 const Collector = require("./collector");
 const Inspector = require("./inspector");
+const Reporter = require("./reporter");
 
 async function run(args, logger) {
   const collector = new Collector(args, logger);
@@ -27,56 +27,51 @@ async function run(args, logger) {
       collectionResult.output
   );
 
-  await inspector.init();
-
-  await inspector.inspectCookies();
-  await inspector.inspectLocalStorage();
-  await inspector.inspectBeacons();
-  await inspector.inspectHosts();
+  let inspectionResult=await inspector.run()
 
   // ########################################################
   //  Reporting - this will process the output object into different formats, yaml, json, html
   // ########################################################
 
   // args passed will determine what is stored on disk and what is sent to console
-  const report = reporter(args);
+  const reporter = new Reporter(args);
   // args.output - determines if anything is stored on disk
   // args.html - determines if html is sent to console
   // args.json - determins if json is sent to console
   // args.yaml - determins if yaml is sent to console
 
   //websockets
-  report.saveJson(inspector.output.websocketLog, "websockets-log.json", false);
+  reporter.saveJson(inspectionResult.websocketLog, "websockets-log.json", false);
 
   // all
-  report.saveJson(inspector.output, "inspection.json");
+  reporter.saveJson(inspectionResult, "inspection.json");
 
   // cookies reporting
-  report.saveYaml(inspector.output.cookies, "cookies.yml", false);
+  reporter.saveYaml(inspectionResult.cookies, "cookies.yml", false);
 
   // local storage reporting
-  report.saveYaml(inspector.output.localStorage, "local-storage.yml", false);
+  reporter.saveYaml(inspectionResult.localStorage, "local-storage.yml", false);
 
   // beacons
-  report.saveYaml(inspector.output.beacons, "beacons.yml", false);
+  reporter.saveYaml(inspectionResult.beacons, "beacons.yml", false);
 
   // all
-  report.saveYaml(inspector.output, "inspection.yml");
+  reporter.saveYaml(inspectionResult, "inspection.yml");
 
   // store html on disk
-  let html_output=report.generateHtml(inspector.output);
+  reporter.generateHtml(inspectionResult);
   
   // store docx on disk
-  await report.generateOfficeDoc(inspector.output);
+  await reporter.generateOfficeDoc(inspectionResult);
 
   // convert html to pdf
-  await report.convertHtmlToPdf();
+  await reporter.convertHtmlToPdf();
 
   // store source on disk
-  report.saveSource(collector.source);
+  reporter.saveSource(collector.source);
 
-  //return collector.output;
-  return inspector.output;
+  //return final result
+  return inspectionResult;
 }
 
 module.exports = run;
