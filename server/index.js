@@ -18,7 +18,13 @@
 
     app.post("/start-collection",jsonParser, async (req, res) => {
       let website_url=req.body.website_url;
-        console.log(`website_url=${website_url}`);
+      const urlPattern = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/;
+
+      if(!urlPattern.test(website_url)) {
+        return res.status(400).send({"reason":"malformatted_url"  })
+      }
+
+      console.log(`Running collection for: ${website_url}`);
 
         const collector = require("..");
         const logger = require("../lib/logger");
