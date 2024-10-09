@@ -18,7 +18,7 @@ const logger = require("../lib/logger");
   let args = argv.parse();
   if (args._[0] === 'serve') {
     const server = require('../server')
-    await server(args, logger.create({}, args))
+    await server(args.port, logger.create({}, args))
   } else {
     const collector = require("..");
     await collector(args, logger.create({}, args));
