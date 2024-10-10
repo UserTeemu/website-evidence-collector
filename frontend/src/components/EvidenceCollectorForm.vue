@@ -62,9 +62,7 @@ async function handleSubmit(form$, _) {
   // Setting cancel token
   form$.cancelToken = form$.$vueform.services.axios.CancelToken.source()
 
-  let response
-
-  console.log(data)
+  let response;
 
   try {
     // Sending the request
@@ -77,7 +75,7 @@ async function handleSubmit(form$, _) {
     )
 
     // Handle success (status is 2XX)
-    console.log('success', response.data)
+    console.log('success')
     sanitizedHtml.value = response.data
 
   } catch (error: any) {
@@ -99,6 +97,5 @@ async function handleSubmit(form$, _) {
 <style scoped>
 .iframe-container {
   width: 100%;
-
 }
 </style>

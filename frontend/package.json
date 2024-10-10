@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@vueform/vueform": "^1.10.10",
-    "vue": "^3.4.37"
+    "axios": "^1.7.7",
+    "vue": "^3.4.37",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.2",
