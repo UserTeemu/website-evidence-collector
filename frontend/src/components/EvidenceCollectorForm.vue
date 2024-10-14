@@ -71,18 +71,25 @@
 <script setup lang="ts">
 import {ref} from "vue";
 
+// If the app is served using Vite we have to specify the server location.
+// If it is served by the server itself a relative URL can be used.
+const isServedUsingVite = import.meta.env !== undefined
+
 const sanitizedHtml = ref('');
 
 async function handleSubmit(form$, _) {
 
-  const WEC_ENDPOINT = "http://localhost:8080/start-collection"
+  const WEC_ENDPOINT = isServedUsingVite
+      ? "http://localhost:8080/start-collection"
+      : new URL("/start-collection", document.location.toString() ).href;
+
   // Using FormData will EXCLUDE conditional elements and it
   // will submit the form as "Content-Type: multipart/form-data".
   const data = form$.data
 
   const urlPattern = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/;
 
-  if(!urlPattern.test(data.website_url)) {
+  if (!urlPattern.test(data.website_url)) {
     form$.messageBag.prepend('The url needs to include the protocol, either https:// or https://')
     return;
   }
@@ -105,8 +112,6 @@ async function handleSubmit(form$, _) {
         }
     )
 
-    // Handle success (status is 2XX)
-    console.log('success')
     sanitizedHtml.value = response.data
 
   } catch (error: any) {
@@ -375,14 +380,14 @@ async function handleSubmit(form$, _) {
   --vf-border-width-toggle: 0.125rem;
   --vf-border-width-tag: 1px;
   --vf-border-width-blockquote: 3px;
-  --vf-shadow-input: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-input-hover: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-input-focus: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-handles: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-handles-hover: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-handles-focus: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-btn: 0px 0px 0px 0px rgba(0,0,0,0);
-  --vf-shadow-dropdown: 0px 0px 0px 0px rgba(0,0,0,0);
+  --vf-shadow-input: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-input-hover: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-input-focus: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-handles: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-handles-hover: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-handles-focus: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-btn: 0px 0px 0px 0px rgba(0, 0, 0, 0);
+  --vf-shadow-dropdown: 0px 0px 0px 0px rgba(0, 0, 0, 0);
   --vf-radius-input: 0.25rem;
   --vf-radius-input-sm: 0.25rem;
   --vf-radius-input-lg: 0.25rem;
