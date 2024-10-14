@@ -37,7 +37,7 @@ function createOutput(args) {
     script: {
       host: os.hostname(),
       version: {
-        npm: require("../package.json").version,
+        npm: require("../../package.json").version,
         commit: null,
       },
       config: pickBy(args, (_value, key) => key === '_' || (key.length > 1 && !key.includes('-'))),

@@ -8,7 +8,7 @@ import PreviousScansView from "./components/PreviousScansView.vue";
 import {createRouter, createWebHistory} from "vue-router";
 
 const routes = [
-    { path: '/', component: EvidenceCollectorForm },
+    { path: '/', component: EvidenceCollectorForm   } ,
     { path: '/previous-scans', component: PreviousScansView },
 ]
 

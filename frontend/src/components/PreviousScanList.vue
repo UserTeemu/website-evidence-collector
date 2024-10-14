@@ -1,6 +1,12 @@
 <script setup lang="ts">
 
-const props = defineProps({previousScans: Array})
+interface PreviousScan {
+  id: string;
+  timestamp: string;
+  host: string;
+}
+
+const props = defineProps({previousScans: Array<PreviousScan> });
 
 const formatDate = (timestamp) => new Date(timestamp).toLocaleDateString('en-GB');
 
@@ -8,8 +14,8 @@ const formatDate = (timestamp) => new Date(timestamp).toLocaleDateString('en-GB'
 
 <template>
   <ul role="list" class="divide-y divide-gray-100">
-    <li v-for="scan in props.previousScans" :key="scan.id" class="flex justify-between gap-x-6 py-5"
-        @click="$emit('scan-clicked', scan)">
+            <li v-for="scan in props.previousScans" :key="scan.id" class="flex justify-between gap-x-6 py-5"
+                @click="$emit('scan-clicked', scan)">
       <button class="w-full text-left flex justify-between gap-x-6">
         <div class="flex min-w-0 gap-x-4">
           <div class="min-w-0 flex-auto">

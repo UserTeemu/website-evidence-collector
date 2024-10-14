@@ -4,6 +4,7 @@
  * @copyright European Data Protection Supervisor (2019)
  * @license EUPL-1.2
  */
+
 const argv = require("yargs") // TODO use rather option('o', hash) syntax and define default top-level command
     .parserConfiguration({
       "populate--": true,
@@ -197,4 +198,4 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
       }
     });
 
-module.exports = argv;
+export default argv;

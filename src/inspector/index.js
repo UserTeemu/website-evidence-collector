@@ -1,8 +1,8 @@
 // jshint esversion: 8
 
-const groupBy = require("lodash/groupBy");
-const flatten = require("lodash/flatten");
-const url = require("url");
+import flatten from "lodash/flatten";
+import groupBy from "lodash/groupBy";
+import url from "url";
 
 const {
   isFirstParty,
@@ -240,4 +240,4 @@ class Inspector {
   }
 }
 
-module.exports = Inspector;
+export default Inspector;

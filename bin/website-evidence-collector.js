@@ -10,17 +10,17 @@
  * @example ./bin/website-evidence-collector.js http://example.com
  */
 
+import server from '../src/server/index';
+import argv from "../src/lib/argv";
+import logger from "../src/lib/logger";
 
-const argv = require("../lib/argv");
-const logger = require("../lib/logger");
 
 (async () => {
   let args = argv.parse();
   if (args._[0] === 'serve') {
-    const server = require('../server')
     await server(args.port, logger.create({}, args))
   } else {
-    const localCollector = require("..");
+    const localCollector = require("../src");
     await localCollector(args, logger.create({}, args));
   }
 })();

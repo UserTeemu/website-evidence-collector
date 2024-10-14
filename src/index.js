@@ -10,7 +10,7 @@
 //const argv = require('./lib/argv');
 const Collector = require("./collector");
 const Inspector = require("./inspector");
-const Reporter = require("./reporter");
+const Reporter = require("./reporter/reporter");
 
 async function run(args, logger) {
   const collector = new Collector(args, logger);

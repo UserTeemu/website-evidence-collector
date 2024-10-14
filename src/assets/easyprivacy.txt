@@ -10651,7 +10651,7 @@ $third-party,xmlhttprequest,domain=opensubtitles.org
 ||hsforms.com^*/counters.gif
 ||hsforms.com^*/timings.gif$image
 ||hspbotdetection.azurewebsites.net^
-||hub.reacti.co/index.js
+||hub.reacti.co/reporter.ts
 ||hubspot.com/analytics/
 ||hubspot.com/cs/loader-v2.js
 ||hubspot.com/tracking/
@@ -12156,7 +12156,7 @@ $third-party,xmlhttprequest,domain=opensubtitles.org
 ! Fingerprinting
 ||ascpqnj-oam.global.ssl.fastly.net^
 ||cloudfront.net/js/grin-sdk.js
-||dingxiang-inc.com/ctu-group/constid-js/index.js
+||dingxiang-inc.com/ctu-group/constid-js/reporter.ts
 ||fyrsbckgi-c.global.ssl.fastly.net^
 ||ipqualityscore.com/api/$third-party
 ||mhxk.com^*/main/entry.common.$script
@@ -33369,7 +33369,7 @@ arketing.indianadunes.com^
 @@||asadcdn.com/adlib/$domain=computerbild.de
 @@||asadcdn.com/assets/video/$domain=computerbild.de
 @@||bilder-a.akamaihd.net/ip/js/ipdvdc/ipdvdc.min.js$domain=n-tv.de|toggo.de|vip.de
-@@||businessclick.ch/index.js$domain=finanzen.ch
+@@||businessclick.ch/reporter.ts$domain=finanzen.ch
 @@||classic.comunio.de/clubImg.phtml/$image,~third-party
 @@||digitale-sammlungen.gwlb.de^*/pageview.js$script,domain=digitale-sammlungen.gwlb.de
 @@||energy.de^*/ivw.js?$domain=energy.de

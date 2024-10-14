@@ -22,7 +22,7 @@ import PreviousScanList from "./PreviousScanList.vue";
 import PreviousScanHeadline from "./PreviousScanHeadline.vue";
 
 const sanitizedHtml = ref('');
-const previousScans = ref(null)
+const previousScans = ref([])
 
 // Define an async function to fetch data from the server
 const fetchPreviousScans = async () => {
