@@ -2,7 +2,7 @@ import express, {Application, Request, Response, NextFunction, RequestHandler} f
 import bodyParser from 'body-parser';
 import {startCollection} from './business-logic';
 
-const corsDefault = 'http://localhost:5173';
+const corsDefault = 'http://localhost:8080';
 
 interface StartCollectionRequestBody {
     website_url: string
@@ -54,7 +54,8 @@ async function run(port: number, logger: any) {
     });
 
     app.listen(port, () => {
-        console.log(`website-evidence-collector awaiting connection on port ${port}`);
+        logger.info("Running website-evidence-collector in server mode");
+        logger.info("Connect by opening the following url in your browser: http://localhost:" + port);
     });
 }
 

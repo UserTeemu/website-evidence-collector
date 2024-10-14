@@ -73,13 +73,12 @@ import {ref} from "vue";
 
 // If the app is served using Vite we have to specify the server location.
 // If it is served by the server itself a relative URL can be used.
-const isServedUsingVite = import.meta.env !== undefined
-
+const isViteDevEnv = import.meta.env.DEV
 const sanitizedHtml = ref('');
 
 async function handleSubmit(form$, _) {
 
-  const WEC_ENDPOINT = isServedUsingVite
+  const WEC_ENDPOINT = isViteDevEnv
       ? "http://localhost:8080/start-collection"
       : new URL("/start-collection", document.location.toString()).href;
 

@@ -20,9 +20,7 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
       return y.alias('p', 'port')
           .default('p', 8080)
           .strict();
-    }, () => {
-      console.log("Run website-evidence-collector as server.")
-    })
+    }, () => {})
     .command(['collect', '$0'], 'Run collection for the websites', (y) => {
       return y
           // top-level default command, see https://github.com/yargs/yargs/blob/master/docs/advanced.md#default-commands
