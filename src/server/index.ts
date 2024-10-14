@@ -1,6 +1,6 @@
 import express, {Application, Request, Response, NextFunction, RequestHandler} from 'express';
 import bodyParser from 'body-parser';
-import {loadPreviousScans, loadReport, startCollection} from './business-logic';
+import {startCollection} from './business-logic';
 
 const corsDefault = 'http://localhost:5173';
 
@@ -25,27 +25,6 @@ async function run(port: number, logger: any) {
     });
 
     app.use('/',express.static('../src/assets/frontend'))
-
-    app.get('/previous-scans', async (req: Request, res: Response) => {
-        try {
-            logger.log('info', req.url);
-            const result = await loadPreviousScans();
-            res.send(JSON.stringify(result));
-        } catch (e) {
-            res.status(500).send({});
-        }
-    });
-
-    app.get('/load-report', async (req: Request, res: Response) => {
-        try {
-            const scanId = req.query.scanId as string;
-            logger.log('info', req.url);
-            const report = await loadReport(scanId);
-            res.send(report);
-        } catch (e) {
-            res.status(500).send({});
-        }
-    });
 
 
     app.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {

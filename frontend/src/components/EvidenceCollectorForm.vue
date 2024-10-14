@@ -81,7 +81,7 @@ async function handleSubmit(form$, _) {
 
   const WEC_ENDPOINT = isServedUsingVite
       ? "http://localhost:8080/start-collection"
-      : new URL("/start-collection", document.location.toString() ).href;
+      : new URL("/start-collection", document.location.toString()).href;
 
   // Using FormData will EXCLUDE conditional elements and it
   // will submit the form as "Content-Type: multipart/form-data".

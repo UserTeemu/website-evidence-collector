@@ -1,12 +1,11 @@
 <script setup lang="ts" >
-import Navbar from "./components/Navbar.vue";
+import EvidenceCollectorForm from "./components/EvidenceCollectorForm.vue";
 </script>
 
 <template>
   <main>
     <div class="h-screen justify-center items-center">
-      <Navbar/>
-      <RouterView />
+      <EvidenceCollectorForm />
     </div>
   </main>
 </template>

@@ -26,7 +26,6 @@
     "jstransformer-marked": "1.4.0",
     "lodash": "^4.17.21",
     "marked-smartypants": "^1.0.2",
-    "mongodb": "^6.9.0",
     "pug": "^3.0.2",
     "puppeteer": "^22.12.1",
     "puppeteer-har": "^1.1.2",
