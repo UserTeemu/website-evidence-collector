@@ -15,19 +15,19 @@ const sessionCookieExpirationTime = -1;
 module.exports.set_cookies = async function (
   page,
   uri_ins,
-  args,
+  setCookies,
   output,
   logger
 ) {
   // check if cookies need to be added
-  if (args.setCookie) {
+  if (setCookies) {
     // variable that will buffer all the valid cookies that are passed
     let cookieJar = [];
-    if (fs.existsSync(args.setCookie)) {
+    if (fs.existsSync(setCookies)) {
       // passed argument is the location of a file
       logger.log(
         "info",
-        `Read cookie parameter from the existing file: ${args.setCookie}`
+        `Read cookie parameter from the existing file: ${setCookies}`
       );
       let requestedDomain, protocol;
 
@@ -41,27 +41,27 @@ module.exports.set_cookies = async function (
       }
       // cookiefile should be small, so reading it into memory
       const lines = fs
-        .readFileSync(args.setCookie, "UTF-8")
+        .readFileSync(setCookies, "UTF-8")
         .trim()
         .split(/\r?\n/);
 
       for (let line of lines) {
-        httpOnly = false;
-        if (line.trim().substring(0, 10) == "#HttpOnly_") {
+        let httpOnly = false;
+        if (line.trim().substring(0, 10) === "#HttpOnly_") {
           // cookie that is flagged as http-only. stripping the flag so we can match the domain later on.
           line = line.trim().substring(10);
           httpOnly = true;
-        } else if (line.trim().indexOf("#") == 0) {
+        } else if (line.trim().indexOf("#") === 0) {
 
           // this line is a comment; not parsing it
           continue;
-        } else if (line.trim() == "") {
+        } else if (line.trim() === "") {
           // this is a blank line; ignoring it
           continue;
         }
 
         let cookieArr = line.split("\t");
-        if (cookieArr.length == 7) {
+        if (cookieArr.length === 7) {
           // valid line, adding cookie
           /***
            * Netscape cookie file format, equal to how curl uses it:
@@ -80,7 +80,7 @@ module.exports.set_cookies = async function (
             name: cookieArr[5],
             value: cookieArr[6],
             expires:
-              cookieArr[4] == "0"
+              cookieArr[4] === "0"
                 ? sessionCookieExpirationTime
                 : parseInt(cookieArr[4]),
             domain: cookieArr[0],
@@ -97,7 +97,7 @@ module.exports.set_cookies = async function (
         "cookie parameter is not an existing file; parsing it as key=value pairs"
       );
 
-      let jarArr = args.setCookie.split(";");
+      let jarArr = setCookies.split(";");
 
       for (let cookieStr of jarArr) {
         if (cookieStr.indexOf("=") >= 0) {

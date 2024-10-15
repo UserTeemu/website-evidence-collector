@@ -61,7 +61,7 @@ export async function startCollection(website_url: string, max_links: number,log
     let reporterArgs: ReporterArguments = {
         html: args.html,
         json: args.json,
-        output: args.output,
+        outputPath: args.output,
         pdf: args.pdf,
         usePandoc: args.usePandoc,
         yaml: args.yaml,

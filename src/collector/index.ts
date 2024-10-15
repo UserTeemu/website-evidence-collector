@@ -1,11 +1,11 @@
 import {createOutputDirectory} from "./io";
 import {CreateOutputArgs, CollectorOutput, createOutputObject} from "./output";
 
-const collector_connection = require("./connection");
-const collector_inspect = require("./inspector");
+import collector_connection from './connection';
+import collector_inspect from './inspector';
 
-const browsersession = require("./browser-session");
-const {isFirstParty, getLocalStorage} = require("../lib/tools");
+import {BrowserArgs, BrowserSession, PageSession} from './browser-session';
+import { isFirstParty, getLocalStorage } from '../lib/tools';
 
 
 export interface CollectionResult {
@@ -16,8 +16,8 @@ export interface CollectionResult {
 
 export class Collector {
     private output: any;
-    private browserSession: any;
-    private pageSession: any;
+    private browserSession: BrowserSession;
+    private pageSession: PageSession;
     private logger: any;
     private args: any;
     private source?: string;
@@ -78,10 +78,22 @@ export class Collector {
     }
 
     private async createSession(): Promise<void> {
-        this.browserSession = await browsersession.createBrowserSession(
-            this.args,
-            this.logger
-        );
+        let browserArgs:BrowserArgs={
+            "--": this.args["--"],
+            browserOptions: this.args.browserOptions,
+            browserProfile: this.args.browserProfile,
+            doNotTrack: this.args.dnt,
+            doNotTrackJs: this.args.dntJs,
+            headless: this.args.headless,
+            linkLimit: this.args.max,
+            outputPath: this.args.output,
+            pageLoadTimeout: this.args.pageTimeout,
+            sleep: this.args.sleep,
+            cookies:this.args.setCookie,
+        }
+        this.browserSession=new BrowserSession(browserArgs,this.logger)
+
+        await this.browserSession.create()
 
         this.output.browser.version = await this.browserSession.browser.version();
         this.output.browser.user_agent = await this.browserSession.browser.userAgent();

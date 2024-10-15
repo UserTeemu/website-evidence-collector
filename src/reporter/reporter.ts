@@ -28,7 +28,7 @@ marked.use({
 marked.use(require('marked-smartypants').markedSmartypants());
 
 export interface ReporterArguments {
-    output: undefined | string;
+    outputPath?:  string;
     json: boolean;
     yaml: boolean;
     html: boolean;
@@ -43,8 +43,8 @@ export class Reporter {
     saveJson(data, filename, log = true) {
         const json_dump = JSON.stringify(data, null, 2);
 
-        if (this.args.output) {
-           fs.writeFileSync(path.join(this.args.output, filename), json_dump);
+        if (this.args.outputPath) {
+           fs.writeFileSync(path.join(this.args.outputPath, filename), json_dump);
 
         }
 
@@ -56,8 +56,8 @@ export class Reporter {
     saveYaml(data, filename, log = true) {
         const yaml_dump = yaml.dump(data, {noRefs: true});
 
-        if (this.args.output) {
-            fs.writeFileSync(path.join(this.args.output, filename), yaml_dump);
+        if (this.args.outputPath) {
+            fs.writeFileSync(path.join(this.args.outputPath, filename), yaml_dump);
         }
 
         if (log && this.args.yaml) {
@@ -67,7 +67,7 @@ export class Reporter {
 
     readYaml(filename) {
         return yaml.load(
-            fs.readFileSync(path.join(this.args.output, filename), "utf8")
+            fs.readFileSync(path.join(this.args.outputPath, filename), "utf8")
         );
     }
 
@@ -97,8 +97,8 @@ export class Reporter {
             })
         );
 
-        if (this.args.output) {
-            fs.writeFileSync(path.join(this.args.output, filename), html_dump);
+        if (this.args.outputPath) {
+            fs.writeFileSync(path.join(this.args.outputPath, filename), html_dump);
         }
 
         if (log && this.args.html) {
@@ -109,12 +109,12 @@ export class Reporter {
     }
 
     async convertHtmlToPdf(htmlfilename = "inspection.html", pdffilename = "inspection.pdf") {
-        if (this.args.pdf && this.args.output) {
+        if (this.args.pdf && this.args.outputPath) {
             const browser = await puppeteer.launch({});
             const pages = await browser.pages();
-            await pages[0].goto("file://" + path.resolve(path.join(this.args.output, htmlfilename)), {waitUntil: 'networkidle0'});
+            await pages[0].goto("file://" + path.resolve(path.join(this.args.outputPath, htmlfilename)), {waitUntil: 'networkidle0'});
             await pages[0].pdf({
-                path: path.resolve(path.join(this.args.output, pdffilename)),
+                path: path.resolve(path.join(this.args.outputPath, pdffilename)),
                 format: 'A4',
                 printBackground: true,
                 displayHeaderFooter: true,
@@ -140,7 +140,7 @@ export class Reporter {
         log = true,
         template = "../assets/template-office.pug"
     ) {
-        if (this.args.output) {
+        if (this.args.outputPath) {
             const office_template =
                 this.args["office-template"] || path.join(__dirname, template);
             const html_dump = pug.renderFile(
@@ -163,7 +163,7 @@ export class Reporter {
 
             if (this.args.usePandoc) {
                 const ret = spawnSync('pandoc', ['-f', 'html', '--number-sections', '--toc', '--output', filename], {
-                    cwd: this.args.output,
+                    cwd: this.args.outputPath,
                     input: html_dump,
                     encoding: 'utf8',
                 });
@@ -185,14 +185,14 @@ export class Reporter {
                     creator: `EDPS Website Evidence Collector v${data.script.version.npm} using NPM html-to-docx`,
                 };
                 const fileBuffer = await HTMLtoDOCX(html_dump, null, documentOptions, null);
-                fs.writeFileSync(path.join(this.args.output, filename), fileBuffer);
+                fs.writeFileSync(path.join(this.args.outputPath, filename), fileBuffer);
             }
         }
     }
 
     saveSource(source, filename = "source.html") {
-        if (this.args.output) {
-            fs.writeFileSync(path.join(this.args.output, filename), source);
+        if (this.args.outputPath) {
+            fs.writeFileSync(path.join(this.args.outputPath, filename), source);
         }
     }
 }

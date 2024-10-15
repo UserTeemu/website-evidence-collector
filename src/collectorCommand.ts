@@ -34,7 +34,7 @@ async function run(args: CollectorCommandOptions, logger: any): Promise<any> {
     const inspectionResult: any = await inspector.run();
 
     let reporterArgs: ReporterArguments = {
-        output: args.output,
+        outputPath: args.output,
         json: args.json,
         yaml: args.yaml,
         html: args.html,
