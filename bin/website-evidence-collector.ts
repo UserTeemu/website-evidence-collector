@@ -26,7 +26,7 @@ import { reporterCommand ,ReporterCommandOptions} from "../src/reporter/reporter
       break;
     case 'reporter':
       const reporterOptions: ReporterCommandOptions = {
-        inspectionJsonPath: args._[0],
+        inspectionJsonPath: args._[1],
         outputFile: args.outputFile,
         htmlTemplate: args.htmlTemplate,
         officeTemplate: args.officeTemplate,

@@ -24,7 +24,44 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
           .strict();
     }, () => {
     })
-    .command(['collect', '$0'], 'Run collection for the websites', (y) => {
+    .command('reporter', 'Generate reports from collected data', (y) => {
+      return y.usage("Usage: $0 [options] <JSON file>")
+          .example("$0 /home/user/inspection.json")
+          .describe("html-template", "Custom pug template to generate HTML output")
+          .nargs("html-template", 1)
+          .alias("html-template", "t")
+          .string("html-template")
+
+          .describe("office-template", "Custom pug template to generate DOCX with NPM html-to-docx or DOCX/ODT with pandoc")
+          .nargs("office-template", 1)
+          .string("office-template")
+
+          .describe("use-pandoc", "Conversion to DOCX/ODT with pandoc instead of NPM")
+          .boolean("use-pandoc")
+          .default("use-pandoc", false)
+
+          .describe("extra-file", "Loads other JSON/YAML files in the template array 'extra'")
+          .nargs("extra-file", 1)
+          .alias("extra-file", "e")
+          .array("extra-file")
+          .coerce("extra-file", (files) => {
+            return files.map((file) => {
+              if (file.toLowerCase().endsWith('.yaml') || file.toLowerCase().endsWith('.yml')) {
+                return yaml.load(
+                    fs.readFileSync(file, "utf8")
+                );
+              } else {
+                return JSON.parse(fs.readFileSync(file, "utf8"));
+              }
+            });
+          })
+
+          .describe("output-file", "Write HTML/PDF/DOCX/ODT output to file according to file extension")
+          .nargs("output-file", 1)
+          .alias("output-file", "o")
+          .string("output-file")
+    }, () => {
+    }).command(['collect', '$0'], 'Run collection for the websites', (y) => {
       return y
           // top-level default command, see https://github.com/yargs/yargs/blob/master/docs/advanced.md#default-commands
           .demandCommand(1, "An URI for inspection or the server command is mandatory.") // ask for command and for inspection url
@@ -180,44 +217,6 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
 
     }, () => {
     })
-    .command('reporter', 'Generate reports from collected data', (y) => {
-      return y.usage("Usage: $0 [options] <JSON file>")
-          .example("$0 /home/user/inspection.json")
-          .describe("html-template", "Custom pug template to generate HTML output")
-          .nargs("html-template", 1)
-          .alias("html-template", "t")
-          .string("html-template")
-
-          .describe("office-template", "Custom pug template to generate DOCX with NPM html-to-docx or DOCX/ODT with pandoc")
-          .nargs("office-template", 1)
-          .string("office-template")
-
-          .describe("use-pandoc", "Conversion to DOCX/ODT with pandoc instead of NPM")
-          .boolean("use-pandoc")
-          .default("use-pandoc", false)
-
-          .describe("extra-file", "Loads other JSON/YAML files in the template array 'extra'")
-          .nargs("extra-file", 1)
-          .alias("extra-file", "e")
-          .array("extra-file")
-          .coerce("extra-file", (files) => {
-            return files.map((file) => {
-              if (file.toLowerCase().endsWith('.yaml') || file.toLowerCase().endsWith('.yml')) {
-                return yaml.load(
-                    fs.readFileSync(file, "utf8")
-                );
-              } else {
-                return JSON.parse(fs.readFileSync(file, "utf8"));
-              }
-            });
-          })
-
-          .describe("output-file", "Write HTML/PDF/DOCX/ODT output to file according to file extension")
-          .nargs("output-file", 1)
-          .alias("output-file", "o")
-          .string("output-file")
-    }, () => {
-    })
 
 
     .help("help")
@@ -225,7 +224,7 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
         "Copyright European Union 2019, licensed under EUPL-1.2 (see LICENSE.txt)"
     )
     .check((argv, options) => {
-      if (argv._[0] && argv._[0] === "serve") {
+      if (argv._[0] && argv._[0] === "serve" || argv._[0] && argv._[0] === "reporter") {
         return true;
       }
       if (argv._[0] && argv._[0].startsWith("http")) {
