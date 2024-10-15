@@ -13,6 +13,10 @@
   },
   "dependencies": {
     "@cliqz/adblocker-puppeteer": "^1.25.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/marked": "^5.0.2",
+    "@types/node": "^22.7.5",
+    "@types/pug": "^2.0.10",
     "body-parser": "^1.20.3",
     "content-security-policy-parser": "^0.6.0",
     "express": "^4.21.0",
@@ -39,7 +43,9 @@
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.10",
+    "@types/puppeteer-har": "^1.1.0",
     "@types/yargs": "^17.0.33",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
@@ -61,7 +67,7 @@
     "test": "jest --detectOpenHandles"
   },
   "bin": {
-    "website-evidence-collector": "./bin/website-evidence-collector.js",
+    "website-evidence-collector": "bin/website-evidence-collector.ts",
     "website-evidence-reporter": "./bin/website-evidence-reporter.js"
   },
   "keywords": [

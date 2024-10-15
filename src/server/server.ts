@@ -1,13 +1,9 @@
 import express, {Application, Request, Response, NextFunction, RequestHandler} from 'express';
 import bodyParser from 'body-parser';
-import {startCollection} from './business-logic';
+import {startCollection} from './startCollection';
 
 const corsDefault = 'http://localhost:8080';
 
-interface StartCollectionRequestBody {
-    website_url: string
-    max_option_input: number
-}
 
 async function run(port: number, logger: any) {
     const app: Application = express();
@@ -24,7 +20,7 @@ async function run(port: number, logger: any) {
         next();
     });
 
-    app.use('/',express.static('../src/assets/frontend'))
+    app.use('/', express.static('../src/assets/frontend'))
 
 
     app.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
@@ -45,7 +41,7 @@ async function run(port: number, logger: any) {
 
             logger.log('info', `Running collection for: ${website_url}`);
 
-            const output = await startCollection(website_url, max_links_option);
+            const output = await startCollection(website_url, max_links_option,logger);
             res.send(output);
             console.log('Finished serving request');
         } catch (e) {
@@ -57,6 +53,11 @@ async function run(port: number, logger: any) {
         logger.info("Running website-evidence-collector in server mode");
         logger.info("Connect by opening the following url in your browser: http://localhost:" + port);
     });
+}
+
+interface StartCollectionRequestBody {
+    website_url: string
+    max_option_input: number
 }
 
 export default run;

@@ -1,12 +1,9 @@
-    import {Reporter, ReporterArguments} from "../reporter/reporter";
-import Collector from "../collector";
+import {Reporter, ReporterArguments} from "../reporter/reporter";
+import {Collector} from "../collector";
 import Inspector from "../inspector";
-import logger from "../lib/logger";
 
 
-
-
-export async function startCollection(website_url: string,max_links:number): Promise<string> {
+export async function startCollection(website_url: string, max_links: number,logger:any): Promise<string> {
     const args = {
         _: [website_url],
         m: 0,
@@ -21,7 +18,7 @@ export async function startCollection(website_url: string,max_links:number): Pro
         dnt: false,
         "dnt-js": false,
         dntJs: false,
-        output: false,
+        output: undefined,
         overwrite: false,
         y: false,
         yaml: false,
@@ -45,10 +42,6 @@ export async function startCollection(website_url: string,max_links:number): Pro
         url: website_url,
     };
 
-    return await performCollection(args, logger.create({}, args));
-}
-
-async function performCollection(args: any, logger: any): Promise<string> {
     // ########################################################
     // create a new collection instance
     // ########################################################
@@ -65,7 +58,7 @@ async function performCollection(args: any, logger: any): Promise<string> {
     const inspectionOutput = await inspector.run();
 
 
-    let reporterArgs: ReporterArguments= {
+    let reporterArgs: ReporterArguments = {
         html: args.html,
         json: args.json,
         output: args.output,
@@ -77,6 +70,7 @@ async function performCollection(args: any, logger: any): Promise<string> {
     const reporter = new Reporter(reporterArgs);
     return reporter.generateHtml(inspectionOutput, "inspection.html", false);
 }
+
 
 
 

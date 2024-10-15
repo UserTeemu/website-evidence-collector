@@ -4,6 +4,8 @@
  * @copyright European Data Protection Supervisor (2019)
  * @license EUPL-1.2
  */
+import yaml from "js-yaml";
+import fs from "fs";
 
 const argv = require("yargs") // TODO use rather option('o', hash) syntax and define default top-level command
     .parserConfiguration({
@@ -16,11 +18,12 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
     )
     // allow for shell variables such as WEC_DNT=true
     .env("WEC")
-    .command('serve', 'Starts as a server for GUI to connect to', (y) => {
+    .command('serve', 'Start in server mode and connect using a web browser', (y) => {
       return y.alias('p', 'port')
           .default('p', 8080)
           .strict();
-    }, () => {})
+    }, () => {
+    })
     .command(['collect', '$0'], 'Run collection for the websites', (y) => {
       return y
           // top-level default command, see https://github.com/yargs/yargs/blob/master/docs/advanced.md#default-commands
@@ -35,7 +38,7 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
           .describe("s", "Time to sleep after every page load in ms")
           .defaults("s", 3000) // 3 seconds default sleep
           .coerce("s", (arg) => {
-            return arg == false ? 0 : Number(arg);
+            return arg === false ? 0 : Number(arg);
           })
 
           .alias("f", "first-party-uri")
@@ -176,7 +179,44 @@ const argv = require("yargs") // TODO use rather option('o', hash) syntax and de
           })
 
     }, () => {
-      console.log('Run default command for local collection.')
+    })
+    .command('reporter', 'Generate reports from collected data', (y) => {
+      return y.usage("Usage: $0 [options] <JSON file>")
+          .example("$0 /home/user/inspection.json")
+          .describe("html-template", "Custom pug template to generate HTML output")
+          .nargs("html-template", 1)
+          .alias("html-template", "t")
+          .string("html-template")
+
+          .describe("office-template", "Custom pug template to generate DOCX with NPM html-to-docx or DOCX/ODT with pandoc")
+          .nargs("office-template", 1)
+          .string("office-template")
+
+          .describe("use-pandoc", "Conversion to DOCX/ODT with pandoc instead of NPM")
+          .boolean("use-pandoc")
+          .default("use-pandoc", false)
+
+          .describe("extra-file", "Loads other JSON/YAML files in the template array 'extra'")
+          .nargs("extra-file", 1)
+          .alias("extra-file", "e")
+          .array("extra-file")
+          .coerce("extra-file", (files) => {
+            return files.map((file) => {
+              if (file.toLowerCase().endsWith('.yaml') || file.toLowerCase().endsWith('.yml')) {
+                return yaml.load(
+                    fs.readFileSync(file, "utf8")
+                );
+              } else {
+                return JSON.parse(fs.readFileSync(file, "utf8"));
+              }
+            });
+          })
+
+          .describe("output-file", "Write HTML/PDF/DOCX/ODT output to file according to file extension")
+          .nargs("output-file", 1)
+          .alias("output-file", "o")
+          .string("output-file")
+    }, () => {
     })
 
 

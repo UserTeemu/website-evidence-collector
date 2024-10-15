@@ -137,7 +137,7 @@ The configuration is compatible with the cookie option (`--cookie` or `-b`) of t
 
 #### How do I change the `User-Agent` request header?
 
-The website evidence collector uses a user agent header of Chrome that is defined in the top of the file `website-evidence-collector.js`. However, the value can be overwritten any other value, e.g. `WEC`:
+The website evidence collector uses a user agent header of Chrome that is defined in the top of the file `website-evidence-collector.ts`. However, the value can be overwritten any other value, e.g. `WEC`:
 
 1. `WEC_BROWSER_OPTIONS="--user-agent=WEC" website-evidence-collector https://example.com`
 2. `website-evidence-collector https://example.com -- --user-agent=WEC`

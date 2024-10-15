@@ -1,19 +1,19 @@
 // jshint esversion: 8
-const fs = require("fs-extra");
-const yaml = require("js-yaml");
-const path = require("path");
-const pug = require("pug");
-const HTMLtoDOCX = require("html-to-docx");
-const {spawnSync} = require('node:child_process');
-const puppeteer = require("puppeteer");
-const marked = require('marked');
-
+import fs from 'fs';
+import path from 'path';
+import pug from 'pug';
+import HTMLtoDOCX from 'html-to-docx';
+import puppeteer from 'puppeteer';
+import { spawnSync } from 'node:child_process';
+import yaml from 'js-yaml';
+import { all as unsafe } from 'js-yaml-js-types';
+import { marked } from 'marked';
 
 // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
 // source of this call: https://github.com/markedjs/marked-custom-heading-id/blob/main/src/index.js (MIT License, Copyright (c) 2021 @markedjs)
 marked.use({
     renderer: {
-        heading(text, level, raw, slugger) {
+        heading(text, level, _) {
             // WEC patch: add \:
             const headingIdRegex = /(?: +|^)\{#([a-z][\:\w-]*)\}(?: +|$)/i;
             const hasId = text.match(headingIdRegex);
@@ -28,7 +28,7 @@ marked.use({
 marked.use(require('marked-smartypants').markedSmartypants());
 
 export interface ReporterArguments {
-    output: boolean | string;
+    output: undefined | string;
     json: boolean;
     yaml: boolean;
     html: boolean;
@@ -37,14 +37,15 @@ export interface ReporterArguments {
 }
 
 export class Reporter {
-    constructor(private args: ReporterArguments) {
+        constructor(private args: ReporterArguments) {
     }
 
     saveJson(data, filename, log = true) {
         const json_dump = JSON.stringify(data, null, 2);
 
         if (this.args.output) {
-            fs.writeFileSync(path.join(this.args.output, filename), json_dump);
+           fs.writeFileSync(path.join(this.args.output, filename), json_dump);
+
         }
 
         if (log && this.args.json) {
@@ -109,9 +110,7 @@ export class Reporter {
 
     async convertHtmlToPdf(htmlfilename = "inspection.html", pdffilename = "inspection.pdf") {
         if (this.args.pdf && this.args.output) {
-            const browser = await puppeteer.launch({
-                headless: 'new',
-            });
+            const browser = await puppeteer.launch({});
             const pages = await browser.pages();
             await pages[0].goto("file://" + path.resolve(path.join(this.args.output, htmlfilename)), {waitUntil: 'networkidle0'});
             await pages[0].pdf({
