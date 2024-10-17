@@ -20,20 +20,13 @@ import {spawnSync} from 'node:child_process';
 import yaml from 'js-yaml';
 import {all as unsafe} from 'js-yaml-js-types';
 import {marked} from 'marked';
+import { ParsedArgsReporter } from '../lib/argv';
 
 yaml.DEFAULT_SCHEMA = yaml.DEFAULT_SCHEMA.extend(unsafe);
 
-export interface ReporterCommandOptions {
-    inspectionJsonPath: string;
-    outputFile?: string;
-    htmlTemplate?: string;
-    officeTemplate?: string;
-    extraFile?: string;
-    usePandoc?: boolean;
-}
 
 /// Code that gets called when invoking the reporter command using the CLI
-export async function reporterCommand(args: ReporterCommandOptions) {
+export async function reporterCommand(args: ParsedArgsReporter) {
     let output = JSON.parse(fs.readFileSync(args.inspectionJsonPath, 'utf8'));
 
     let html_template =

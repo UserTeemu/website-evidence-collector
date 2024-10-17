@@ -11,31 +11,28 @@
  */
 
 import server from '../src/server/server';
-import argv from "../src/lib/argv";
+import {parse,ParsedArgs,ParsedArgsCollector,ParsedArgsReporter,ParsedArgsServe} from "../src/lib/argv";
 import logger from "../src/lib/logger";
 import localCollector from "../src/collectorCommand";
-import { reporterCommand ,ReporterCommandOptions} from "../src/reporter/reporterCommand";
+import { reporterCommand } from "../src/reporter/reporterCommand";
+
+
 (async () => {
-  const args:any = argv.parse();
-  const command = args._[0];
+  let args:ParsedArgs =await parse();
+
   const loggerInstance = logger.create({}, args);
 
-  switch (command) {
+  switch (args.command) { 
     case 'serve':
+      args=args as ParsedArgsServe;
       await server(args.port, loggerInstance);
       break;
     case 'reporter':
-      const reporterOptions: ReporterCommandOptions = {
-        inspectionJsonPath: args._[1],
-        outputFile: args.outputFile,
-        htmlTemplate: args.htmlTemplate,
-        officeTemplate: args.officeTemplate,
-        extraFile: args.extraFile,
-        usePandoc: args.usePandoc,
-      };
-      await reporterCommand(reporterOptions);
+      args=args as ParsedArgsReporter;
+      await reporterCommand(args);
       break;
     default:
+      args=args as ParsedArgsCollector;
       await localCollector(args, loggerInstance);
   }
 })();

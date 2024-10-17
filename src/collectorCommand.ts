@@ -8,19 +8,11 @@
 
 import {Collector, CollectionResult} from './collector';
 import Inspector from './inspector';
+import { ParsedArgsCollector } from './lib/argv';
 import {Reporter, ReporterArguments} from './reporter/reporter';
 
-interface CollectorCommandOptions {
-    output: undefined | string;
-    html: boolean;
-    json: boolean;
-    yaml: boolean;
-    usePandoc: boolean;
-    pdf: boolean;
-}
 
-
-async function run(args: CollectorCommandOptions, logger: any): Promise<any> {
+async function run(args: ParsedArgsCollector, logger: any): Promise<any> {
     const collector = new Collector(args, logger);
     const collectionResult: CollectionResult = await collector.run();
 

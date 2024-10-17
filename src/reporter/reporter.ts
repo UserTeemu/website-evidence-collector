@@ -6,7 +6,6 @@ import HTMLtoDOCX from 'html-to-docx';
 import puppeteer from 'puppeteer';
 import { spawnSync } from 'node:child_process';
 import yaml from 'js-yaml';
-import { all as unsafe } from 'js-yaml-js-types';
 import { marked } from 'marked';
 
 // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
