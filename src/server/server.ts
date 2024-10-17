@@ -1,4 +1,4 @@
-import express, {Application, Request, Response, NextFunction, RequestHandler} from 'express';
+import express, {Application, Request, Response, NextFunction} from 'express';
 import bodyParser from 'body-parser';
 import {startCollection} from './startCollection';
 
@@ -27,25 +27,29 @@ async function run(port: number, logger: any) {
 
         try {
             const website_url = req.body.website_url;
-            const max_links_option = req.body.max_option_input;
             logger.info(`Received request for URL: ${req.url}`, {
                 website_url: req.body.website_url,
-                max_links_option: req.body.max_option_input
+                max_links_option: req.body.max_option_input,
+                sleep_option_input: req.body.sleep_option_input,
+                timeout_input_option: req.body.timeout_input_option,
+                first_party_uri_option_input: req.body.first_party_uri_option_input,
+                browse_link_option_input: req.body.browse_link_option_input,
             });
-            const urlPattern = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/;
 
-            if (!urlPattern.test(website_url)) {
+            if (!URL.canParse(website_url)) {
                 res.status(400).send({reason: 'malformatted_url'});
                 return;
             }
 
             logger.log('info', `Running collection for: ${website_url}`);
 
-            const output = await startCollection(website_url, max_links_option,logger);
+            const output = await startCollection(req.body, logger);
             res.send(output);
             console.log('Finished serving request');
-        } catch (e) {
-            res.status(500).send({});
+        } catch (e: any) {
+            logger.log('error',  e.message);
+            logger.log('error',  e.stack);
+            res.status(500).send({reason: e.reason});
         }
     });
 
@@ -55,9 +59,13 @@ async function run(port: number, logger: any) {
     });
 }
 
-interface StartCollectionRequestBody {
+export interface StartCollectionRequestBody {
     website_url: string
     max_option_input: number
+    sleep_option_input: number,
+    timeout_input_option: number,
+    first_party_uri_option_input: string,
+    browse_link_option_input: string,
 }
 
 export default run;

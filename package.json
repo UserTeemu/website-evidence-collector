@@ -46,6 +46,7 @@
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.10",
     "@types/puppeteer-har": "^1.1.0",
+    "@types/validator": "^13.12.2",
     "@types/yargs": "^17.0.33",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",

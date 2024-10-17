@@ -315,7 +315,7 @@ function configureCollectorCommand(yargs: yargs.Argv) {
         .check((parsedArgs, _) => {
             parsedArgs.command = 'collector'
 
-            let invokedAsDefaultCommand = parsedArgs._[0] !== 'collector'
+            let invokedAsDefaultCommand = parsedArgs._[0] !==  parsedArgs.command
             let urlPosition = invokedAsDefaultCommand ? 0 : 1
             if (parsedArgs._[urlPosition] && (parsedArgs._[urlPosition] as string).startsWith("http")) {
                 parsedArgs.url = parsedArgs._[urlPosition];
@@ -333,6 +333,7 @@ function configureServerCommand(yargs: yargs.Argv) {
         .strict()
         .check((parsedArgs, _) => {
             parsedArgs.command = 'serve'
+            return true;    
         });
 }
 

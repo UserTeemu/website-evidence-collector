@@ -2,36 +2,28 @@
 <template>
   <div class="flex flex-col md:flex-row">
     <div class="w-full md:w-2/6 px-4 my-auto">
-      <Vueform
-          :endpoint=false
-          @submit=handleSubmit
-          validate-on="step|change"
-          :display-errors="true"
-          add-class="vf-evidence-collection-form"
-      >
-        <StaticElement
-            name="title"
-            tag="h1"
-            content="Evidence Collection Form"
-        />
+      <Vueform :endpoint=false @submit=handleSubmit validate-on="step|change" :display-errors="true"
+               add-class="vf-evidence-collection-form">
+        <StaticElement name="title" tag="h1" content="Start Evidence Collection"/>
         <TextElement
             name="website_url"
-            :rules="['required']"
-
+            :rules="[
+        'required',
+      ]"
             input-type="url"
             placeholder="http://example.com"
         />
         <StaticElement
+            name="divider"
+            tag="hr"
+        />
+        <StaticElement
             name="max_option_label"
             tag="h4"
-            content="Set maximum of extra links to browse"
-            :columns="{
-        container: 6,
-      }"
+            content="Maximum Additional Links to browse"
             align="left"
-            top="1"
-            bottom="1"
             info="When larger than 0 links found on the site will be included in the collection up to the maximum defined here."
+            size="sm"
         />
         <TextElement
             name="max_option_input"
@@ -43,13 +35,87 @@
         'integer',
       ]"
             autocomplete="off"
-            :columns="{
-        container: 6,
-      }"
-            label="--max"
             placeholder="0"
             default="0"
             :floating="false"
+            info="The maximum number of links that will be browsed."
+        />
+        <StaticElement
+            name="sleep_option_label"
+            tag="h4"
+            content="Delay After Page Load (ms)"
+            align="left"
+        />
+        <TextElement
+            name="sleep_option_input"
+            input-type="number"
+            :rules="[
+        'nullable',
+        'min:0',
+        'integer',
+      ]"
+            autocomplete="off"
+            info="Amount of sleep in milliseconds after a page load"
+            placeholder="3000"
+            default="3000"
+            :floating="false"
+            :addons="{
+        after: 'milliseconds',
+      }"
+        />
+        <StaticElement
+            name="timeout_input_label"
+            tag="h4"
+            content="Page Load Timeout (ms)"
+            align="left"
+        />
+        <TextElement
+            name="timout_input_option"
+            input-type="number"
+            :rules="[
+        'nullable',
+        'min:0',
+        'integer',
+      ]"
+            autocomplete="off"
+            info="Page load imeout in milliseconds "
+            placeholder="0"
+            :floating="false"
+            default="0"
+            :addons="{
+        after: 'milliseconds',
+      }"
+            :attrs="{
+        'hide-spin-buttons': 'true',
+      }"
+        />
+        <StaticElement
+            name="first_party_uri_option_label"
+            tag="h4"
+            content="List of URIs Considered First-Party (separated by ;)"
+        />
+        <TextareaElement
+            name="first_party_uri_option_input"
+            :floating="false"
+            placeholder="http://example.com/example;http://another-example.com/"
+            :autogrow="false"
+        />
+        <StaticElement
+            name="browse_link_option_label"
+            tag="h4"
+            content="Links to Include in collection (separated by ;)"
+            top="1"
+            align="left"
+        />
+        <TextareaElement
+            name="browse_link_option_input"
+            :autogrow="false"
+            :floating="false"
+            placeholder="http://example.com/example;http://example.com/another-example"
+        />
+        <StaticElement
+            name="divider_1"
+            tag="hr"
         />
         <ButtonElement
             name="submit"
@@ -60,8 +126,7 @@
         />
       </Vueform>
     </div>
-    <div
-        class="inline-block h-screen min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10"></div>
+    <div class="inline-block h-screen min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10"></div>
     <div class="w-full md:w-4/6">
       <iframe :srcdoc="sanitizedHtml" ref="iframe" class="h-screen iframe-container"></iframe>
     </div>
@@ -86,9 +151,7 @@ async function handleSubmit(form$, _) {
   // will submit the form as "Content-Type: multipart/form-data".
   const data = form$.data
 
-  const urlPattern = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/;
-
-  if (!urlPattern.test(data.website_url)) {
+  if (!URL.canParse(data.website_url)) {
     form$.messageBag.prepend('The url needs to include the protocol, either https:// or https://')
     return;
   }
@@ -118,6 +181,8 @@ async function handleSubmit(form$, _) {
       const errorData = error.response.data.reason;
       console.log(errorData)// Assuming error.response.data contains the data you want to interpolate
       sanitizedHtml.value = `<html><head>${errorData}</head></html>`;
+    } else {
+      sanitizedHtml.value = `<html><head>${error.response.data.reason}</head></html>`;
     }
     console.error('error', error)
     return
@@ -125,7 +190,6 @@ async function handleSubmit(form$, _) {
     // Hide loading spinner
     form$.submitting = false
   }
-
 
 }
 </script>
@@ -442,5 +506,4 @@ async function handleSubmit(form$, _) {
   --vf-slider-tooltip-arrow-size-sm: 0.3125rem;
   --vf-slider-tooltip-arrow-size-lg: 0.3125rem;
 }
-
 </style>
