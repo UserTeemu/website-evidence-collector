@@ -30,8 +30,7 @@ export function safeJSONParse(obj: string): any {
 
 export function isFirstParty(refs_regexp: RegExp, uri_test: UrlWithStringQuery): boolean {
   // is first party if uri_test starts with any uri_ref ignoring, parameters,protocol and port
-  let uri_test_parsed = url.parse(uri_test.toString());
-  let test_stripped = `${uri_test_parsed.hostname}${uri_test_parsed.pathname}`;
+  let test_stripped = `${uri_test.hostname}${uri_test.pathname}`;
 
   return !!test_stripped.match(refs_regexp);
 }

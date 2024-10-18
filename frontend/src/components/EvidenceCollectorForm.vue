@@ -172,9 +172,9 @@ import {ref} from "vue";
 // If the app is served using Vite we have to specify the server location.
 // If it is served by the server itself a relative URL can be used.
 const isViteDevEnv = import.meta.env.DEV
-const sanitizedHtml = ref(null);
-const pdfUrl = ref(null);
-const htmlUrl = ref(null)
+const sanitizedHtml = ref<string | null>(null);
+const pdfUrl = ref<string | null>(null);
+const htmlUrl = ref<string | null>(null)
 
 function reset() {
   pdfUrl.value = null;
@@ -241,19 +241,21 @@ const createHtmlUrl = (html) => {
 };
 
 const downloadPdf = () => {
+  let url = pdfUrl.value as string;
   const link = document.createElement('a');
-  link.href = pdfUrl.value;
+  link.href = url;
   link.download = "inspection.pdf";
   link.click();
-  URL.revokeObjectURL(pdfUrl.value);
+  URL.revokeObjectURL(url);
 };
 
 const downloadHtml = () => {
+  let url = htmlUrl.value as string;
   const link = document.createElement('a');
-  link.href = htmlUrl.value;
+  link.href = url;
   link.download = "inspection.html";
   link.click();
-  URL.revokeObjectURL(htmlUrl.value);
+  URL.revokeObjectURL(url);
 }
 
 </script>
@@ -295,7 +297,7 @@ const downloadHtml = () => {
   --vf-dark-800: #546FA6;
   --vf-dark-900: #26324B;
   --vf-ring-width: 2px;
-  --vf-ring-color: #07bf9b66;
+  --vf-ring-color: #BBB3FF;
   --vf-link-color: var(--vf-primary);
   --vf-link-decoration: inherit;
   --vf-font-size: 1rem;
