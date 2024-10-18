@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer';
 import { spawnSync } from 'node:child_process';
 import yaml from 'js-yaml';
 import { marked } from 'marked';
+import groupBy   from "lodash/groupBy";
 
 // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
 // source of this call: https://github.com/markedjs/marked-custom-heading-id/blob/main/src/index.js (MIT License, Copyright (c) 2021 @markedjs)
@@ -33,6 +34,7 @@ export interface ReporterArguments {
     html: boolean;
     pdf: boolean;
     usePandoc:boolean;
+    "html-template"?:string;
 }
 
 export class Reporter {
@@ -78,13 +80,14 @@ export class Reporter {
     ) {
         const html_template =
             this.args["html-template"] || path.join(__dirname, template);
+
         const html_dump = pug.renderFile(
             html_template,
             Object.assign({}, data, {
                 pretty: true,
                 basedir: path.join(__dirname, "../assets"),
                 jsondir: ".", // images in the folder of the inspection.json
-                groupBy: require("lodash/groupBy"),
+                groupBy: groupBy,
                 marked: marked, // we need to pass the markdown engine to template for access at render-time (as opposed to comile time), see https://github.com/pugjs/pug/issues/1171
                 fs: fs,
                 yaml: yaml,

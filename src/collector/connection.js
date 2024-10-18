@@ -1,12 +1,12 @@
 // jshint esversion: 8
 
-const url = require("url");
-const got = require("got");
-const fs = require("fs-extra");
-const os = require("os");
-const path = require("path");
+import url from "url";
+import got from "got";
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
 
-async function testSSL(uri, args, logger, output) {
+export async function testSSL(uri, args, logger, output) {
   if (args.testssl) {
     let uri_ins_https = new url.URL(uri);
     uri_ins_https.protocol = "https:";
@@ -69,7 +69,7 @@ async function testSSL(uri, args, logger, output) {
   }
 }
 
-async function testHttps(uri, output) {
+export async function testHttps(uri, output) {
   // test if server responds to https
   let uri_ins_https;
 

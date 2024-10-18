@@ -3,6 +3,7 @@ import {Collector} from "../collector";
 import Inspector from "../inspector";
 import {StartCollectionRequestBody} from "./server";
 
+
 function isEmptyString(input: string | null | undefined): boolean {
     return !input || input.trim().length === 0;
 }
@@ -12,26 +13,28 @@ function isEmptyNumber(input: number | null | undefined): boolean {
 }
 
 export async function startCollection(args: StartCollectionRequestBody, logger: any): Promise<string> {
-    let browseLinks = isEmptyString(args.browse_link_option_input) ? [] : args.browse_link_option_input.split(';')
-    let firstPartyUris = isEmptyString(args.first_party_uri_option_input) ? [] : args.first_party_uri_option_input.split(';')
     let sleepOption = isEmptyNumber(args.sleep_option_input) ? 3000 : args.sleep_option_input
     let pageTimeout = isEmptyNumber(args.timeout_input_option) ? 0 : args.timeout_input_option
     let maxLinks = isEmptyNumber(args.max_option_input) ? 0 : args.max_option_input
 
+    let browseLinks = isEmptyString(args.browse_link_option_input) ? [] : args.browse_link_option_input.trim().split('\n')
+    let firstPartyUris = isEmptyString(args.first_party_uri_option_input) ? [] : args.first_party_uri_option_input.trim().split('\n')
+
     // Check that Links are URLs and FirstPartyUris only consist of domains.
-    let allExtraLinksUrls=browseLinks.every((link:string)=>URL.canParse(link))
-    let allFirstPartyUrisUrls=firstPartyUris.every((link)=>{
-        if(!URL.canParse(link)) {
+    let allExtraLinksUrls = browseLinks.every((link: string) => URL.canParse(link))
+    let allFirstPartyUrisUrls = firstPartyUris.every((link) => {
+        try {
+            new URL(link)
+            return true;
+        } catch (e) {
             return false;
         }
-        let parsedUrl=URL.parse(link)
-        return parsedUrl.pathname === '/' && parsedUrl.search === '';
     })
 
-    if(!allFirstPartyUrisUrls ) {
+    if (!allFirstPartyUrisUrls) {
         throw new Error("Not all firstPartyURIs are valid.")
     }
-    if(!allExtraLinksUrls) {
+    if (!allExtraLinksUrls) {
         throw new Error("Not all extra links are invalid.")
     }
 
@@ -75,7 +78,6 @@ export async function startCollection(args: StartCollectionRequestBody, logger: 
     );
 
     const inspectionOutput = await inspector.run();
-
 
     let reporterArgs: ReporterArguments = {
         html: collectionArgs.html,

@@ -1,10 +1,10 @@
 // jshint esversion: 8
 
-const fs = require("fs-extra");
-const yaml = require("js-yaml");
-const path = require("path");
-const url = require("url");
-const escapeRegExp = require("lodash/escapeRegExp");
+import fs from "fs-extra";
+import yaml from "js-yaml";
+import path from "path";
+import url from "url";
+import escapeRegExp from "lodash/escapeRegExp";
 
 const {
   isFirstParty,
@@ -136,7 +136,8 @@ async function collectCookies(page, start_time) {
 
 async function beacons() {}
 
-module.exports = {
+
+export default {
   collectLinks,
   collectCookies,
   filterSocialPlatforms,

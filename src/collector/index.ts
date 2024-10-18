@@ -1,7 +1,7 @@
 import {createOutputDirectory} from "./io";
 import {CreateOutputArgs, CollectorOutput, createOutputObject} from "./output";
 
-import collector_connection from './connection';
+import {testSSL,testHttps} from './connection';
 import collector_inspect from './inspector';
 
 import {BrowserArgs, BrowserSession, PageSession} from './browser-session';
@@ -31,6 +31,7 @@ export class Collector {
             taskDescription: args.taskDescription,
             title: args.title,
             url: args.url,
+            screenshots:args.screenshots,
         }
 
         // create the output hash...
@@ -101,8 +102,8 @@ export class Collector {
     }
 
     private async testConnection(): Promise<void> {
-        await collector_connection.testHttps(this.output.uri_ins, this.output);
-        await collector_connection.testSSL(
+        await testHttps(this.output.uri_ins, this.output);
+        await testSSL(
             this.output.uri_ins,
             this.args,
             this.logger,

@@ -4,9 +4,8 @@
       "allowJs": true,
       "target": "es2020",
       "moduleResolution": "nodenext",
-      "module": "nodenext"
+      "module": "nodenext",
+      "assets":["**/src/assets/*"]
     },
-    "include": ["./src/**/*"],
-
-
+    "include": ["./src/**/*","./bin/**/*"],
   }

@@ -9,6 +9,7 @@ export interface CreateOutputArgs {
   firstPartyUri: string[];
   title?: string;
   taskDescription?: string;
+  screenshots: boolean;
 }
 
 export interface CollectorOutput {

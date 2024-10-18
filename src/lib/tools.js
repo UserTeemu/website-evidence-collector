@@ -11,15 +11,14 @@ const url = require("url");
 const path = require("path");
 // const logger = require("./logger");
 
-safeJSONParse = function (obj) {
+
+module.exports.safeJSONParse = function (obj) {
   try {
     return JSON.parse(obj);
   } catch (e) {
     return obj;
   }
 };
-
-module.exports.safeJSONParse = safeJSONParse;
 
 module.exports.isFirstParty = function (refs_regexp, uri_test) {
   // is first party if uri_test starts with any uri_ref ignoring, parameters, protocol and port

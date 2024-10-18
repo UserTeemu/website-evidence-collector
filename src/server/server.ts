@@ -49,7 +49,7 @@ async function run(port: number, logger: any) {
         } catch (e: any) {
             logger.log('error',  e.message);
             logger.log('error',  e.stack);
-            res.status(500).send({reason: e.reason});
+            res.status(500).send({reason: e.message});
         }
     });
 

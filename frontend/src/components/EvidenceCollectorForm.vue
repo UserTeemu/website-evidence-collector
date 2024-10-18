@@ -92,7 +92,7 @@
         <StaticElement
             name="first_party_uri_option_label"
             tag="h4"
-            content="List of URIs Considered First-Party (separated by ;)"
+            content="List of URIs Considered First-Party (one per line)"
         />
         <TextareaElement
             name="first_party_uri_option_input"
@@ -103,7 +103,7 @@
         <StaticElement
             name="browse_link_option_label"
             tag="h4"
-            content="Links to Include in collection (separated by ;)"
+            content="Links to Include in collection (one per line)"
             top="1"
             align="left"
         />
@@ -182,6 +182,7 @@ async function handleSubmit(form$, _) {
       console.log(errorData)// Assuming error.response.data contains the data you want to interpolate
       sanitizedHtml.value = `<html><head>${errorData}</head></html>`;
     } else {
+      console.log(response)
       sanitizedHtml.value = `<html><head>${error.response.data.reason}</head></html>`;
     }
     console.error('error', error)
