@@ -4,10 +4,10 @@ import path from 'path';
 import pug from 'pug';
 import HTMLtoDOCX from 'html-to-docx';
 import puppeteer from 'puppeteer';
-import { spawnSync } from 'node:child_process';
+import {spawnSync} from 'node:child_process';
 import yaml from 'js-yaml';
-import { marked } from 'marked';
-import groupBy   from "lodash/groupBy";
+import {marked} from 'marked';
+import groupBy from "lodash/groupBy";
 
 // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
 // source of this call: https://github.com/markedjs/marked-custom-heading-id/blob/main/src/index.js (MIT License, Copyright (c) 2021 @markedjs)
@@ -28,24 +28,24 @@ marked.use({
 marked.use(require('marked-smartypants').markedSmartypants());
 
 export interface ReporterArguments {
-    outputPath?:  string;
+    outputPath?: string;
     json: boolean;
     yaml: boolean;
     html: boolean;
     pdf: boolean;
-    usePandoc:boolean;
-    "html-template"?:string;
+    usePandoc: boolean;
+    "html-template"?: string;
 }
 
 export class Reporter {
-        constructor(private args: ReporterArguments) {
+    constructor(private args: ReporterArguments) {
     }
 
     saveJson(data, filename, log = true) {
         const json_dump = JSON.stringify(data, null, 2);
 
         if (this.args.outputPath) {
-           fs.writeFileSync(path.join(this.args.outputPath, filename), json_dump);
+            fs.writeFileSync(path.join(this.args.outputPath, filename), json_dump);
 
         }
 
@@ -110,6 +110,7 @@ export class Reporter {
         return html_dump;
     }
 
+
     async convertHtmlToPdf(htmlfilename = "inspection.html", pdffilename = "inspection.pdf") {
         if (this.args.pdf && this.args.outputPath) {
             const browser = await puppeteer.launch({});
@@ -121,20 +122,41 @@ export class Reporter {
                 printBackground: true,
                 displayHeaderFooter: true,
                 headerTemplate: `
-          <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
-              <div style="bottom: 5px; text-align: center;"><span class="title"></span></div>
-          </div>
-        `,
+                      <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
+                          <div style="bottom: 5px; text-align: center;"><span class="title"></span></div>
+                      </div>`,
                 footerTemplate: `
-          <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
-              <div style="top: 5px; text-align: center;"><span class="pageNumber"></span>/<span class="totalPages"></span></div>
-          </div>
-        `,
+                      <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
+                          <div style="top: 5px; text-align: center;"><span class="pageNumber"></span>/<span class="totalPages"></span></div>
+                      </div>`,
                 margin: {top: '1.5cm', bottom: '1cm'},
             })
             await browser.close();
         }
     }
+
+    async convertHtmlToPdfWithoutDisk(htmlContent: string): Promise<Uint8Array> {
+        const browser = await puppeteer.launch({});
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, {waitUntil: 'networkidle0'});
+        let pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `
+                      <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
+                          <div style="bottom: 5px; text-align: center;"><span class="title"></span></div>
+                      </div>`,
+            footerTemplate: `
+                      <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
+                          <div style="top: 5px; text-align: center;"><span class="pageNumber"></span>/<span class="totalPages"></span></div>
+                      </div>`,
+            margin: {top: '1.5cm', bottom: '1cm'},
+        })
+        await browser.close();
+        return pdfBuffer;
+    }
+
 
     async generateOfficeDoc(
         data,

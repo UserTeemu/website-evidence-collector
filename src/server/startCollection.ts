@@ -2,6 +2,7 @@ import {Reporter, ReporterArguments} from "../reporter/reporter";
 import {Collector} from "../collector";
 import Inspector from "../inspector";
 import {StartCollectionRequestBody} from "./server";
+import fs from "fs";
 
 
 function isEmptyString(input: string | null | undefined): boolean {
@@ -12,7 +13,7 @@ function isEmptyNumber(input: number | null | undefined): boolean {
     return input === null || input === undefined || isNaN(input) || input === 0;
 }
 
-export async function startCollection(args: StartCollectionRequestBody, logger: any): Promise<string> {
+export async function startCollection(args: StartCollectionRequestBody, logger: any): Promise<{  }> {
     let sleepOption = isEmptyNumber(args.sleep_option_input) ? 3000 : args.sleep_option_input
     let pageTimeout = isEmptyNumber(args.timeout_input_option) ? 0 : args.timeout_input_option
     let maxLinks = isEmptyNumber(args.max_option_input) ? 0 : args.max_option_input
@@ -89,7 +90,12 @@ export async function startCollection(args: StartCollectionRequestBody, logger: 
     }
 
     const reporter = new Reporter(reporterArgs);
-    return reporter.generateHtml(inspectionOutput, "inspection.html", false);
+    let html= reporter.generateHtml(inspectionOutput, "inspection.html", false);
+    let pdfBuffer = await reporter.convertHtmlToPdfWithoutDisk(html)
+    return {
+        html:html,
+        pdf:Buffer.from(pdfBuffer.buffer).toString('base64'),
+    }
 }
 
 

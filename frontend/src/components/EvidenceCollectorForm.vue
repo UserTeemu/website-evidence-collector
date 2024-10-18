@@ -127,9 +127,14 @@
       </Vueform>
     </div>
     <div class="inline-block h-screen min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10"></div>
-    <div class="w-full md:w-4/6">
-      <iframe :srcdoc="sanitizedHtml" ref="iframe" class="h-screen iframe-container"></iframe>
-    </div>
+      <div class="w-full md:w-4/6 relative" ref="contentArea">
+        <div class="absolute top-0 left-0 right-0 h-12 bg-black flex items-center px-4 z-10">
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+        </div>
+        <iframe :srcdoc="sanitizedHtml" ref="iframe" class="h-screen iframe-container pt-12"></iframe>
+      </div>
   </div>
 </template>
 
@@ -169,13 +174,11 @@ async function handleSubmit(form$, _) {
     response = await form$.$vueform.services.axios.post(
         WEC_ENDPOINT,
         data,
-        {
-          cancelToken: form$.cancelToken.token,
-        }
+        { cancelToken: form$.cancelToken.token}
     )
 
-    sanitizedHtml.value = response.data
-
+    sanitizedHtml.value = response.data.html;
+    downloadPDF(response.data.pdf)
   } catch (error: any) {
     if (error.response.status === 400) {
       const errorData = error.response.data.reason;
@@ -190,6 +193,18 @@ async function handleSubmit(form$, _) {
   } finally {
     // Hide loading spinner
     form$.submitting = false
+  }
+
+  function downloadPDF(pdfAsBase64:string){
+    const binString = atob(pdfAsBase64);
+    let decodedBase64 = Uint8Array.from(binString, (m) => m.codePointAt(0));
+
+    const blob = new Blob([decodedBase64], {type: 'application/pdf'})
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = "inspection.pdf"
+    link.click()
+    URL.revokeObjectURL(link.href)
   }
 
 }
