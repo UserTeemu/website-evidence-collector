@@ -126,27 +126,54 @@
         />
       </Vueform>
     </div>
-    <div class="inline-block h-screen min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10"></div>
-      <div class="w-full md:w-4/6 relative" ref="contentArea">
-        <div class="absolute top-0 left-0 right-0 h-12 bg-black flex items-center px-4 z-10">
-          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Button
+    <div class="inline-block h-screen min-h-[2em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10"></div>
+    <div class="w-full md:w-4/6 relative">
+      <div v-if="sanitizedHtml ">
+        <div id='downloadButtonBar'
+             class="absolute top-0 left-0 right-0 h-12 bg-black flex items-center px-4 z-10 space-x-4">
+          <button class="bg-eu-primary hover:bg-eu-primary-80 text-white font-bold py-1 px-2  "
+                  v-if="pdfUrl"
+                  @click="downloadPdf">Download PDF
+          </button>
+          <button class="bg-eu-primary hover:bg-eu-primary-80 text-white font-bold py-1 px-2  "
+                  v-if="htmlUrl"
+                  @click="downloadHtml">Download HTML
           </button>
         </div>
         <iframe :srcdoc="sanitizedHtml" ref="iframe" class="h-screen iframe-container pt-12"></iframe>
       </div>
+      <div v-else class="flex items-center justify-center min-h-screen">
+        <div class="p-6 text-center">
+          <h1 class="text-2xl font-bold mb-4">Output will be displayed here</h1>
+          <p class="text-gray-600">Enter a URL and submit the form to start</p>
+        </div>
+      </div>
+
+
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {ref} from "vue";
 
+
 // If the app is served using Vite we have to specify the server location.
 // If it is served by the server itself a relative URL can be used.
 const isViteDevEnv = import.meta.env.DEV
-const sanitizedHtml = ref('');
+const sanitizedHtml = ref(null);
+const pdfUrl = ref(null);
+const htmlUrl = ref(null)
+
+function reset() {
+  pdfUrl.value = null;
+  htmlUrl.value = null;
+  sanitizedHtml.value = null;
+}
 
 async function handleSubmit(form$, _) {
+
+  reset();
 
   const WEC_ENDPOINT = isViteDevEnv
       ? "http://localhost:8080/start-collection"
@@ -163,22 +190,18 @@ async function handleSubmit(form$, _) {
 
   // Show loading spinner
   form$.submitting = true
-
-  // Setting cancel token
   form$.cancelToken = form$.$vueform.services.axios.CancelToken.source()
 
   let response;
 
   try {
     // Sending the request
-    response = await form$.$vueform.services.axios.post(
-        WEC_ENDPOINT,
-        data,
-        { cancelToken: form$.cancelToken.token}
-    )
+    response = await form$.$vueform.services.axios.post(WEC_ENDPOINT, data, {cancelToken: form$.cancelToken.token})
 
     sanitizedHtml.value = response.data.html;
-    downloadPDF(response.data.pdf)
+    createPdfUrl(response.data.pdf)
+    createHtmlUrl(response.data.html)
+
   } catch (error: any) {
     if (error.response.status === 400) {
       const errorData = error.response.data.reason;
@@ -194,20 +217,34 @@ async function handleSubmit(form$, _) {
     // Hide loading spinner
     form$.submitting = false
   }
-
-  function downloadPDF(pdfAsBase64:string){
-    const binString = atob(pdfAsBase64);
-    let decodedBase64 = Uint8Array.from(binString, (m) => m.codePointAt(0));
-
-    const blob = new Blob([decodedBase64], {type: 'application/pdf'})
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = "inspection.pdf"
-    link.click()
-    URL.revokeObjectURL(link.href)
-  }
-
 }
+
+const createPdfUrl = (decodedBase64) => {
+  const blob = new Blob([decodedBase64], {type: 'application/pdf'});
+  pdfUrl.value = URL.createObjectURL(blob);
+};
+
+const createHtmlUrl = (html) => {
+  const blob = new Blob([html], {type: 'application/pdf'});
+  htmlUrl.value = URL.createObjectURL(blob);
+};
+
+const downloadPdf = () => {
+  const link = document.createElement('a');
+  link.href = pdfUrl.value;
+  link.download = "inspection.pdf";
+  link.click();
+  URL.revokeObjectURL(pdfUrl.value);
+};
+
+const downloadHtml = () => {
+  const link = document.createElement('a');
+  link.href = htmlUrl.value;
+  link.download = "inspection.html";
+  link.click();
+  URL.revokeObjectURL(htmlUrl.value);
+}
+
 </script>
 <style scoped>
 .iframe-container {
