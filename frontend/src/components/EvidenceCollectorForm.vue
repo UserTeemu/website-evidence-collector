@@ -29,10 +29,10 @@
             name="max_option_input"
             input-type="number"
             :rules="[
-        'nullable',
-        'min:0',
-        'max:150',
-        'integer',
+              'nullable',
+              'min:0',
+              'max:150',
+              'integer',
       ]"
             autocomplete="off"
             placeholder="0"
@@ -70,7 +70,7 @@
             align="left"
         />
         <TextElement
-            name="timout_input_option"
+            name="timeout_input_option"
             input-type="number"
             :rules="[
         'nullable',
@@ -78,7 +78,7 @@
         'integer',
       ]"
             autocomplete="off"
-            info="Page load imeout in milliseconds "
+            info="Page load timeout in milliseconds "
             placeholder="0"
             :floating="false"
             default="0"
@@ -88,6 +88,17 @@
             :attrs="{
         'hide-spin-buttons': 'true',
       }"
+        />
+        <StaticElement
+            name="seed_option_label"
+            tag="h4"
+            content="Seed for deterministic link selection"
+        />
+        <TextElement
+            name="seed_option_input"
+            placeholder="jfmixuirofujq3po4utg90qutucngiuqgrpi"
+            autocomplete="off"
+            :floating="false"
         />
         <StaticElement
             name="first_party_uri_option_label"

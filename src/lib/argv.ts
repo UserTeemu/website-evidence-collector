@@ -45,6 +45,7 @@ export interface ParsedArgsCollector {
     lang: string;
     pageTimeout: number;
     url: string;
+    seed?: string;
 }
 
 export interface ParsedArgsServe {
@@ -95,7 +96,7 @@ export async function parse(): Promise<ParsedArgs> {
             pageTimeout: parsingResult["pageTimeout"] as number,
             command: parsingResult["command"] as string,
             url: parsingResult["url"] as string,
-
+            seed: parsingResult["seed"] as string,
         }
     }
 
@@ -308,6 +309,8 @@ function configureCollectorCommand(yargs: yargs.Argv) {
         .describe("lang", "Change the browser language")
         .default("lang", "en")
 
+        .describe("seed","Provide a seed to initialize randomness for link selection. Useful for ensuring reproducability.")
+
         .describe("page-timeout", "page load timeout in ms (0 to disable)")
         .number("page-timeout")
         .default("page-timeout", 0)
@@ -315,7 +318,7 @@ function configureCollectorCommand(yargs: yargs.Argv) {
         .check((parsedArgs, _) => {
             parsedArgs.command = 'collector'
 
-            let invokedAsDefaultCommand = parsedArgs._[0] !==  parsedArgs.command
+            let invokedAsDefaultCommand = parsedArgs._[0] !== parsedArgs.command
             let urlPosition = invokedAsDefaultCommand ? 0 : 1
             if (parsedArgs._[urlPosition] && (parsedArgs._[urlPosition] as string).startsWith("http")) {
                 parsedArgs.url = parsedArgs._[urlPosition];
@@ -333,7 +336,7 @@ function configureServerCommand(yargs: yargs.Argv) {
         .strict()
         .check((parsedArgs, _) => {
             parsedArgs.command = 'serve'
-            return true;    
+            return true;
         });
 }
 

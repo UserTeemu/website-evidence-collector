@@ -5,7 +5,7 @@ import {testSSL,testHttps} from './connection';
 import collector_inspect from './inspector';
 
 import {BrowserArgs, BrowserSession, PageSession} from './browser-session';
-import { isFirstParty, getLocalStorage } from '../lib/tools';
+import {  getLocalStorage } from '../lib/tools';
 
 
 export interface CollectionResult {
@@ -91,6 +91,7 @@ export class Collector {
             pageLoadTimeout: this.args.pageTimeout,
             sleep: this.args.sleep,
             cookies:this.args.setCookie,
+            seed:this.args.seed,
         }
         this.browserSession=new BrowserSession(browserArgs,this.logger)
 
@@ -181,7 +182,8 @@ export class Collector {
     private async collectLocalStorage(): Promise<void> {
         this.output.localStorage = await getLocalStorage(
             this.pageSession.page,
-            this.logger
+            this.logger,
+            {}
         );
     }
 

@@ -10,7 +10,7 @@ import {setup_cookie_recording} from "../lib/setup-cookie-recording";
 import {setup_beacon_recording} from "../lib/setup-beacon-recording";
 import {setup_websocket_recording} from "../lib/setup-websocket-recording";
 import {set_cookies} from "../lib/set-cookies";
-import {isFirstParty, getLocalStorage} from "../lib/tools";
+import {isFirstParty, getLocalStorage, sampleSizeSeeded} from "../lib/tools";
 
 const UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/126.0.6478.126 Safari/537.36";
 const WindowSize = {width: 1680, height: 927};
@@ -55,6 +55,7 @@ export interface BrowserArgs {
     linkLimit: number;
     sleep: number;
     cookies: string;
+    seed?: string;
 }
 
 export class BrowserSession {
@@ -90,7 +91,7 @@ export class BrowserSession {
     }
 
     async start(output) {
-        let session= new PageSession(this, output);
+        let session = new PageSession(this, output);
         await session.initialize()
         return session
     }
@@ -99,14 +100,13 @@ export class BrowserSession {
         if (this.har) {
             await this.har.stop();
         }
-            await this.page.close();
-            await this.browser.close();
+        await this.page.close();
+        await this.browser.close();
     }
 }
 
 
 export class PageSession {
-
     private browserSession: BrowserSession;
     private output: any;
     public refs_regexp: RegExp;
@@ -117,9 +117,17 @@ export class PageSession {
         this.refs_regexp = null;
     }
 
-    get page():Page { return this.browserSession.page;}
-    get hosts():Hosts { return this.browserSession.hosts;}
-    get webSocketLog():any { return this.browserSession.webSocketLog;}
+    get page(): Page {
+        return this.browserSession.page;
+    }
+
+    get hosts(): Hosts {
+        return this.browserSession.hosts;
+    }
+
+    get webSocketLog(): any {
+        return this.browserSession.webSocketLog;
+    }
 
     async initialize() {
         let uri_refs_stripped = this.output.uri_refs.map((uri_ref) => {
@@ -244,7 +252,7 @@ export class PageSession {
     }
 
     async browseSamples(
-        page:Page,
+        page: Page,
         localStorage,
         root_uri,
         firstPartyLinks,
@@ -252,7 +260,10 @@ export class PageSession {
     ) {
         const preset_links = [page.url(), ...userSet];
         const extra_links = (firstPartyLinks.map(l => l.href)).filter(l => !preset_links.includes(l));
-        const random_links = sampleSize(extra_links, this.browserSession.browserArgs.linkLimit - preset_links.length); // can be empty!
+        const random_links = this.browserSession.browserArgs.seed ?
+            sampleSizeSeeded(extra_links, this.browserSession.browserArgs.linkLimit - preset_links.length, this.browserSession.browserArgs.seed) :
+            sampleSize(extra_links, this.browserSession.browserArgs.linkLimit - preset_links.length) // can be empty!
+
         const browsing_history = [root_uri, ...userSet, ...random_links];
 
         for (const link of browsing_history.slice(1)) { // can have zero iterations!

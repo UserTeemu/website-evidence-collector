@@ -34,6 +34,7 @@ async function run(port: number, logger: any) {
                 timeout_input_option: req.body.timeout_input_option,
                 first_party_uri_option_input: req.body.first_party_uri_option_input,
                 browse_link_option_input: req.body.browse_link_option_input,
+                seed_option_input:req.body.seed_option_input,
             });
 
             if (!URL.canParse(website_url)) {
@@ -47,8 +48,8 @@ async function run(port: number, logger: any) {
             res.send(output);
             console.log('Finished serving request');
         } catch (e: any) {
-            logger.log('error',  e.message);
-            logger.log('error',  e.stack);
+            logger.log('error', e.message);
+            logger.log('error', e.stack);
             res.status(500).send({reason: e.message});
         }
     });
@@ -66,6 +67,7 @@ export interface StartCollectionRequestBody {
     timeout_input_option: number,
     first_party_uri_option_input: string,
     browse_link_option_input: string,
+    seed_option_input: string,
 }
 
 export default run;

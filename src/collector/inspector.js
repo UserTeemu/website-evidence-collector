@@ -6,11 +6,7 @@ import path from "path";
 import url from "url";
 import escapeRegExp from "lodash/escapeRegExp";
 
-const {
-  isFirstParty,
-  getLocalStorage,
-  safeJSONParse,
-} = require("../lib/tools");
+const {isFirstParty} = require("../lib/tools");
 
 async function collectLinks(page, logger) {
   // get all links from page

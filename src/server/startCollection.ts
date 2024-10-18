@@ -47,6 +47,7 @@ export async function startCollection(args: StartCollectionRequestBody, logger: 
         sleep: sleepOption,
         firstPartyUri: firstPartyUris,
         pageTimeout: pageTimeout,
+        seed:args.seed_option_input,
         headless: true,
         screenshots: true,
         dnt: false,

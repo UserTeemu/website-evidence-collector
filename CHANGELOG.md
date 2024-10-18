@@ -38,7 +38,7 @@
 * feature: website-evidence-reporter computes the relative path to screenshots if the output file is set (option `-o`)
 * fix: cookies in the event log don't have always a path attribute, so that the matching of cookies from Chrome storage and the event log failed sometimes
 * feature: add Section numbers to the HTML/PDF output using CSS
-* fix: logger must be passed through as argument in lib/tools.js
+* fix: logger must be passed through as argument in lib/tools.ts
 * feature: support dark mode via CSS `var(--color-canvas-default)`
 * fix: in some occasions, the path of cookies registered in the log was wrong, so that cookies from the log and from the storage would not be matched as the same cookie
 * fix: non-compliant cookie headers such as ` ; sameSite=None` with no key are discarded from the logging and matching

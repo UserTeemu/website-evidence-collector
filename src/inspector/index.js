@@ -4,11 +4,7 @@ import flatten from "lodash/flatten";
 import groupBy from "lodash/groupBy";
 import url from "url";
 
-const {
-  isFirstParty,
-  getLocalStorage,
-  safeJSONParse,
-} = require("../lib/tools");
+const {isFirstParty} = require("../lib/tools");
 
 class Inspector {
   constructor(args, logger, pageSession, output) {
