@@ -1,6 +1,7 @@
 import express, {Application, Request, Response, NextFunction} from 'express';
 import bodyParser from 'body-parser';
 import {startCollection} from './startCollection';
+import path from "path";
 
 const corsDefault = 'http://localhost:8080';
 
@@ -8,7 +9,6 @@ const corsDefault = 'http://localhost:8080';
 async function run(port: number, logger: any) {
     const app: Application = express();
     const jsonParser = bodyParser.json();
-
     app.use((req: Request, res: Response, next: NextFunction) => {
         if (req.header('origin')) {
             let requestOrigin = req.header('origin')?.toLowerCase();
@@ -20,7 +20,11 @@ async function run(port: number, logger: any) {
         next();
     });
 
-    app.use('/', express.static('../src/assets/frontend'))
+    console.log();
+    let frontendDirectory=path.resolve(__dirname, '../assets/frontend')
+    console.log(frontendDirectory);
+
+    app.use('/', express.static(frontendDirectory))
 
 
     app.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
@@ -34,7 +38,7 @@ async function run(port: number, logger: any) {
                 timeout_input_option: req.body.timeout_input_option,
                 first_party_uri_option_input: req.body.first_party_uri_option_input,
                 browse_link_option_input: req.body.browse_link_option_input,
-                seed_option_input:req.body.seed_option_input,
+                seed_option_input: req.body.seed_option_input,
             });
 
             if (!URL.canParse(website_url)) {
