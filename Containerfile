@@ -2,10 +2,18 @@
 #
 # Usage:
 #
-# build from source code folder: docker build -t website-evidence-collector-server -f docker/server/Dockerfile .
+# build from source code folder using either Docker or Podman: podman build -t website-evidence-collector -f Containerfile
+# running the container automatically starts the server mode
 # run container with e.g.:
-# docker run --rm -it --cap-add=SYS_ADMIN \
-#   website-evidence-collector-server http://example.com/about
+#   podman run -d -p 8080:8080 localhost/website-evidence-collector:latest
+# and connect using the browser on localhost:8080/
+
+# connect to the running container using:
+#    podman exec -it -l  bash
+# Then execute commands using wec e.g.:
+#    wec http:example.com
+#    wec reporter path/to/inspection.json
+#
 # If you hit the Error: EACCES: permission denied,
 # then try "mkdir output && chown 1000 output"
 
@@ -72,13 +80,14 @@ RUN chmod +x /opt/website-evidence-collector/built/bin/website-evidence-collecto
 WORKDIR /home/collector
 
 RUN ln -s /opt/website-evidence-collector /home/collector/wec
-
-#RUN npm install -g --prefix='/home/collector' /opt/website-evidence-collector
+# Create symlink so the program can be run as 'wec' from everywhere
+RUN ln -s /opt/website-evidence-collector/built/bin/website-evidence-collector.js /opt/website-evidence-collector/built/bin/wec
 
 # Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
 # Configure default command in Docker container
-ENTRYPOINT ["website-evidence-collector.js" ]
+#ENTRYPOINT ["website-evidence-collector.js" ]
+ENTRYPOINT ["website-evidence-collector.js","serve"]
 EXPOSE 8080
 
 WORKDIR /output

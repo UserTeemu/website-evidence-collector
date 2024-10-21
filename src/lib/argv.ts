@@ -166,6 +166,7 @@ function configureReporterCommand(yargs: yargs.Argv) {
             if (!parsedArgs._[1]) {
                 return "Error: You must provide a file name or path     ";
             }
+            return true;
         })
 }
 
