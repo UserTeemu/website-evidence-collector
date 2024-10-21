@@ -67,7 +67,7 @@
     }
   },
   "scripts": {
-    "prepare": "npm run setup",
+    "prepare": "setup",
     "clean": "rimraf built/",
     "start": "node built/bin/website-evidence-collector.js",
     "test": "jest --detectOpenHandles",
