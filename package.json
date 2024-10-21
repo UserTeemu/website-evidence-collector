@@ -69,9 +69,7 @@
   "scripts": {
     "clean": "rimraf built/",
     "copy-assets": "copyfiles --follow src/assets/frontend/**/* src/assets/frontend/* src/assets/*  package.json built/",
-
     "start": "node built/bin/website-evidence-collector.js",
-
     "test": "jest --detectOpenHandles",
     "build-frontend": "cd frontend && npm run build",
     "build-ts": "tsc -p .",

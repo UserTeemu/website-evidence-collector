@@ -20,12 +20,7 @@ async function run(port: number, logger: any) {
         next();
     });
 
-    console.log();
-    let frontendDirectory=path.resolve(__dirname, '../assets/frontend')
-    console.log(frontendDirectory);
-
-    app.use('/', express.static(frontendDirectory))
-
+    app.use('/', express.static(path.resolve(__dirname, '../assets/frontend')))
 
     app.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
 
