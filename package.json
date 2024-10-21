@@ -67,10 +67,11 @@
     }
   },
   "scripts": {
+    "prepare": "npm run setup",
     "clean": "rimraf built/",
     "start": "node built/bin/website-evidence-collector.js",
     "test": "jest --detectOpenHandles",
-    "setup": "npm install && npm run clean && npm run build-frontend && npm run build-ts && npm run copy-assets",
+    "setup": "npm run clean && npm run build-frontend && npm run build-ts && npm run copy-assets",
     "copy-assets": "copyfiles --follow src/assets/frontend/**/* src/assets/frontend/* src/assets/*  package.json built/",
     "build-ts": "tsc -p .",
     "build-frontend": "cd frontend && npm install && npm run build"
