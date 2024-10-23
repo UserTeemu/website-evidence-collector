@@ -54,6 +54,10 @@ export interface ParsedArgsServe {
     port: number;
 }
 
+export const SERVER_COMMAND='serve'
+export const REPORTER_COMMAND='report'
+export const COLLECTOR_COMMAND='collect'
+
 export async function parse(): Promise<ParsedArgs> {
     let argv = yargs
         .parserConfiguration({"populate--": true})
@@ -62,18 +66,18 @@ export async function parse(): Promise<ParsedArgs> {
         .example([["$0 http://example.com/about -f http://example.com -f http://cdn.ex.com -l http://example.com/contact"]])
         // allow for shell variables such as WEC_DNT=true
         .env("WEC")
-        .command('serve', 'Start in server mode and connect using a web browser', configureServerCommand, () => {
+        .command(SERVER_COMMAND, 'Start in server mode and connect using a web browser', configureServerCommand, () => {
         })
-        .command('reporter', 'Generate reports from collected data', configureReporterCommand, () => {
+        .command(REPORTER_COMMAND, 'Generate reports from collected data', configureReporterCommand, () => {
         })
-        .command(['collect', '$0'], 'Run collection for the websites', configureCollectorCommand, () => {
+        .command([COLLECTOR_COMMAND, '$0'], 'Run collection for the websites', configureCollectorCommand, () => {
         })
         .help("help")
         .epilog("Copyright European Union 2019, licensed under EUPL-1.2 (see LICENSE.txt)");
 
     let parsingResult: ArgumentsCamelCase = await argv.parse()
 
-    if (parsingResult.command === 'collector') {
+    if (parsingResult.command === COLLECTOR_COMMAND) {
         return {
             _: parsingResult._,
             max: parsingResult["max"] as number,
@@ -101,7 +105,7 @@ export async function parse(): Promise<ParsedArgs> {
     }
 
 
-    if (parsingResult.command === 'reporter') {
+    if (parsingResult.command === REPORTER_COMMAND) {
         return {
             _: parsingResult._ as string[],
             inspectionJsonPath: parsingResult._[1] as string,
@@ -115,7 +119,7 @@ export async function parse(): Promise<ParsedArgs> {
 
     }
 
-    if (parsingResult.command === 'serve') {
+    if (parsingResult.command === SERVER_COMMAND) {
         return {
             _: parsingResult._ as string[],
             port: parsingResult["port"] as number,
@@ -162,7 +166,7 @@ function configureReporterCommand(yargs: yargs.Argv) {
         .alias("output-file", "o")
         .string("output-file")
         .check((parsedArgs, _) => {
-            parsedArgs.command = 'reporter'
+            parsedArgs.command = REPORTER_COMMAND
             if (!parsedArgs._[1]) {
                 return "Error: You must provide a file name or path     ";
             }
@@ -317,7 +321,7 @@ function configureCollectorCommand(yargs: yargs.Argv) {
         .default("page-timeout", 0)
         .nargs("page-timeout", 1)
         .check((parsedArgs, _) => {
-            parsedArgs.command = 'collector'
+            parsedArgs.command = COLLECTOR_COMMAND
 
             let invokedAsDefaultCommand = parsedArgs._[0] !== parsedArgs.command
             let urlPosition = invokedAsDefaultCommand ? 0 : 1
@@ -336,7 +340,7 @@ function configureServerCommand(yargs: yargs.Argv) {
         .default('p', 8080)
         .strict()
         .check((parsedArgs, _) => {
-            parsedArgs.command = 'serve'
+            parsedArgs.command = SERVER_COMMAND
             return true;
         });
 }

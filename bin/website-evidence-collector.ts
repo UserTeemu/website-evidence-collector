@@ -11,7 +11,7 @@
  */
 
 import server from '../src/server/server';
-import {parse,ParsedArgs,ParsedArgsCollector,ParsedArgsReporter,ParsedArgsServe} from "../src/lib/argv";
+import {parse,ParsedArgs,ParsedArgsCollector,ParsedArgsReporter,ParsedArgsServe,REPORTER_COMMAND,SERVER_COMMAND} from "../src/lib/argv";
 import logger from "../src/lib/logger";
 import localCollector from "../src/collectorCommand";
 import { reporterCommand } from "../src/reporter/reporterCommand";
@@ -23,11 +23,11 @@ import { reporterCommand } from "../src/reporter/reporterCommand";
   const loggerInstance = logger.create({}, args);
 
   switch (args.command) { 
-    case 'serve':
+    case SERVER_COMMAND:
       args=args as ParsedArgsServe;
       await server(args.port, loggerInstance);
       break;
-    case 'reporter':
+    case REPORTER_COMMAND:
       args=args as ParsedArgsReporter;
       await reporterCommand(args);
       break;
