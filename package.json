@@ -76,7 +76,7 @@
     "test": "jest --detectOpenHandles"
   },
   "bin": {
-    "website-evidence-collector": "built/bin/website-evidence-collector.js"
+    "website-evidence-collector": "bin/website-evidence-collector.js",
   },
   "keywords": [
     "privacy",

@@ -1,0 +1,18 @@
+image: node:20.0.0
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+
+build:
+  script:
+    - npm install
+    - npm run setup
+    - cd built/
+    - npm pack
+  artifacts:
+    paths:
+      - built/
+    expire_in: 1 week
+    untracked: true
