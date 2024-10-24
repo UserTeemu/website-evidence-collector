@@ -87,7 +87,7 @@ RUN ln -s /opt/website-evidence-collector/built/bin/website-evidence-collector.j
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
 # Configure default command in Docker container
 #ENTRYPOINT ["website-evidence-collector.js" ]
-ENTRYPOINT ["website-evidence-collector.js","serve"]
+ENTRYPOINT ["website-evidence-collector.js"]
 EXPOSE 8080
 
 WORKDIR /output
