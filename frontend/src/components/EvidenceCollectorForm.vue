@@ -217,7 +217,8 @@ async function handleSubmit(form$, _) {
     response = await form$.$vueform.services.axios.post(WEC_ENDPOINT, data, {cancelToken: form$.cancelToken.token})
 
     sanitizedHtml.value = response.data.html;
-    createPdfUrl(response.data.pdf)
+
+    createPdfUrl(base64ToBinary(response.data.pdf))
     createHtmlUrl(response.data.html)
 
   } catch (error: any) {
@@ -238,13 +239,18 @@ async function handleSubmit(form$, _) {
   }
 }
 
+function base64ToBinary(base64: string): Uint8Array {
+  const binString = atob(base64);
+  return Uint8Array.from(binString, (m) => m.codePointAt(0));
+}
+
 const createPdfUrl = (decodedBase64) => {
   const blob = new Blob([decodedBase64], {type: 'application/pdf'});
   pdfUrl.value = URL.createObjectURL(blob);
 };
 
 const createHtmlUrl = (html) => {
-  const blob = new Blob([html], {type: 'application/pdf'});
+  const blob = new Blob([html], {type: 'text/html'});
   htmlUrl.value = URL.createObjectURL(blob);
 };
 
