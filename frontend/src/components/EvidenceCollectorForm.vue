@@ -240,8 +240,8 @@ async function handleSubmit(form$, _) {
 }
 
 function base64ToBinary(base64: string): Uint8Array {
-  const binString = atob(base64);
-  return Uint8Array.from(binString, (m) => m.codePointAt(0));
+  // @ts-ignore TS2769
+  return Uint8Array.from(atob(base64), (m,_) => m.codePointAt(0));
 }
 
 const createPdfUrl = (decodedBase64) => {
