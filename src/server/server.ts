@@ -8,14 +8,13 @@ const corsDefault = 'http://localhost:8080';
 
 async function run(port: number, logger: any) {
     const app: Application = express();
-    const jsonParser = bodyParser.json();
-    const router: Router = express();
 
     let basePath = process.env.BASE_PATH;
 
     if (basePath) {
         logger.info("The basePath is set as:" + basePath);
-        app.use(basePath,)
+    } else {
+        basePath='/'
     }
 
     app.use(function (req, _, next) {
@@ -27,10 +26,11 @@ async function run(port: number, logger: any) {
         next();
     });
 
+
     app.use((req: Request, res: Response, next: NextFunction) => {
         if (req.header('origin')) {
             let requestOrigin = req.header('origin')?.toLowerCase();
-            const origin = requestOrigin?.includes('localhost') ? req.headers.origin : corsDefault;
+            const origin = requestOrigin ? req.headers.origin : corsDefault;
             res.header('Access-Control-Allow-Origin', origin);
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
         }
@@ -38,9 +38,24 @@ async function run(port: number, logger: any) {
         next();
     });
 
-    app.use('/', express.static(path.resolve(__dirname, '../assets/frontend')))
+    const router=configureRoutes(logger)
 
-    app.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
+    app.use(basePath,router)
+
+    app.listen(port, () => {
+        logger.info("Running website-evidence-collector in server mode");
+        logger.info("Connect by opening the following url in your browser: http://localhost:" + port+basePath);
+    });
+}
+
+
+function configureRoutes(logger:any) :Router {
+    const jsonParser = bodyParser.json();
+    const router: Router = express();
+
+    router.use('/', express.static(path.resolve(__dirname, '../assets/frontend')))
+
+    router.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
 
         try {
             const website_url = req.body.website_url;
@@ -71,10 +86,11 @@ async function run(port: number, logger: any) {
         }
     });
 
-    app.listen(port, () => {
-        logger.info("Running website-evidence-collector in server mode");
-        logger.info("Connect by opening the following url in your browser: http://localhost:" + port);
+    router.get('/health', (_, res: Response) => {
+        res.status(200).json({ status: 'OK' });
     });
+
+    return router;
 }
 
 export interface StartCollectionRequestBody {
