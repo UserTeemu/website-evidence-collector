@@ -80,8 +80,6 @@ RUN chmod +x /opt/website-evidence-collector/built/bin/website-evidence-collecto
 WORKDIR /home/collector
 
 RUN ln -s /opt/website-evidence-collector /home/collector/wec
-# Create symlink so the program can be run as 'wec' from everywhere
-RUN ln -s /opt/website-evidence-collector/built/bin/website-evidence-collector.js /opt/website-evidence-collector/built/bin/wec
 
 # Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"

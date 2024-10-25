@@ -1,4 +1,4 @@
-import express, {Application, Request, Response, NextFunction} from 'express';
+import express, {Application, Request, Response, NextFunction, Router} from 'express';
 import bodyParser from 'body-parser';
 import {startCollection} from './startCollection';
 import path from "path";
@@ -9,6 +9,24 @@ const corsDefault = 'http://localhost:8080';
 async function run(port: number, logger: any) {
     const app: Application = express();
     const jsonParser = bodyParser.json();
+    const router: Router = express();
+
+    let basePath = process.env.BASE_PATH;
+
+    if (basePath) {
+        logger.info("The basePath is set as:" + basePath);
+        app.use(basePath,)
+    }
+
+    app.use(function (req, _, next) {
+        logger.info(`Received request:`, {
+            "method": req.method,
+            "path": req.path,
+            "url": req.url,
+        });
+        next();
+    });
+
     app.use((req: Request, res: Response, next: NextFunction) => {
         if (req.header('origin')) {
             let requestOrigin = req.header('origin')?.toLowerCase();
@@ -26,7 +44,7 @@ async function run(port: number, logger: any) {
 
         try {
             const website_url = req.body.website_url;
-            logger.info(`Received request for URL: ${req.url}`, {
+            logger.info(`Received /start-collection request`, {
                 website_url: req.body.website_url,
                 max_links_option: req.body.max_option_input,
                 sleep_option_input: req.body.sleep_option_input,
