@@ -50,13 +50,10 @@ RUN addgroup --system --gid 1001 collector \
       && mkdir -p /output \
       && chown -R collector:collector /output
 
+
+
 # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 # Let Puppeteer use system Chromium
-ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
-
-ENV PATH="/home/collector/wec/build/bin:/opt/testssl.sh-3.0.6:${PATH}"
-
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
     PATH="/home/collector/wec/build/bin:/opt/testssl.sh-3.0.6:${PATH}"

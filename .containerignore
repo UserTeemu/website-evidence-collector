@@ -1,0 +1,16 @@
+node_modules
+output/
+build/
+*.mp4
+*.mov
+*.avi
+*.jpg
+*.png
+*.gif
+*/output/
+*.log
+.idea/
+.vscode/
+*.iml
+.github/
+.gitlab-ci.yml
