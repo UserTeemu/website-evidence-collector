@@ -16,7 +16,7 @@ const path = require("path");
 const {
   PuppeteerBlocker,
   fromPuppeteerDetails,
-} = require("@cliqz/adblocker-puppeteer");
+} = require("@ghostery/adblocker-puppeteer");
 
 // The following options make sure that blocker will behave optimally for the
 // use-case of identifying blocked network requests as well as the rule which
