@@ -17,6 +17,22 @@
 # If you hit the Error: EACCES: permission denied,
 # then try "mkdir output && chown 1000 output"
 
+FROM alpine:3.20.0 AS build
+
+RUN apk add --no-cache \
+        nodejs  \
+        npm
+
+COPY . /opt/website-evidence-collector/
+
+WORKDIR /opt/website-evidence-collector/
+
+RUN npm ci          && \
+    npm run build   && \
+    cd build/       && \
+    npm install --omit=dev && \
+    chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
+
 FROM alpine:3.20.0
 
 LABEL maintainer="Robert Riemann <robert.riemann@edps.europa.eu>"
@@ -38,7 +54,6 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont \
       nodejs  \
-      npm \
       # Packages linked to testssl.sh
       bash procps drill coreutils libidn curl \
       # Toolbox for advanced interactive use of WEC in container
@@ -50,31 +65,24 @@ RUN addgroup --system --gid 1001 collector \
       && mkdir -p /output \
       && chown -R collector:collector /output
 
-
-
 # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
 # Let Puppeteer use system Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    PATH="/home/collector/wec/build/bin:/opt/testssl.sh-3.0.6:${PATH}"
+    PATH="/home/collector/wec/bin:/opt/testssl.sh-3.0.6:${PATH}"
 
-COPY . /opt/website-evidence-collector/
+COPY --from=build  /opt/website-evidence-collector/build  /opt/website-evidence-collector
 
 # Install Testssl.sh
 RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v3.0.6.tar.gz | tar -xz --directory /opt && \
     chown -R collector:collector /opt/website-evidence-collector && \
-    chown -R collector:collector /home/collector && \
-    ln -s /opt/website-evidence-collector /home/collector/wec
+    chown -R collector:collector /home/collector
 
 # Run everything after as non-privileged user.
 USER collector
 
-WORKDIR /home/collector/wec
+RUN ln -s /opt/website-evidence-collector /home/collector/wec
 
-
-RUN npm ci && \
-    npm run build && \
-    chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
 
 # Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
