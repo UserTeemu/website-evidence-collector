@@ -11,6 +11,30 @@
   "engines": {
     "node": ">=20.0"
   },
+  "scripts": {
+    "build": "npm run clean && npm run build-frontend && npm run build-ts && npm run copy-assets",
+    "clean": "rimraf build/",
+    "build-frontend": "cd frontend && npm ci && npm run build",
+    "build-ts": "tsc -p .",
+    "copy-assets": "copyfiles --follow src/assets/frontend/**/* src/assets/frontend/* src/assets/*  package.json build/",
+    "start": "node build/bin/website-evidence-collector.js",
+    "serve": "node build/bin/website-evidence-collector.js serve",
+    "test": "jest --detectOpenHandles"
+  },
+  "bin": {
+    "website-evidence-collector": "bin/website-evidence-collector.js"
+  },
+  "keywords": [
+    "privacy",
+    "tracking",
+    "website",
+    "data",
+    "protection",
+    "personal",
+    "data",
+    "GDPR",
+    "puppeteer"
+  ],
   "dependencies": {
     "@cliqz/adblocker-puppeteer": "^1.25.2",
     "@types/js-yaml": "^4.0.9",
@@ -66,30 +90,6 @@
       "chrome-har": "^0.13.1"
     }
   },
-  "scripts": {
-    "setup": "npm run clean && npm run build-frontend && npm run build-ts && npm run copy-assets",
-    "clean": "rimraf built/",
-    "build-frontend": "cd frontend && npm ci && npm run build",
-    "build-ts": "tsc -p .",
-    "copy-assets": "copyfiles --follow src/assets/frontend/**/* src/assets/frontend/* src/assets/*  package.json built/",
-    "start": "node built/bin/website-evidence-collector.js",
-    "serve": "node built/bin/website-evidence-collector.js serve",
-    "test": "jest --detectOpenHandles"
-  },
-  "bin": {
-    "website-evidence-collector": "bin/website-evidence-collector.js"
-  },
-  "keywords": [
-    "privacy",
-    "tracking",
-    "website",
-    "data",
-    "protection",
-    "personal",
-    "data",
-    "GDPR",
-    "puppeteer"
-  ],
   "author": "Robert Riemann <robert.riemann@edps.europa.eu>",
   "license": "EUPL-1.2"
 }

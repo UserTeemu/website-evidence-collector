@@ -55,7 +55,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 # Let Puppeteer use system Chromium
 ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 
-ENV PATH="/home/collector/wec/built/bin:/opt/testssl.sh-3.0.6:${PATH}"
+ENV PATH="/home/collector/wec/build/bin:/opt/testssl.sh-3.0.6:${PATH}"
 
 COPY . /opt/website-evidence-collector/
 
@@ -75,7 +75,7 @@ RUN npm ci
 
 RUN npm run setup
 
-RUN chmod +x /opt/website-evidence-collector/built/bin/website-evidence-collector.js
+RUN chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
 
 WORKDIR /home/collector
 
@@ -84,7 +84,6 @@ RUN ln -s /opt/website-evidence-collector /home/collector/wec
 # Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
 # Configure default command in Docker container
-#ENTRYPOINT ["website-evidence-collector.js" ]
 ENTRYPOINT ["website-evidence-collector.js"]
 EXPOSE 8080
 

@@ -90,4 +90,4 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
-/built/
+/build/

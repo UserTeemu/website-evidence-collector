@@ -9,10 +9,10 @@ build:
   script:
     - npm install
     - npm run setup
-    - cd built/
+    - cd build/
     - npm pack
   artifacts:
     paths:
-      - built/
+      - build/
     expire_in: 1 week
     untracked: true
