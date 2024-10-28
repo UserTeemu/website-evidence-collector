@@ -5,8 +5,10 @@ import path from "path";
 
 const corsDefault = 'http://localhost:8080';
 
-
 async function run(port: number, logger: any) {
+    process.on('SIGINT', handleShutdownSignal);
+    process.on('SIGTERM', handleShutdownSignal);
+
     const app: Application = express();
 
     let basePath = process.env.BASE_PATH;
@@ -25,7 +27,6 @@ async function run(port: number, logger: any) {
         });
         next();
     });
-
 
     app.use((req: Request, res: Response, next: NextFunction) => {
         if (req.header('origin')) {
@@ -92,6 +93,12 @@ function configureRoutes(logger:any) :Router {
 
     return router;
 }
+
+function handleShutdownSignal(signal:string) {
+    console.log(`Received ${signal}. Shutting down.`);
+    process.exit();
+}
+
 
 export interface StartCollectionRequestBody {
     website_url: string
