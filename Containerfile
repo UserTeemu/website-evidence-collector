@@ -17,6 +17,9 @@
 # If you hit the Error: EACCES: permission denied,
 # then try "mkdir output && chown 1000 output"
 
+# Define ARGs that can be set during build
+ARG TESTSSL_VERSION=3.0.6
+
 FROM alpine:3.20.0 AS build
 
 RUN apk add --no-cache \
@@ -44,6 +47,10 @@ LABEL org.label-schema.description="Website Evidence Collector running in a tiny
       org.label-schema.vendor="European Data Protection Supervisor (EDPS)" \
       org.label-schema.license="EUPL-1.2"
 
+# Use the ARG without a value to load the default defined on top
+ARG TESTSSL_VERSION
+ENV TESTSSL_VERSION=${TESTSSL_VERSION}
+
 # Installs latest Chromium (77) package.
 RUN apk add --no-cache \
       chromium \
@@ -69,12 +76,12 @@ RUN addgroup --system --gid 1001 collector \
 # Let Puppeteer use system Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    PATH="/home/collector/wec/bin:/opt/testssl.sh-3.0.6:${PATH}"
+    PATH="/home/collector/wec/bin:/opt/testssl.sh-${TESTSSL_VERSION}:${PATH}"
 
 COPY --from=build  /opt/website-evidence-collector/build  /opt/website-evidence-collector
 
 # Install Testssl.sh
-RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v3.0.6.tar.gz | tar -xz --directory /opt && \
+RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v${TESTSSL_VERSION}.tar.gz | tar -xz --directory /opt && \
     chown -R collector:collector /opt/website-evidence-collector && \
     chown -R collector:collector /home/collector
 
