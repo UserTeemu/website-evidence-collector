@@ -39,9 +39,9 @@ RUN apk add --no-cache \
       ttf-freefont \
       nodejs  \
       npm \
-# Packages linked to testssl.sh
+      # Packages linked to testssl.sh
       bash procps drill coreutils libidn curl \
-# Toolbox for advanced interactive use of WEC in container
+      # Toolbox for advanced interactive use of WEC in container
       parallel jq grep aha
 
 # Add user so we don't need --no-sandbox and match first linux uid 1000
@@ -57,34 +57,33 @@ ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 
 ENV PATH="/home/collector/wec/build/bin:/opt/testssl.sh-3.0.6:${PATH}"
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PATH="/home/collector/wec/build/bin:/opt/testssl.sh-3.0.6:${PATH}"
+
 COPY . /opt/website-evidence-collector/
 
 # Install Testssl.sh
-RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v3.0.6.tar.gz | \
-      tar -xz --directory /opt
-
-RUN chown -R collector:collector /opt/website-evidence-collector
-RUN chown -R collector:collector /home/collector
+RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v3.0.6.tar.gz | tar -xz --directory /opt && \
+    chown -R collector:collector /opt/website-evidence-collector && \
+    chown -R collector:collector /home/collector && \
+    ln -s /opt/website-evidence-collector /home/collector/wec
 
 # Run everything after as non-privileged user.
 USER collector
 
-WORKDIR /opt/website-evidence-collector/
+WORKDIR /home/collector/wec
 
-RUN npm ci
 
-RUN npm run setup
-
-RUN chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
-
-WORKDIR /home/collector
-
-RUN ln -s /opt/website-evidence-collector /home/collector/wec
+RUN npm ci && \
+    npm run build && \
+    chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
 
 # Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
 # Configure default command in Docker container
 ENTRYPOINT ["website-evidence-collector.js"]
+CMD ["serve"]
 EXPOSE 8080
 
 WORKDIR /output
