@@ -6,15 +6,17 @@
  */
 
 // jshint esversion: 8
+import { safeJSONParse } from "./tools.js";
+import { Cookie as cookieParser, defaultPath } from "tough-cookie";
+import fs from "fs";
+import groupBy from "lodash/groupBy.js";
+import url from "url";
 
-const { safeJSONParse } = require("./tools");
-const cookieParser = require("tough-cookie").Cookie;
-const defaultPath = require("tough-cookie").defaultPath;
-const fs = require("fs");
-const groupBy = require("lodash/groupBy");
-const url = require("url");
+import {createRequire} from 'module';
 
-module.exports.setup_cookie_recording = async function (page, logger) {
+const require = createRequire(import.meta.url);
+
+export async function setup_cookie_recording (page, logger) {
   // inject stacktraceJS https://www.stacktracejs.com/
   const stackTraceHelper = fs.readFileSync(
     require.resolve("stacktrace-js/dist/stacktrace.js"),
@@ -28,7 +30,7 @@ module.exports.setup_cookie_recording = async function (page, logger) {
   // this code will intercept it, log it, and then set the cookie
   await page.evaluateOnNewDocument(() => {
     // original object
-    origDescriptor = Object.getOwnPropertyDescriptor(
+    let origDescriptor = Object.getOwnPropertyDescriptor(
       Document.prototype,
       "cookie"
     );
@@ -41,11 +43,12 @@ module.exports.setup_cookie_recording = async function (page, logger) {
       },
       set(value) {
         // https://www.stacktracejs.com/#!/docs/stacktrace-js
+        // @ts-ignore We are injecting this into the Browser
         let stack = StackTrace.getSync({ offline: true });
 
         // inside our wrapper we execute the .reportEvent from within the browser
         // reportEvent is defined further down
-        window.reportEvent("Cookie.JS", stack, value, window.location);
+        this.window.reportEvent("Cookie.JS", stack, value, window.location);
         return origDescriptor.set.call(this, value);
       },
       enumerable: true,
@@ -58,14 +61,15 @@ module.exports.setup_cookie_recording = async function (page, logger) {
       configurable: true,
       enumerable: true,
       value: new Proxy(localStorage, {
-        set: function (ls, prop, value) {
+        set: function (ls:Storage, prop:string, value) {
           //console.log(`direct assignment: ${prop} = ${value}`);
+          // @ts-ignore We are injecting this into the Browser
           let stack = StackTrace.getSync({ offline: true });
           let hash = {};
           hash[prop] = value;
 
           // reportEvent is called within the browser context - this is defined further down
-          window.reportEvent(
+          this.window.reportEvent(
             "Storage.LocalStorage",
             stack,
             hash,
@@ -74,7 +78,7 @@ module.exports.setup_cookie_recording = async function (page, logger) {
           ls[prop] = value;
           return true;
         },
-        get: function (ls, prop) {
+        get: function (ls:Storage, prop:string) {
           // The only property access we care about is setItem. We pass
           // anything else back without complaint. But using the proxy
           // fouls 'this', setting it to this {set: fn(), get: fn()}
@@ -87,10 +91,11 @@ module.exports.setup_cookie_recording = async function (page, logger) {
             }
           }
           return (...args) => {
+            // @ts-ignore We are injecting this into the Browser
             let stack = StackTrace.getSync({ offline: true });
             let hash = {};
             hash[args[0]] = args[1];
-            window.reportEvent(
+            this.window.reportEvent(
               "Storage.LocalStorage",
               stack,
               hash,
@@ -116,7 +121,7 @@ module.exports.setup_cookie_recording = async function (page, logger) {
 
     // construct the event object to log
     // include the stack
-    let event = {
+    let event :any = {
       type: type,
       stack: stack.slice(1, 3), // remove reference to Document.set (0) and keep two more elements (until 3)
       origin: location.origin,
@@ -204,8 +209,8 @@ module.exports.setup_cookie_recording = async function (page, logger) {
       const dataHasKey = groupBy(data, (cookie) => {
         return !!cookie.key;
       });
-      const valid = dataHasKey[true] || [];
-      const invalid = dataHasKey[false] || [];
+      const valid = dataHasKey['true'] || [];
+      const invalid = dataHasKey['false'] || [];
 
       const messages = [
         `${valid.length} Cookie(s) (HTTP) set for host ${domain}${
@@ -246,4 +251,4 @@ module.exports.setup_cookie_recording = async function (page, logger) {
       });
     }
   });
-};
+}

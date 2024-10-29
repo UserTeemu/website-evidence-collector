@@ -1,8 +1,8 @@
 import express, {Application, Request, Response, NextFunction, Router} from 'express';
 import bodyParser from 'body-parser';
-import {startCollection} from './startCollection';
+import {startCollection} from './startCollection.js';
 import path from "path";
-
+const __dirname = import.meta.dirname;
 const corsDefault = 'http://localhost:8080';
 
 async function run(port: number, logger: any) {

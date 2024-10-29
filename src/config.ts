@@ -1,4 +1,4 @@
-function cfg(url) {
+export function cfg(url) {
   return {
     url: url,
     max: 0,
@@ -21,4 +21,3 @@ function cfg(url) {
   };
 }
 
-module.exports = cfg;

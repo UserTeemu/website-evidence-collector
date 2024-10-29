@@ -6,10 +6,10 @@
  * @license EUPL-1.2
  */
 
-import {Collector, CollectionResult} from './collector';
-import Inspector from './inspector';
-import { ParsedArgsCollector } from './lib/argv';
-import {Reporter, ReporterArguments} from './reporter/reporter';
+import {Collector, CollectionResult} from './collector/index.js';
+import Inspector from './inspector/inspector.js';
+import { ParsedArgsCollector } from './lib/argv.js';
+import {Reporter, ReporterArguments} from './reporter/reporter.js';
 
 
 async function run(args: ParsedArgsCollector, logger: any): Promise<any> {

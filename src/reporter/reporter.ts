@@ -7,7 +7,16 @@ import puppeteer from 'puppeteer';
 import {spawnSync} from 'node:child_process';
 import yaml from 'js-yaml';
 import {marked} from 'marked';
-import groupBy from "lodash/groupBy";
+import groupBy from "lodash/groupBy.js";
+import {markedSmartypants} from "marked-smartypants";
+
+
+import {fileURLToPath} from 'url';
+import {createRequire} from 'module';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
 // source of this call: https://github.com/markedjs/marked-custom-heading-id/blob/main/src/index.js (MIT License, Copyright (c) 2021 @markedjs)
@@ -25,7 +34,7 @@ marked.use({
         }
     }
 });
-marked.use(require('marked-smartypants').markedSmartypants());
+marked.use(markedSmartypants());
 
 export interface ReporterArguments {
     outputPath?: string;
@@ -55,7 +64,11 @@ export class Reporter {
     }
 
     saveYaml(data, filename, log = true) {
-        const yaml_dump = yaml.dump(data, {noRefs: true});
+        const yaml_dump = yaml.dump(data, {
+            noRefs: true, replacer: function replacer(key, value) {
+                return value instanceof URL ? value.toString() : value
+            }
+        });
 
         if (this.args.outputPath) {
             fs.writeFileSync(path.join(this.args.outputPath, filename), yaml_dump);
@@ -173,7 +186,7 @@ export class Reporter {
                     pretty: true,
                     basedir: path.join(__dirname, "../assets"),
                     jsondir: ".", // images in the folder of the inspection.json
-                    groupBy: require("lodash/groupBy"),
+                    groupBy: groupBy,
                     marked: marked, // we need to pass the markdown engine to template for access at render-time (as opposed to comile time), see https://github.com/pugjs/pug/issues/1171
                     fs: fs,
                     yaml: yaml,

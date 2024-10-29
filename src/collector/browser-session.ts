@@ -2,15 +2,15 @@ import puppeteer, {Browser, Page} from "puppeteer";
 import PuppeteerHar from "puppeteer-har";
 import path from "path";
 import url from "url";
-import escapeRegExp from "lodash/escapeRegExp";
+import escapeRegExp from "lodash/escapeRegExp.js";
 import got from "got";
-import sampleSize from "lodash/sampleSize";
+import sampleSize from "lodash/sampleSize.js";
 import parseContentSecurityPolicy from "content-security-policy-parser";
-import {setup_cookie_recording} from "../lib/setup-cookie-recording";
-import {setup_beacon_recording} from "../lib/setup-beacon-recording";
-import {setup_websocket_recording} from "../lib/setup-websocket-recording";
-import {set_cookies} from "../lib/set-cookies";
-import {isFirstParty, getLocalStorage, sampleSizeSeeded} from "../lib/tools";
+import {setup_cookie_recording} from "../lib/setup-cookie-recording.js";
+import {setup_beacon_recording} from "../lib/setup-beacon-recording.js";
+import {setup_websocket_recording} from "../lib/setup-websocket-recording.js";
+import {set_cookies} from "../lib/set-cookies.js";
+import {isFirstParty, getLocalStorage, sampleSizeSeeded} from "../lib/tools.js";
 
 const UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/126.0.6478.126 Safari/537.36";
 const WindowSize = {width: 1680, height: 927};
@@ -79,6 +79,11 @@ export class BrowserSession {
     }
 
     async create() {
+        let proxyServer=process.env.HTTP_PROXY;
+        if(proxyServer) {
+           this.logger.info(`Chrome uses ${proxyServer} as its proxy.`)
+        }
+
         this.browser = await puppeteer.launch({
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
@@ -86,6 +91,7 @@ export class BrowserSession {
             args: [
                 `--user-agent=${UserAgent}`,
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
+                ...(proxyServer ? [`--proxy-server=${proxyServer}`] : []),
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
         });
     }

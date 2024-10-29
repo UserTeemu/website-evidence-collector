@@ -1,22 +1,11 @@
-/**
- * @file Setup recording of Cookie and LocalStorage API use
- * @author Robert Riemann <robert.riemann@edps.europa.eu>
- * @copyright European Data Protection Supervisor (2019)
- * @license EUPL-1.2
- */
+import url from "url";
+import {PuppeteerBlocker, fromPuppeteerDetails} from "@ghostery/adblocker-puppeteer";
+import path from "path";
+import {safeJSONParse} from "./tools.js";
+import { fileURLToPath } from 'url';
+import fs from "fs";
 
-// jshint esversion: 8
-
-const { safeJSONParse } = require("./tools");
-const fs = require("fs");
-const url = require("url");
-const path = require("path");
-//const logger = require('./logger');
-
-const {
-  PuppeteerBlocker,
-  fromPuppeteerDetails,
-} = require("@ghostery/adblocker-puppeteer");
+const __dirname = import.meta.dirname;
 
 // The following options make sure that blocker will behave optimally for the
 // use-case of identifying blocked network requests as well as the rule which
@@ -76,19 +65,17 @@ const decodeURLParams = (search) => {
     } catch {
       return Object.assign(params, { [key]: val });
     }
-
   }, {});
-
 };
 
-module.exports.setup_beacon_recording = async function (page, logger) {
+export async function  setup_beacon_recording(page, logger) {
   // prepare easyprivacy list matching
   // requires to call somewhere: await page.setRequestInterception(true);
   page.on("request", (request) => {
     Object.entries(blockers).forEach(([listName, blocker]) => {
       const {
-        match, // `true` if there is a match
-        filter, // instance of NetworkFilter which matched
+        match,
+        filter,
       } = blocker.match(fromPuppeteerDetails(request));
 
       if (match) {

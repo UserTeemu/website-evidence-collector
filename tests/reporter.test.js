@@ -1,4 +1,4 @@
-const StandardConfig = require("../config.js");
+const StandardConfig = require("../config.ts");
 const reporter = require("../reporter/index");
 const fs = require("fs-extra");
 const path = require("path");

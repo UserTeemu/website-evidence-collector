@@ -1,8 +1,7 @@
-import {Reporter, ReporterArguments} from "../reporter/reporter";
-import {Collector} from "../collector";
-import Inspector from "../inspector";
-import {StartCollectionRequestBody} from "./server";
-import fs from "fs";
+import {Reporter, ReporterArguments} from "../reporter/reporter.js";
+import {Collector} from "../collector/index.js";
+import Inspector from "../inspector/inspector.js";
+import {StartCollectionRequestBody} from "./server.js";
 
 
 function isEmptyString(input: string | null | undefined): boolean {

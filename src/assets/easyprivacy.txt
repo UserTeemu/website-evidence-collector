@@ -325,7 +325,7 @@
 /analytics.ad.
 /analytics.bundled.js
 /analytics.collect.
-/analytics.config.js
+/analytics.config.ts
 /analytics.do
 /analytics.gif?
 /analytics.html?
@@ -2523,7 +2523,7 @@
 /sensorsdata-
 /sensorsdata.$domain=~sensorsdata.cn
 /sentry-browser.
-/sentry-logger.js
+/sentry-logger.ts
 /sentry/bundle.min.js
 /seo.taCo.min.js
 /seostats/*
@@ -12875,7 +12875,7 @@ $third-party,xmlhttprequest,domain=opensubtitles.org
 ||snva.jp/api/bcon/basic?
 ||snva.jp/javascripts/reco/
 ||speee-ad.akamaized.net^
-||spnx.jp/spnx-logger.js
+||spnx.jp/spnx-logger.ts
 ||stats.streamhub.io^
 ||storage.googleapis.com/rasin/*/hm.js
 ||sweet-candy.jp/c.php?$third-party

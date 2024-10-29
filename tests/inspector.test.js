@@ -1,4 +1,4 @@
-const StandardConfig = require("../config.js");
+const StandardConfig = require("../config.ts");
 const logger = require("../lib/logger");
 const collector = require("../collector/index");
 const inspector = require("../inspector/index");

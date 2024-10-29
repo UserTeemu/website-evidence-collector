@@ -10,17 +10,17 @@
  * @example ./bin/website-evidence-collector.ts http://example.com
  */
 
-import server from '../src/server/server';
-import {parse,ParsedArgs,ParsedArgsCollector,ParsedArgsReporter,ParsedArgsServe,REPORTER_COMMAND,SERVER_COMMAND} from "../src/lib/argv";
-import logger from "../src/lib/logger";
-import localCollector from "../src/collectorCommand";
-import { reporterCommand } from "../src/reporter/reporterCommand";
+import server from '../src/server/server.js';
+import {parse,ParsedArgs,ParsedArgsCollector,ParsedArgsReporter,ParsedArgsServe,REPORTER_COMMAND,SERVER_COMMAND} from "../src/lib/argv.js";
+import {create} from "../src/lib/logger.js";
+import localCollector from "../src/collectorCommand.js";
+import { reporterCommand } from "../src/reporter/reporterCommand.js";
 
 
 (async () => {
   let args:ParsedArgs =await parse();
 
-  const loggerInstance = logger.create({}, args);
+  const loggerInstance = create({}, args);
 
   switch (args.command) { 
     case SERVER_COMMAND:

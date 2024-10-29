@@ -5,7 +5,7 @@ export default {
   content: [
     './index.html',
     './src/**/*.{vue,js,ts,jsx,tsx}',
-    './vueform.config.js',
+    './vueform.config.ts',
     './node_modules/@vueform/vueform/themes/tailwind/**/*.vue',
     './node_modules/@vueform/vueform/themes/tailwind/**/*.js',
   ],

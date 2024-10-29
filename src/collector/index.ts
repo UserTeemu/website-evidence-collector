@@ -1,11 +1,11 @@
-import {createOutputDirectory} from "./io";
-import {CreateOutputArgs, CollectorOutput, createOutputObject} from "./output";
+import {createOutputDirectory} from "./io.js";
+import {CreateOutputArgs, CollectorOutput, createOutputObject} from "./output.js";
 
-import {testSSL,testHttps} from './connection';
-import collector_inspect from './inspector';
+import {testSSL,testHttps} from './connection.js';
+import collector_inspect from './inspector.js';
 
-import {BrowserArgs, BrowserSession, PageSession} from './browser-session';
-import {  getLocalStorage } from '../lib/tools';
+import {BrowserArgs, BrowserSession, PageSession} from './browser-session.js';
+import {  getLocalStorage } from '../lib/tools.js';
 
 
 export interface CollectionResult {

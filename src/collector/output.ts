@@ -1,8 +1,11 @@
-import pickBy from 'lodash/pickBy';
-import { safeJSONParse } from '../lib/tools';
+import pickBy from 'lodash/pickBy.js';
+import { safeJSONParse } from '../lib/tools.js';
 import os from 'os';
 import url from 'url';
-import { gitDescribeSync } from 'git-describe';
+import gitDescribe from 'git-describe';
+import packageConfig from '../../package.json' with { type: 'json' };
+
+const __dirname = import.meta.dirname;
 
 export interface CreateOutputArgs {
   url: string;
@@ -98,7 +101,7 @@ export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
     script: {
       host: os.hostname(),
       version: {
-        npm: require('../../package.json').version,
+        npm:packageConfig.version ,
         commit: null,
       },
       config: pickBy(args, (_value, key) => key === '_' || (key.length > 1 &&
@@ -142,7 +145,7 @@ export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
   };
 
   try {
-    const gitInfo = gitDescribeSync(__dirname);
+    const gitInfo = gitDescribe.gitDescribeSync(__dirname);
     output.script.version.commit = gitInfo.raw;
   } catch (e) {}
 

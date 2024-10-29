@@ -4,9 +4,10 @@ import fs from "fs-extra";
 import yaml from "js-yaml";
 import path from "path";
 import url from "url";
-import escapeRegExp from "lodash/escapeRegExp";
+import escapeRegExp from "lodash/escapeRegExp.js";
+const __dirname = import.meta.dirname;
+import {isFirstParty} from "../lib/tools.js";
 
-const {isFirstParty} = require("../lib/tools");
 
 async function collectLinks(page, logger) {
   // get all links from page
@@ -28,9 +29,7 @@ async function collectLinks(page, logger) {
   });
   
   // https://stackoverflow.com/a/70406623/1407622
-  const links_http_without_duplicates = Array.from(new Map(links_http_with_duplicates.map(v => [v.href, v])).values())
-
-  return links_http_without_duplicates;
+  return Array.from(new Map(links_http_with_duplicates.map(v => [v.href, v])).values());
 }
 
 async function mapLinksToParties(links, hosts, refs_regexp) {

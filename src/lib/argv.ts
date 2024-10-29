@@ -6,7 +6,8 @@
  */
 import yaml from "js-yaml";
 import fs from "fs";
-import yargs, {ArgumentsCamelCase} from "yargs";
+import  {ArgumentsCamelCase,Argv} from "yargs";
+import yargs from "yargs";
 
 export type ParsedArgs = ParsedArgsReporter | ParsedArgsCollector |
     ParsedArgsServe;
@@ -59,7 +60,7 @@ export const REPORTER_COMMAND='report'
 export const COLLECTOR_COMMAND='collect'
 
 export async function parse(): Promise<ParsedArgs> {
-    let argv = yargs
+    let argv = yargs(process.argv.slice(2))
         .parserConfiguration({"populate--": true})
         .scriptName("website-evidence-collector")
         .usage("Usage: $0 <URI> [options] [-- [browser options]]")
@@ -74,7 +75,6 @@ export async function parse(): Promise<ParsedArgs> {
         })
         .help("help")
         .epilog("Copyright European Union 2019, licensed under EUPL-1.2 (see LICENSE.txt)");
-
     let parsingResult: ArgumentsCamelCase = await argv.parse()
 
     if (parsingResult.command === COLLECTOR_COMMAND) {
@@ -129,7 +129,7 @@ export async function parse(): Promise<ParsedArgs> {
 
 }
 
-function configureReporterCommand(yargs: yargs.Argv) {
+function configureReporterCommand(yargs: Argv) {
     return yargs.usage("Usage: $0 [options] <JSON file>")
         .example([["$0 /home/user/inspection.json"]])
         .describe("html-template", "Custom pug template to generate HTML output")
@@ -174,7 +174,7 @@ function configureReporterCommand(yargs: yargs.Argv) {
         })
 }
 
-function configureCollectorCommand(yargs: yargs.Argv) {
+function configureCollectorCommand(yargs: Argv) {
     return yargs
         .demandCommand(1, "An URI for inspection or the server command is mandatory.") // ask for command and for inspection url
         .alias("m", "max")
@@ -335,7 +335,7 @@ function configureCollectorCommand(yargs: yargs.Argv) {
 
 }
 
-function configureServerCommand(yargs: yargs.Argv) {
+function configureServerCommand(yargs: Argv) {
     return yargs.alias('p', 'port')
         .default('p', 8080)
         .check((parsedArgs, _) => {

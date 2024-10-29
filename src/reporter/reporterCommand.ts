@@ -10,7 +10,6 @@
  * @example while inotifywait -e modify assets/template.pug; do ./create-html.js output/inspection.json > output/inspection.html; done
  */
 
-
 import fs from 'fs';
 import path from 'path';
 import pug from 'pug';
@@ -18,11 +17,17 @@ import HTMLtoDOCX from 'html-to-docx';
 import puppeteer from 'puppeteer';
 import {spawnSync} from 'node:child_process';
 import yaml from 'js-yaml';
-import {all as unsafe} from 'js-yaml-js-types';
 import {marked} from 'marked';
-import { ParsedArgsReporter } from '../lib/argv';
+import {ParsedArgsReporter} from '../lib/argv.js';
+import {markedSmartypants} from "marked-smartypants";
+import groupBy from "lodash/groupBy.js";
 
-yaml.DEFAULT_SCHEMA = yaml.DEFAULT_SCHEMA.extend(unsafe);
+import {fileURLToPath} from 'url';
+import {createRequire} from 'module';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 
 /// Code that gets called when invoking the reporter command using the CLI
@@ -53,7 +58,7 @@ export async function reporterCommand(args: ParsedArgsReporter) {
             }
         }
     });
-    marked.use(require('marked-smartypants').markedSmartypants());
+    marked.use(markedSmartypants());
 
     const make_office = args.outputFile && (args.outputFile.endsWith(".docx") || args.outputFile.endsWith(".odt"));
     const make_pdf = args.outputFile && args.outputFile.endsWith(".pdf");
@@ -65,13 +70,14 @@ export async function reporterCommand(args: ParsedArgsReporter) {
             basedir: path.resolve(path.join(__dirname, '../assets')), // determines root director for pug
             jsondir: jsondir || ".",
             // expose some libraries to pug templates
-            groupBy: require("lodash/groupBy"),
+            groupBy: groupBy,
             marked: marked, // we need to pass the markdown engine to template for access at render-time (as opposed to comile time), see https://github.com/pugjs/pug/issues/1171
             fs: fs,
             yaml: yaml,
             path: path,
             inlineCSS: fs.readFileSync(
-                require.resolve("github-markdown-css/github-markdown.css")
+                require.resolve('github-markdown-css/github-markdown.css'),
+                'utf8'
             ),
             inspection: output,
             extra: args.extraFile,

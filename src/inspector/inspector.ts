@@ -1,13 +1,27 @@
-// jshint esversion: 8
-
-import flatten from "lodash/flatten";
-import groupBy from "lodash/groupBy";
+import flatten from "lodash/flatten.js";
+import groupBy from "lodash/groupBy.js";
 import url from "url";
+import {isFirstParty} from "../lib/tools.js";
 
-const {isFirstParty} = require("../lib/tools");
+interface Beacon {
+  url: string;
+  listName: string;
+  log: {
+    stack: string;
+    timestamp: string;
+  };
+  occurrances?: number;
+}
+
 
 class Inspector {
-  constructor(args, logger, pageSession, output) {
+  private eventData: any;
+  private logger: any;
+  private args: any;
+  private output: any;
+  private pageSession: any;
+
+  constructor(args: any, logger: any, pageSession: any, output: any) {
     this.eventData = null;
     this.logger = logger;
     this.args = args;
@@ -15,39 +29,37 @@ class Inspector {
     this.pageSession = pageSession;
   }
 
-  async run() {
-    await this.#init();
-    await this.#inspectCookies();
-    await this.#inspectLocalStorage();
-    await this.#inspectBeacons();
-    await this.#inspectHosts();
+  async run(): Promise<any> {
+    await this.init();
+    await this.inspectCookies();
+    await this.inspectLocalStorage();
+    await this.inspectBeacons();
+    await this.inspectHosts();
 
     return this.output;
   }
 
-  async #init() {
-    let event_data_all = await new Promise((resolve, reject) => {
+  private async init(): Promise<void> {
+    let event_data_all = await new Promise<any[]>((resolve, reject) => {
       this.logger.query(
           {
             start: 0,
             order: "desc",
             limit: Infinity,
-          },
-          (err, results) => {
+          } ,
+          (err: Error | null, results: { file: [] }) => {
             if (err) return reject(err);
             return resolve(results.file);
           }
-      );
+    );
     });
 
-    // filter only events with type set
-    this.eventData = event_data_all.filter((event) => {
-      return !!event.type;
-    });
+    this.eventData = event_data_all.filter((event) => !!event.type);
   }
 
-  async #inspectCookies() {
-    // we get all cookies from the log, which can be both JS and http cookies
+
+  private async inspectCookies(): Promise<void> {
+  // we get all cookies from the log, which can be both JS and http cookies
     let cookies_from_events = flatten(
         this.eventData
             .filter((event) => event.type.startsWith("Cookie"))
@@ -62,9 +74,9 @@ class Inspector {
               });
               return event.data;
             })
-    ).filter((cookie) => cookie.value); // don't consider deletion events with no value defined
+    ).filter((cookie :any) => cookie.value); // don't consider deletion events with no value defined
 
-    cookies_from_events.forEach((event_cookie) => {
+    cookies_from_events.forEach((event_cookie:any) => {
       // we compare the eventlog with what was collected
       let matched_cookie = this.output.cookies.find((cookie) => {
         return (
@@ -79,7 +91,7 @@ class Inspector {
       if (matched_cookie) {
         matched_cookie.log = event_cookie.log;
       } else {
-        let cookie = {
+        let cookie:any = {
           name: event_cookie.key,
           domain: event_cookie.domain,
           path: event_cookie.path,
@@ -106,7 +118,7 @@ class Inspector {
       if (
           isFirstParty(
               this.pageSession.refs_regexp,
-              `cookie://${cookie.domain}${cookie.path}`
+              url.parse(`cookie://${cookie.domain}${cookie.path}`)
           ) ||
           cookie.domain === ""
       ) {
@@ -124,14 +136,14 @@ class Inspector {
     });
   }
 
-  async #inspectLocalStorage() {
+ private  async inspectLocalStorage() :Promise<void> {
     let storage_from_events = this.eventData.filter((event) => {
       return event.type.startsWith("Storage");
     });
 
     Object.keys(this.output.localStorage).forEach((origin) => {
       let hostname = new url.URL(origin).hostname;
-      let isFirstPartyStorage = isFirstParty(this.pageSession.refs_regexp, origin);
+      let isFirstPartyStorage = isFirstParty(this.pageSession.refs_regexp, url.parse(origin));
 
       if (isFirstPartyStorage) {
         this.pageSession.hosts.localStorage.firstParty.add(hostname);
@@ -163,8 +175,8 @@ class Inspector {
     });
   }
 
-  async #inspectBeacons() {
-    let beacons_from_events = flatten(
+  private async inspectBeacons():Promise<void>  {
+    let beacons_from_events:Beacon[] = flatten(
         this.eventData
             .filter((event) => {
               return event.type.startsWith("Request.Tracking");
@@ -216,7 +228,7 @@ class Inspector {
     this.output.beacons = beacons_summary;
   }
 
-  async #inspectHosts() {
+ private  async inspectHosts():Promise<void>  {
     // Hosts Inspection
     let arrayFromParties = function (array) {
       return {
