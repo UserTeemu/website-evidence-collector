@@ -338,7 +338,6 @@ function configureCollectorCommand(yargs: yargs.Argv) {
 function configureServerCommand(yargs: yargs.Argv) {
     return yargs.alias('p', 'port')
         .default('p', 8080)
-        .strict()
         .check((parsedArgs, _) => {
             parsedArgs.command = SERVER_COMMAND
             return true;
