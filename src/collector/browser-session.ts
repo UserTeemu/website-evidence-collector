@@ -80,6 +80,7 @@ export class BrowserSession {
 
     async create() {
         this.browser = await puppeteer.launch({
+            dumpio:true,
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
