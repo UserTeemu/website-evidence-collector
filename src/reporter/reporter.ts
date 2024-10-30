@@ -65,7 +65,8 @@ export class Reporter {
 
     saveYaml(data, filename, log = true) {
         const yaml_dump = yaml.dump(data, {
-            noRefs: true, replacer: function replacer(key, value) {
+            noRefs: true,
+            replacer: function replacer(_, value) {
                 return value instanceof URL ? value.toString() : value
             }
         });

@@ -3,9 +3,12 @@ import { safeJSONParse } from '../lib/tools.js';
 import os from 'os';
 import url from 'url';
 import gitDescribe from 'git-describe';
-import packageConfig from '../../package.json' with { type: 'json' };
 
 const __dirname = import.meta.dirname;
+
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const packageJson = require('../../package.json');
 
 export interface CreateOutputArgs {
   url: string;
@@ -101,7 +104,7 @@ export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
     script: {
       host: os.hostname(),
       version: {
-        npm:packageConfig.version ,
+        npm:packageJson.version ,
         commit: null,
       },
       config: pickBy(args, (_value, key) => key === '_' || (key.length > 1 &&

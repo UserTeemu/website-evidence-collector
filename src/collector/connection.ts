@@ -5,6 +5,7 @@ import os from "os";
 import path from "path";
 import {execSync} from "child_process";
 import {Logger} from "winston";
+import {HttpProxyAgent, HttpsProxyAgent} from "hpagent";
 
 interface TestSslArgs {
     testssl?: boolean;
@@ -45,6 +46,7 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
             "--standard",
             "--server-defaults",
             "--server-preference",
+            "--proxy=auto"
         ];
 
         let json_file: string;
@@ -89,6 +91,22 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
 }
 
 export async function testHttps(uri: string, output: Output): Promise<void> {
+    let httpProxy = process.env.HTTP_PROXY;
+    let httpAgent: HttpProxyAgent | undefined;
+    if (httpProxy) {
+        httpAgent = new HttpProxyAgent({
+            proxy: httpProxy,
+        })
+    }
+
+    let httpsProxy = process.env.HTTPS_PROXY;
+    let httpsAgent: HttpsProxyAgent | undefined;
+    if (httpsProxy) {
+        httpsAgent = new HttpsProxyAgent({
+            proxy: httpsProxy,
+        })
+    }
+
     let uri_ins_https: url.URL;
 
     try {
@@ -97,6 +115,10 @@ export async function testHttps(uri: string, output: Output): Promise<void> {
 
         await got(uri_ins_https.toString(), {
             followRedirect: false,
+            agent: {
+                https: httpsAgent,
+                http: httpAgent,
+            }
         });
 
         output.secure_connection.https_support = true;
@@ -114,6 +136,10 @@ export async function testHttps(uri: string, output: Output): Promise<void> {
             https: {
                 rejectUnauthorized: false,
             },
+            agent: {
+                https: httpsAgent,
+                http: httpAgent,
+            }
         });
 
         output.secure_connection.redirects = res.redirectUrls;
@@ -122,7 +148,7 @@ export async function testHttps(uri: string, output: Output): Promise<void> {
             output.secure_connection.https_redirect = false;
             return;
         }
-        
+
         let final_redirect_url = res.redirectUrls[res.redirectUrls.length - 1];
 
         output.secure_connection.https_redirect =

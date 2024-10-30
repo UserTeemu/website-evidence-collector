@@ -21,7 +21,7 @@ import {marked} from 'marked';
 import {ParsedArgsReporter} from '../lib/argv.js';
 import {markedSmartypants} from "marked-smartypants";
 import groupBy from "lodash/groupBy.js";
-
+import {all as unsafe} from 'js-yaml-js-types-esm';
 import {fileURLToPath} from 'url';
 import {createRequire} from 'module';
 
@@ -29,6 +29,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
+yaml.DEFAULT_SCHEMA = yaml.DEFAULT_SCHEMA.extend(unsafe);
 
 /// Code that gets called when invoking the reporter command using the CLI
 export async function reporterCommand(args: ParsedArgsReporter) {

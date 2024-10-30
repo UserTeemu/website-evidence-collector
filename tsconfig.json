@@ -5,7 +5,6 @@
       "target": "es2020",
       "moduleResolution": "nodenext",
       "module": "nodenext",
-      "resolveJsonModule": true,
     },
     "include": ["./src/**/*","./bin/**/*"],
     "exclude": ["./src/assets/frontend/**/*"]
