@@ -68,6 +68,7 @@ function configureRoutes(logger:any) :Router {
                 first_party_uri_option_input: req.body.first_party_uri_option_input,
                 browse_link_option_input: req.body.browse_link_option_input,
                 seed_option_input: req.body.seed_option_input,
+                testssl_input_option:req.body.testssl_input_option,
             });
 
             if (!URL.canParse(website_url)) {
@@ -108,6 +109,7 @@ export interface StartCollectionRequestBody {
     first_party_uri_option_input: string,
     browse_link_option_input: string,
     seed_option_input: string,
+    testssl_input_option:boolean,
 }
 
 export default run;

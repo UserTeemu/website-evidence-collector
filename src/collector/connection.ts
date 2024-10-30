@@ -31,8 +31,11 @@ interface Output {
 
 export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, output: Output): Promise<void> {
     if (args.testssl) {
+        logger.info("Run testssl.sh")
         let uri_ins_https = new url.URL(uri);
         uri_ins_https.protocol = "https:";
+
+
 
         let testsslExecutable = args.testsslExecutable || "testssl.sh";
         let testsslArgs = [
@@ -46,8 +49,14 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
             "--standard",
             "--server-defaults",
             "--server-preference",
-            "--proxy=auto"
         ];
+
+        // testSSL only uses HTTP proxy.
+        let httpProxy = process.env.http_proxy;
+        if(httpProxy) {
+            testsslArgs.push("--proxy=auto")
+            logger.info("testssl: Proxy config found. Calling with automatic proxy settings")
+        }
 
         let json_file: string;
 
@@ -90,8 +99,10 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
     }
 }
 
-export async function testHttps(uri: string, output: Output): Promise<void> {
-    let httpProxy = process.env.HTTP_PROXY;
+export async function testHttps(uri: string, output: Output,logger:Logger): Promise<void> {
+    logger.info("Run testHttps")
+
+    let httpProxy = process.env.http_proxy;
     let httpAgent: HttpProxyAgent | undefined;
     if (httpProxy) {
         httpAgent = new HttpProxyAgent({
@@ -99,7 +110,7 @@ export async function testHttps(uri: string, output: Output): Promise<void> {
         })
     }
 
-    let httpsProxy = process.env.HTTPS_PROXY;
+    let httpsProxy = process.env.https_proxy;
     let httpsAgent: HttpsProxyAgent | undefined;
     if (httpsProxy) {
         httpsAgent = new HttpsProxyAgent({
@@ -123,6 +134,9 @@ export async function testHttps(uri: string, output: Output): Promise<void> {
 
         output.secure_connection.https_support = true;
     } catch (error: any) {
+        // Log the full error object
+        logger.error(`testHttps: ${error.toString()}`)
+        logger.error('testHttps:', { error });
         output.secure_connection.https_support = false;
         output.secure_connection.https_error = error.toString();
     }
@@ -154,6 +168,8 @@ export async function testHttps(uri: string, output: Output): Promise<void> {
         output.secure_connection.https_redirect =
             final_redirect_url.protocol.includes("https");
     } catch (error: any) {
+        logger.error(`testHttps: ${error.toString()}`)
+        logger.error('testHttps:', { error });
         output.secure_connection.http_error = error.toString();
     }
 }

@@ -46,6 +46,7 @@ export async function startCollection(args: StartCollectionRequestBody, logger: 
         sleep: sleepOption,
         firstPartyUri: firstPartyUris,
         pageTimeout: pageTimeout,
+        testssl:args.testssl_input_option,
         seed:args.seed_option_input,
         headless: true,
         screenshots: true,

@@ -1,7 +1,7 @@
 <!-- EvidenceCollectionForm.vue -->
 <template>
   <div class="flex flex-col md:flex-row">
-    <div class="w-full md:w-2/6 pl-4" >
+    <div class="w-full md:w-2/6 pl-4">
       <div class="max-h-screen overflow-y-auto pr-2 py-3">
         <Vueform :endpoint=false @submit=handleSubmit validate-on="step|change" :display-errors="true"
                  add-class="vf-evidence-collection-form">
@@ -124,6 +124,10 @@
               :autogrow="false"
               :floating="false"
               placeholder="http://example.com/example;http://example.com/another-example"
+          />
+          <CheckboxElement
+              name="testssl_input_option"
+              text="Run with TestSSL"
           />
           <StaticElement
               name="divider_1"

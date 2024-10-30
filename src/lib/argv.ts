@@ -42,6 +42,7 @@ export interface ParsedArgsCollector {
     pdf: boolean;
     taskDescription?: string;
     quiet: boolean;
+    testssl:boolean;
     browserOptions: any[];
     lang: string;
     pageTimeout: number;
@@ -95,6 +96,7 @@ export async function parse(): Promise<ParsedArgs> {
             usePandoc: parsingResult["usePandoc"] as boolean,
             pdf: parsingResult["pdf"] as boolean,
             quiet: parsingResult["quiet"] as boolean,
+            testssl:parsingResult["testssl"] as boolean,
             browserOptions: parsingResult["browserOptions"] as string[],
             lang: parsingResult["lang"] as string,
             pageTimeout: parsingResult["pageTimeout"] as number,
@@ -295,6 +297,7 @@ function configureCollectorCommand(yargs: Argv) {
 
         .describe("testssl", "call of testssl.sh executable and integrate its output")
         .boolean("testssl")
+        .default("testssl",false)
         .conflicts("testssl", "testssl-file")
 
         .describe("testssl-executable", "set location of the testssl.sh executable")

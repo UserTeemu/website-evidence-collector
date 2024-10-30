@@ -103,7 +103,7 @@ export class Collector {
     }
 
     private async testConnection(): Promise<void> {
-        await testHttps(this.output.uri_ins, this.output);
+        await testHttps(this.output.uri_ins, this.output,this.logger);
         await testSSL(
             this.output.uri_ins,
             this.args,

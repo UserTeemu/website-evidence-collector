@@ -29,16 +29,6 @@ import {reporterCommand} from "../src/reporter/reporterCommand.js";
     let args: ParsedArgs = await parse();
     const loggerInstance = create({}, args);
 
-    let httpProxy = process.env.HTTP_PROXY;
-    let httpsProxy = process.env.HTTPS_PROXY;
-
-    if(httpProxy) {
-        loggerInstance.info(`HTTP_PROXY is set to ${httpProxy}`)
-    }
-    if(httpsProxy) {
-        loggerInstance.info(`HTTPS_PROXY is set to ${httpsProxy}`)
-    }
-
     switch (args.command) {
         case SERVER_COMMAND:
             args = args as ParsedArgsServe;

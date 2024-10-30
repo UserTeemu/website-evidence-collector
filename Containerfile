@@ -20,36 +20,7 @@
 # Define ARGs that can be set during build
 ARG TESTSSL_VERSION=3.0.6
 
-FROM alpine:3.20.0 AS build
-
-RUN apk add --no-cache \
-        nodejs  \
-        npm
-
-COPY . /opt/website-evidence-collector/
-
-WORKDIR /opt/website-evidence-collector/
-
-RUN npm ci          && \
-    npm run build   && \
-    cd build/       && \
-    npm install --omit=dev && \
-    chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
-
-FROM alpine:3.20.0
-
-LABEL maintainer="Robert Riemann <robert.riemann@edps.europa.eu>"
-
-LABEL org.label-schema.description="Website Evidence Collector running in a tiny Alpine Docker container" \
-      org.label-schema.name="website-evidence-collector" \
-      org.label-schema.usage="https://github.com/EU-EDPS/website-evidence-collector/blob/master/README.md" \
-      org.label-schema.vcs-url="https://github.com/EU-EDPS/website-evidence-collector" \
-      org.label-schema.vendor="European Data Protection Supervisor (EDPS)" \
-      org.label-schema.license="EUPL-1.2"
-
-# Use the ARG without a value to load the default defined on top
-ARG TESTSSL_VERSION
-ENV TESTSSL_VERSION=${TESTSSL_VERSION}
+FROM alpine:3.20.0 AS alpine-with-dependencies
 
 # Installs latest Chromium (77) package.
 RUN apk add --no-cache \
@@ -65,6 +36,38 @@ RUN apk add --no-cache \
       bash procps drill coreutils libidn curl \
       # Toolbox for advanced interactive use of WEC in container
       parallel jq grep aha
+
+FROM alpine-with-dependencies AS build
+
+RUN apk add --no-cache npm
+
+WORKDIR /opt/website-evidence-collector/
+
+COPY package.json package-lock.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build   && \
+    cd build/       && \
+    npm install --omit=dev && \
+    chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
+
+FROM alpine-with-dependencies
+
+LABEL maintainer="Robert Riemann <robert.riemann@edps.europa.eu>"
+
+LABEL org.label-schema.description="Website Evidence Collector running in a tiny Alpine Docker container" \
+      org.label-schema.name="website-evidence-collector" \
+      org.label-schema.usage="https://github.com/EU-EDPS/website-evidence-collector/blob/master/README.md" \
+      org.label-schema.vcs-url="https://github.com/EU-EDPS/website-evidence-collector" \
+      org.label-schema.vendor="European Data Protection Supervisor (EDPS)" \
+      org.label-schema.license="EUPL-1.2"
+
+# Use the ARG without a value to load the default defined on top
+ARG TESTSSL_VERSION
+ENV TESTSSL_VERSION=${TESTSSL_VERSION}
 
 # Add user so we don't need --no-sandbox and match first linux uid 1000
 RUN addgroup --system --gid 1001 collector \

@@ -85,10 +85,13 @@ export class BrowserSession {
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
             args: [
                 `--proxy-auto-detect`,
+                `--enable-logging`,
+                `--v=1  `,
                 `--user-agent=${UserAgent}`,
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
         });
+
     }
 
     async start(output) {
