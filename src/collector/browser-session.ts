@@ -87,8 +87,10 @@ export class BrowserSession {
             args: [
                 `--proxy-auto-detect`,
                 `--enable-logging`,
-                `--v=1  `,
+                `--v=1`,
                 `--user-agent=${UserAgent}`,
+                `--disable-gpu`,
+                `--disable-dev-shm-usage`,
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
         });
