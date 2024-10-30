@@ -1,3 +1,5 @@
 FROM zenika/alpine-chrome:with-puppeteer
 COPY test.js .
+RUN npm i proxy-chain
+
 ENTRYPOINT ["node","test.js"]

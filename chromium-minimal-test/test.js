@@ -3,19 +3,24 @@
 
 console.log("Starting minimal chromium test script:");
 
-var website = process.env.WEBSITE;
-
-if (website) {
-  console.log(`Read ${website} from the ENV.`);
-}
 
 const puppeteer = require("puppeteer");
-
+const proxyChain = require('proxy-chain');
 (async () => {
+
+  const website = process.env.WEBSITE;
+  const oldProxyUrl = process.env.http_proxy;
+  const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
+
+  if (website) {
+    console.log(`Read ${website} from the ENV.`);
+  }
+
+
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: [`--proxy-auto-detect`, `--disable-gpu`, `--disable-dev-shm-usage`],
+      args: [`--proxy-server=${newProxyUrl}`, `--disable-gpu`, `--disable-dev-shm-usage`],
     });
     const page = await browser.newPage();
 
@@ -33,6 +38,9 @@ const puppeteer = require("puppeteer");
   } catch (e) {
     console.log("An error occured!");
     console.log(e);
+  } finally {
+    // Clean up, forcibly close all pending connections
+    await proxyChain.closeAnonymizedProxy(newProxyUrl, true);
     process.exit();
   }
 })();
