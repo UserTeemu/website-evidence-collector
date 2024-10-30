@@ -79,36 +79,14 @@ export class BrowserSession {
     }
 
     async create() {
-        let httpProxy = process.env.HTTP_PROXY;
-        let httpsProxy = process.env.HTTPS_PROXY;
-
-        let proxyString = '';
-
-        if (httpProxy) {
-            this.logger.info(`HTTP Proxy: ${httpProxy}`);
-            proxyString += `http=${httpProxy};`;
-        }
-
-        if (httpsProxy) {
-            this.logger.info(`HTTPS Proxy: ${httpsProxy}`);
-            proxyString += `https=${httpsProxy};`;
-        }
-
-        if (proxyString) {
-            proxyString = proxyString.slice(0, -1); // Remove the trailing semicolon
-            this.logger.info(`Chrome will use the following proxy string:${proxyString}`);
-        } else {
-            this.logger.info('No proxy settings found in environment variables.');
-        }
-
         this.browser = await puppeteer.launch({
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
             args: [
+                `--proxy-auto-detect`,
                 `--user-agent=${UserAgent}`,
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
-                ...(proxyString ? [`--proxy-server=${proxyString}`] : []),
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
         });
     }
