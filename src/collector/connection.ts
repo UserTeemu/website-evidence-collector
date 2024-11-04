@@ -103,6 +103,7 @@ export async function testHttps(uri: string, output: Output,logger:Logger): Prom
     logger.info("Run testHttps")
 
     let uri_ins_https: url.URL;
+    let proxyConfig = getGotProxyConfiguration(logger);
 
     try {
         uri_ins_https = new url.URL(uri);
@@ -110,7 +111,7 @@ export async function testHttps(uri: string, output: Output,logger:Logger): Prom
 
         await got(uri_ins_https.toString(), {
             followRedirect: false,
-            agent: getGotProxyConfiguration(logger)
+            ...(proxyConfig && { agent: proxyConfig })
         });
 
         output.secure_connection.https_support = true;
@@ -131,7 +132,7 @@ export async function testHttps(uri: string, output: Output,logger:Logger): Prom
             https: {
                 rejectUnauthorized: false,
             },
-            agent: getGotProxyConfiguration(logger)
+            ...(proxyConfig && { agent: proxyConfig })
         });
 
         output.secure_connection.redirects = res.redirectUrls;

@@ -71,7 +71,7 @@ export function getChromiumProxyConfiguration(logger: Logger): string | null {
     return chromiumProxyConfiguration;
 }
 
-export function getGotProxyConfiguration(logger: Logger): null | {
+export function getGotProxyConfiguration(logger: Logger): undefined | {
     http: HttpProxyAgent | undefined,
     https: HttpsProxyAgent | undefined
 } {
@@ -90,7 +90,7 @@ export function getGotProxyConfiguration(logger: Logger): null | {
         : undefined;
 
     if (!httpAgent && !httpsAgent) {
-        return null;
+        return undefined;
     }
 
     return {

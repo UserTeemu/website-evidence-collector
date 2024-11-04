@@ -83,7 +83,6 @@ export class BrowserSession {
         let proxyConfig=getChromiumProxyConfiguration(this.logger)
 
         this.browser = await puppeteer.launch({
-            dumpio:true,
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
@@ -274,6 +273,8 @@ export class PageSession {
 
         const browsing_history = [root_uri, ...userSet, ...random_links];
 
+        let proxyConfig=getGotProxyConfiguration(this.browserSession.logger);
+
         for (const link of browsing_history.slice(1)) { // can have zero iterations!
             try {
                 // check mime-type and skip if not html
@@ -284,7 +285,7 @@ export class PageSession {
                     https: {
                         rejectUnauthorized: false,
                     },
-                    agent:getGotProxyConfiguration(this.browserSession.logger)
+                    ...(proxyConfig && { agent: proxyConfig })
                 });
 
                 if (!head.headers["content-type"].startsWith("text/html")) {
