@@ -32,7 +32,7 @@ import {reporterCommand} from "../src/reporter/reporterCommand.js";
     switch (args.command) {
         case SERVER_COMMAND:
             args = args as ParsedArgsServe;
-            await server(args.port, loggerInstance);
+            await server(args.port,args.browserOptions, loggerInstance);
             break;
         case REPORTER_COMMAND:
             args = args as ParsedArgsReporter;

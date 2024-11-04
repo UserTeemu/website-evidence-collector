@@ -54,6 +54,7 @@ export interface ParsedArgsServe {
     _: (string | number)[];
     command: string;
     port: number;
+    browserOptions: any[];
 }
 
 export const SERVER_COMMAND='serve'
@@ -126,6 +127,7 @@ export async function parse(): Promise<ParsedArgs> {
             _: parsingResult._ as string[],
             port: parsingResult["port"] as number,
             command: parsingResult["command"] as string,
+            browserOptions: parsingResult["browserOptions"] as string[],
         };
     }
 
@@ -341,6 +343,12 @@ function configureCollectorCommand(yargs: Argv) {
 function configureServerCommand(yargs: Argv) {
     return yargs.alias('p', 'port')
         .default('p', 8080)
+
+        .describe("browser-options", "Arguments passed over to the browser (Chrome)")
+        .nargs("browser-options", 1)
+        .array("browser-options")
+        .default("browser-options", [])
+
         .check((parsedArgs, _) => {
             parsedArgs.command = SERVER_COMMAND
             return true;

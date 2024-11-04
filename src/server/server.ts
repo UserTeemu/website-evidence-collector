@@ -5,7 +5,7 @@ import path from "path";
 const __dirname = import.meta.dirname;
 const corsDefault = 'http://localhost:8080';
 
-async function run(port: number, logger: any) {
+async function run(port: number,browser_options:any[], logger: any) {
     process.on('SIGINT', handleShutdownSignal);
     process.on('SIGTERM', handleShutdownSignal);
 
@@ -39,7 +39,7 @@ async function run(port: number, logger: any) {
         next();
     });
 
-    const router=configureRoutes(logger)
+    const router=configureRoutes(logger,browser_options)
 
     app.use(basePath,router)
 
@@ -50,7 +50,7 @@ async function run(port: number, logger: any) {
 }
 
 
-function configureRoutes(logger:any) :Router {
+function configureRoutes(logger:any,browser_options:any[]) :Router {
     const jsonParser = bodyParser.json();
     const router: Router = express();
 
@@ -78,7 +78,7 @@ function configureRoutes(logger:any) :Router {
 
             logger.log('info', `Running collection for: ${website_url}`);
 
-            const output = await startCollection(req.body, logger);
+            const output = await startCollection(req.body,browser_options, logger);
             res.send(output);
             console.log('Finished serving request');
         } catch (e: any) {

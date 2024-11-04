@@ -12,7 +12,7 @@ function isEmptyNumber(input: number | null | undefined): boolean {
     return input === null || input === undefined || isNaN(input) || input === 0;
 }
 
-export async function startCollection(args: StartCollectionRequestBody, logger: any): Promise<{  }> {
+export async function startCollection(args: StartCollectionRequestBody,browser_options:any[], logger: any): Promise<{  }> {
     let sleepOption = isEmptyNumber(args.sleep_option_input) ? 3000 : args.sleep_option_input
     let pageTimeout = isEmptyNumber(args.timeout_input_option) ? 0 : args.timeout_input_option
     let maxLinks = isEmptyNumber(args.max_option_input) ? 0 : args.max_option_input
@@ -61,7 +61,7 @@ export async function startCollection(args: StartCollectionRequestBody, logger: 
         pdf: true,
         taskDescription: null,
         quiet: false,
-        browserOptions: [],
+        browserOptions: browser_options,
         lang: "en",
         $0: "website-evidence-collector",
     };

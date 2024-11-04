@@ -83,13 +83,14 @@ export class BrowserSession {
         let proxyConfig=getChromiumProxyConfiguration(this.logger)
 
         this.browser = await puppeteer.launch({
+            dumpio:true,
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
             args: [
                 ...(proxyConfig!=null ? [proxyConfig]: []),
                 `--user-agent=${UserAgent}`,
-                `--disable-gpu`,
+                `--disable-setuid-sandbox`,
                 `--disable-dev-shm-usage`,
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
