@@ -6,6 +6,7 @@ import path from "path";
 import {execSync} from "child_process";
 import {Logger} from "winston";
 import {HttpProxyAgent, HttpsProxyAgent} from "hpagent";
+import {getGotProxyConfiguration, loadProxyConfiguration} from "../lib/proxy_config.js";
 
 interface TestSslArgs {
     testssl?: boolean;
@@ -52,8 +53,7 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
         ];
 
         // testSSL only uses HTTP proxy.
-        let httpProxy = process.env.http_proxy;
-        if(httpProxy) {
+        if( loadProxyConfiguration(logger).http_proxy) {
             testsslArgs.push("--proxy=auto")
             logger.info("testssl: Proxy config found. Calling with automatic proxy settings")
         }
@@ -102,22 +102,6 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
 export async function testHttps(uri: string, output: Output,logger:Logger): Promise<void> {
     logger.info("Run testHttps")
 
-    let httpProxy = process.env.http_proxy;
-    let httpAgent: HttpProxyAgent | undefined;
-    if (httpProxy) {
-        httpAgent = new HttpProxyAgent({
-            proxy: httpProxy,
-        })
-    }
-
-    let httpsProxy = process.env.https_proxy;
-    let httpsAgent: HttpsProxyAgent | undefined;
-    if (httpsProxy) {
-        httpsAgent = new HttpsProxyAgent({
-            proxy: httpsProxy,
-        })
-    }
-
     let uri_ins_https: url.URL;
 
     try {
@@ -126,10 +110,7 @@ export async function testHttps(uri: string, output: Output,logger:Logger): Prom
 
         await got(uri_ins_https.toString(), {
             followRedirect: false,
-            agent: {
-                https: httpsAgent,
-                http: httpAgent,
-            }
+            agent: getGotProxyConfiguration(logger)
         });
 
         output.secure_connection.https_support = true;
@@ -150,10 +131,7 @@ export async function testHttps(uri: string, output: Output,logger:Logger): Prom
             https: {
                 rejectUnauthorized: false,
             },
-            agent: {
-                https: httpsAgent,
-                http: httpAgent,
-            }
+            agent: getGotProxyConfiguration(logger)
         });
 
         output.secure_connection.redirects = res.redirectUrls;

@@ -11,6 +11,7 @@ import {setup_beacon_recording} from "../lib/setup-beacon-recording.js";
 import {setup_websocket_recording} from "../lib/setup-websocket-recording.js";
 import {set_cookies} from "../lib/set-cookies.js";
 import {isFirstParty, getLocalStorage, sampleSizeSeeded} from "../lib/tools.js";
+import {getChromiumProxyConfiguration, getGotProxyConfiguration} from "../lib/proxy_config.js";
 
 const UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/126.0.6478.126 Safari/537.36";
 const WindowSize = {width: 1680, height: 927};
@@ -79,15 +80,15 @@ export class BrowserSession {
     }
 
     async create() {
+        let proxyConfig=getChromiumProxyConfiguration(this.logger)
+
         this.browser = await puppeteer.launch({
             dumpio:true,
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
             args: [
-                `--proxy-auto-detect`,
-                `--enable-logging`,
-                `--v=1`,
+                ...(proxyConfig!=null ? [proxyConfig]: []),
                 `--user-agent=${UserAgent}`,
                 `--disable-gpu`,
                 `--disable-dev-shm-usage`,
@@ -283,6 +284,7 @@ export class PageSession {
                     https: {
                         rejectUnauthorized: false,
                     },
+                    agent:getGotProxyConfiguration(this.browserSession.logger)
                 });
 
                 if (!head.headers["content-type"].startsWith("text/html")) {
