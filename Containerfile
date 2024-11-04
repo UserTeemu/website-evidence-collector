@@ -43,14 +43,22 @@ RUN apk add --no-cache npm
 
 WORKDIR /opt/website-evidence-collector/
 
+# Install Dependencies for WEC
 COPY package.json package-lock.json ./
 
 RUN npm ci
 
+# Build frontend
+COPY frontend/ ./frontend/
+
+RUN npm run build-frontend
+
+# Copy remainder of WEC
 COPY . .
 
-RUN npm run build   && \
-    cd build/       && \
+RUN npm run build-ts    && \
+    npm run copy-assets && \
+    cd build/           && \
     npm install --omit=dev && \
     chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
 
