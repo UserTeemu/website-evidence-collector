@@ -61,7 +61,7 @@ export function getChromiumProxyConfiguration(logger: Logger): string | null {
     }
 
     if (proxyConfigInstance.https_proxy) {
-        chromiumProxyConfiguration += `https_proxy=${proxyConfigInstance.https_proxy};`;
+        chromiumProxyConfiguration += `https=${proxyConfigInstance.https_proxy};`;
     }
 
     chromiumProxyConfiguration=chromiumProxyConfiguration.slice(0, -1)
