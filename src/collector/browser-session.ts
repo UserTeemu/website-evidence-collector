@@ -90,7 +90,6 @@ export class BrowserSession {
             args: [
                 ...(proxyConfig!=null ? [proxyConfig]: []),
                 `--user-agent=${UserAgent}`,
-                `--disable-setuid-sandbox`,
                 `--disable-dev-shm-usage`,
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
