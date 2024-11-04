@@ -12,6 +12,7 @@ import {setup_websocket_recording} from "../lib/setup-websocket-recording.js";
 import {set_cookies} from "../lib/set-cookies.js";
 import {isFirstParty, getLocalStorage, sampleSizeSeeded} from "../lib/tools.js";
 import {getChromiumProxyConfiguration, getGotProxyConfiguration} from "../lib/proxy_config.js";
+import {Logger} from "winston";
 
 const UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/126.0.6478.126 Safari/537.36";
 const WindowSize = {width: 1680, height: 927};
@@ -61,7 +62,7 @@ export interface BrowserArgs {
 
 export class BrowserSession {
     public browser: Browser;
-    public logger: any;
+    public logger: Logger;
     public page: Page;
     public har: PuppeteerHar;
     public webSocketLog: any;
@@ -81,6 +82,8 @@ export class BrowserSession {
 
     async create() {
         let proxyConfig=getChromiumProxyConfiguration(this.logger)
+
+        this.logger.info(`Chromium called  with following options: ${this.browserArgs.browserOptions}`)
 
         this.browser = await puppeteer.launch({
             dumpio:true,
