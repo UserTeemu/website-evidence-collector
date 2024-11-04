@@ -1,6 +1,7 @@
 node_modules
 output/
 build/
+frontend/dist/
 *.mp4
 *.mov
 *.avi
@@ -14,3 +15,9 @@ build/
 *.iml
 .github/
 .gitlab-ci.yml
+/
+*.mp4
+*.mkv
+*.zip
+*.odp
+*.pdf
