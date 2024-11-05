@@ -1,6 +1,6 @@
 console.log("Starting minimal chromium test script:");
 
-var website = process.env.WEBSITE;
+const website = process.env.WEBSITE;
 
 if (website) {
   console.log(`Read ${website} from the ENV.`);

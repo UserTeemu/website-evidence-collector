@@ -54,7 +54,7 @@ function configureRoutes(logger:any,browser_options:any[]) :Router {
     const jsonParser = bodyParser.json();
     const router: Router = express();
 
-    router.use('/', express.static(path.resolve(__dirname, '../assets/frontend')))
+    router.use('/', express.static(path.resolve(__dirname, '../../static/')))
 
     router.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
 

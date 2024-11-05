@@ -13,10 +13,10 @@
   },
   "scripts": {
     "build": "npm run clean && npm run build-frontend && npm run build-ts && npm run copy-assets",
-    "clean": "rimraf build/",
+    "clean": "rimraf build/ && rimraf frontend/dist/",
     "build-frontend": "cd frontend && npm ci && npm run build",
     "build-ts": "tsc -p .",
-    "copy-assets": "copyfiles --follow src/assets/frontend/**/* src/assets/frontend/* src/assets/*  package.json build/",
+    "copy-assets": "copyfiles src/assets/*  package.json build/ && copyfiles --up 2 frontend/dist/* frontend/dist/assets/* build/static",
     "start": "node build/bin/website-evidence-collector.js",
     "serve": "node build/bin/website-evidence-collector.js serve",
     "test": "jest --detectOpenHandles"
