@@ -86,7 +86,6 @@ export class BrowserSession {
         this.logger.info(`Chromium called  with following options: ${this.browserArgs.browserOptions}`)
 
         this.browser = await puppeteer.launch({
-            dumpio:true,
             headless: this.browserArgs.headless,
             defaultViewport: WindowSize,
             userDataDir: this.browserArgs.browserProfile || (this.browserArgs.outputPath ? path.join(this.browserArgs.outputPath, "browser-profile") : undefined),
@@ -94,6 +93,7 @@ export class BrowserSession {
                 ...(proxyConfig!=null ? [proxyConfig]: []),
                 `--user-agent=${UserAgent}`,
                 `--disable-dev-shm-usage`,
+                '--disable-gpu',
                 `--window-size=${WindowSize.width},${WindowSize.height}`,
             ].concat(this.browserArgs.browserOptions, this.browserArgs["--"] || []),
         });
