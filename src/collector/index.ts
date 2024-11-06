@@ -6,6 +6,7 @@ import collector_inspect from './inspector.js';
 
 import {BrowserArgs, BrowserSession, PageSession} from './browser-session.js';
 import {  getLocalStorage } from '../lib/tools.js';
+import {Logger} from "winston";
 
 
 export interface CollectionResult {
@@ -18,7 +19,7 @@ export class Collector {
     private output: any;
     private browserSession: BrowserSession;
     private pageSession: PageSession;
-    private logger: any;
+    private logger: Logger;
     private args: any;
     private source?: string;
 
@@ -47,29 +48,36 @@ export class Collector {
     async run(): Promise<CollectionResult> {
         // create browser, session, har, pagesession etc to be able to collect
         await this.createSession();
-
+        this.logger.info("Done: Creating puppeteer chrome session")
         //test the ssl and https connection
         await this.testConnection();
-
+        this.logger.info("Done: Testing connection using testHttps and testSSL")
         // go to the target url specified in the args - also possible to overload with a custom url.
         await this.getPage();
-
+        this.logger.info("Done: Loading page")
         // ########################################################
         // Collect Links, Forms and Cookies to populate the output
         // ########################################################
         await this.collectScreenshots();
+        this.logger.info("Done: Collecting screenshots")
         await this.collectLinks();
+        this.logger.info("Done: Collecting links")
         await this.collectForms();
+        this.logger.info("Done: Collecting forms")
         await this.collectCookies();
+        this.logger.info("Done: Collecting cookies")
         await this.collectLocalStorage();
+        this.logger.info("Done: Collecting local storage")
         await this.collectWebsocketLog();
+        this.logger.info("Done: Collecting websocket log")
 
         // browse sample history and log to localstorage
         let browse_user_set = this.args.browseLink || [];
         await this.browseSamples(this.output.localStorage, browse_user_set);
-
+        this.logger.info("Done: Browsing samples")
         // END OF BROWSING - discard the browser and page
         await this.endSession();
+        this.logger.info("Done: Ending session")
 
         return {
             output: this.output,
