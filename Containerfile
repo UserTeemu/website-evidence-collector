@@ -24,22 +24,19 @@ FROM alpine:3.20.0 AS alpine-with-dependencies
 
 # Installs latest Chromium (77) package.
 RUN apk add --no-cache \
-      chromium \
       nss \
       freetype \
       freetype-dev \
       harfbuzz \
       ca-certificates \
-      ttf-freefont \
       nodejs  \
+      npm  \
       # Packages linked to testssl.sh
       bash procps drill coreutils libidn curl \
       # Toolbox for advanced interactive use of WEC in container
       parallel jq grep aha
 
 FROM alpine-with-dependencies AS build
-
-RUN apk add --no-cache npm
 
 WORKDIR /opt/website-evidence-collector/
 
@@ -62,7 +59,10 @@ RUN npm run build-ts    && \
     npm install --omit=dev && \
     chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
 
-FROM alpine-with-dependencies
+FROM zenika/alpine-chrome:with-puppeteer
+
+USER root
+RUN apk add --no-cache curl
 
 LABEL maintainer="Robert Riemann <robert.riemann@edps.europa.eu>"
 
@@ -73,31 +73,27 @@ LABEL org.label-schema.description="Website Evidence Collector running in a tiny
       org.label-schema.vendor="European Data Protection Supervisor (EDPS)" \
       org.label-schema.license="EUPL-1.2"
 
-# Use the ARG without a value to load the default defined on top
 ARG TESTSSL_VERSION
 ENV TESTSSL_VERSION=${TESTSSL_VERSION}
 
 # Add user so we don't need --no-sandbox and match first linux uid 1000
-RUN addgroup --system --gid 1001 collector \
-      && adduser --system --uid 1000 --ingroup collector --shell /bin/bash collector \
-      && mkdir -p /output \
-      && chown -R collector:collector /output
+RUN mkdir -p /output && chown -R chrome:chrome /output
 
 # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
 # Let Puppeteer use system Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    PATH="/home/collector/wec/bin:/opt/testssl.sh-${TESTSSL_VERSION}:${PATH}"
+ENV PATH="/home/collector/wec/bin:/opt/testssl.sh-${TESTSSL_VERSION}:${PATH}"
 
 COPY --from=build  /opt/website-evidence-collector/build  /opt/website-evidence-collector
 
 # Install Testssl.sh
 RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v${TESTSSL_VERSION}.tar.gz | tar -xz --directory /opt && \
-    chown -R collector:collector /opt/website-evidence-collector && \
-    chown -R collector:collector /home/collector
+    chown -R chrome:chrome /opt/website-evidence-collector && \
+    mkdir -p /home/collector    && \
+    chown -R chrome:chrome /home/collector
 
 # Run everything after as non-privileged user.
-USER collector
+# USER collector
+USER chrome
 
 RUN ln -s /opt/website-evidence-collector /home/collector/wec
 

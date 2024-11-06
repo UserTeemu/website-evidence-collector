@@ -1,6 +1,7 @@
 node_modules
 output/
 build/
+Containerfile
 frontend/dist/
 *.mp4
 *.mov
