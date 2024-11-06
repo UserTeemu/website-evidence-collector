@@ -5,7 +5,6 @@ import os from "os";
 import path from "path";
 import {execSync} from "child_process";
 import {Logger} from "winston";
-import {HttpProxyAgent, HttpsProxyAgent} from "hpagent";
 import {getGotProxyConfiguration, loadProxyConfiguration} from "../lib/proxy_config.js";
 
 interface TestSslArgs {
@@ -36,8 +35,6 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
         let uri_ins_https = new url.URL(uri);
         uri_ins_https.protocol = "https:";
 
-
-
         let testsslExecutable = args.testsslExecutable || "testssl.sh";
         let testsslArgs = [
             "--ip one",
@@ -53,7 +50,7 @@ export async function testSSL(uri: string, args: TestSslArgs, logger: Logger, ou
         ];
 
         // testSSL only uses HTTP proxy.
-        if( loadProxyConfiguration(logger).http_proxy) {
+        if(loadProxyConfiguration(logger)?.http_proxy) {
             testsslArgs.push("--proxy=auto")
             logger.info("testssl: Proxy config found. Calling with automatic proxy settings")
         }
