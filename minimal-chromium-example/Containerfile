@@ -1,4 +1,0 @@
-FROM zenika/alpine-chrome:with-puppeteer
-COPY test.js .
-
-ENTRYPOINT ["node","test.js"]
