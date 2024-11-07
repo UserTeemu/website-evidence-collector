@@ -1,4 +1,4 @@
-![Website Evidence Collector Logo](src/assets/wec_logo.svg)
+![Website Evidence Collector Logo](readme-assets/wec_logo.svg)
 
 # Website Evidence Collector
 
@@ -8,7 +8,7 @@ The tool *Website Evidence Collector* (WEC) automates the website evidence colle
 
 ## Installation
 
-![Screencast Installation](screencast-installation.svg "Screencast Installation")
+![Screencast Installation](readme-assets/screencast-installation.svg "Screencast Installation")
 
 1. The Website Evidence Collector is a set of scripts written in JavaScript for execution by *Node.js*. Install Node.js and the *Node.js package manager* (NPM). The minimum version for Node.js is 16.0.
    1. Windows or Mac: Follow the guide on <https://nodejs.org/en/>.
@@ -31,7 +31,7 @@ Now repeat step 2.
 
 ## Run Website Evidence Collector
 
-![Screencast Call](screencast-call.svg "Screencast Call")
+![Screencast Call](readme-assets/screencast-call.svg "Screencast Call")
 
 Either start the WEC in server mode by running `website-evidence-collector serve` in the Terminal and connect using your browser on http://localhost:8080 or start the collection for e.g. <https://example.com>, open the terminal and run `website-evidence-collector https://example.com`. The folder `output` contains the gathered evidence.
 
