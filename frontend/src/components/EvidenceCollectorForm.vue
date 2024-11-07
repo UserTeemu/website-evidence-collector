@@ -160,7 +160,8 @@
           </button>
         </div>
         <div class="max-h-screen overflow-y-auto">
-          <iframe :srcdoc="sanitizedHtml" ref="iframe" class="h-screen iframe-container pt-12"></iframe>
+          <iframe :srcdoc="sanitizedHtml" ref="output-iframe"
+                  class="h-screen iframe-container pt-12"></iframe>
         </div>
       </div>
       <div v-else class="flex items-center justify-center min-h-screen">
@@ -180,7 +181,7 @@
         <!-- Error message. -->
         <div v-else-if="errorMessage" class="p-6 text-center bg-white">
           <h1 class="text-3xl font-bold text-center text-eu-error mb-4">An error occurred</h1>
-          <p class="text-lg text-gray-800">{{errorMessage}}</p>
+          <p class="text-lg text-gray-800">{{ errorMessage }}</p>
         </div>
         <!-- Placeholder for Output -->
         <div v-else class="p-6 text-center">
@@ -193,8 +194,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
-
+import {ref, useTemplateRef} from "vue";
 
 // If the app is served using Vite we have to specify the server location.
 // If it is served by the server itself a relative URL can be used.
@@ -204,6 +204,15 @@ const errorMessage = ref<string | null>(null);
 const pdfUrl = ref<string | null>(null);
 const htmlUrl = ref<string | null>(null)
 const isRequestRunning = ref<boolean>(false)
+const iFrame = useTemplateRef('output-iframe')
+
+// Listen to chnages in the path from anchor links within the iFrame then scroll the corresponding element into view
+window.addEventListener('hashchange', () => {
+  let path = window.location.hash;
+  if (path.charAt(0) == '#' && iFrame.value?.contentWindow?.document) {
+    iFrame?.value?.contentWindow?.document?.getElementById(path.substring(1))?.scrollIntoView();
+  }
+})
 
 function reset() {
   pdfUrl.value = null;
@@ -245,15 +254,15 @@ async function handleSubmit(form$, _) {
 
   } catch (error: any) {
     console.log("An error occured.")
-    console.log('error',error)
+    console.log('error', error)
     console.log(response)
 
-    if(error.response?.data?.reason){
-      errorMessage.value=error.response.data.reason;
+    if (error.response?.data?.reason) {
+      errorMessage.value = error.response.data.reason;
     } else if (error.response) {
-      errorMessage.value=`A HTTP ${error.response.status} error occurred.`;
+      errorMessage.value = `A HTTP ${error.response.status} error occurred.`;
     } else {
-      errorMessage.value=`${error.message}`;
+      errorMessage.value = `${error.message}`;
     }
   } finally {
     // Hide loading spinner
