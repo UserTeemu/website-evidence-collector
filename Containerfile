@@ -5,7 +5,7 @@
 # build from source code folder using either Docker or Podman: podman build -t website-evidence-collector -f Containerfile
 # running the container automatically starts the server mode
 # run container with e.g.:
-#   podman run -d -p 8080:8080 localhost/website-evidence-collector:latest
+#   podman run --rm -it -p 8080:8080 localhost/website-evidence-collector:latest
 # and connect using the browser on localhost:8080/
 
 # connect to the running container using:
@@ -17,26 +17,44 @@
 # If you hit the Error: EACCES: permission denied,
 # then try "mkdir output && chown 1000 output"
 
-# Define ARGs that can be set during build
 ARG TESTSSL_VERSION=3.0.6
 
-FROM alpine:3.20.0 AS alpine-with-dependencies
+# Largely copied from https://github.com/jlandure/alpine-chrome/blob/master/with-puppeteer/Dockerfile
+FROM alpine:3.20.0 AS chromium-base-image
 
-# Installs latest Chromium (77) package.
+RUN apk upgrade --no-cache --available \
+    && apk add --no-cache \
+      chromium-swiftshader \
+      ttf-freefont \
+      font-noto-emoji \
+      make gcc g++ python3 git nodejs npm yarn \
+    && apk add --no-cache \
+      --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+      font-wqy-zenhei
+
+COPY local.conf /etc/fonts/local.conf
+
+# Add Chrome as a user
+RUN mkdir -p /usr/src/app \
+    && adduser -D chrome \
+    && chown -R chrome:chrome /usr/src/app
+
+# Run Chrome as non-privileged
+USER chrome
+WORKDIR /usr/src/app
+
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/ \
+    CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage" \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+FROM alpine:3.20.0 AS build
+
 RUN apk add --no-cache \
-      nss \
-      freetype \
-      freetype-dev \
-      harfbuzz \
-      ca-certificates \
+      bash \
       nodejs  \
-      npm  \
-      # Packages linked to testssl.sh
-      bash procps drill coreutils libidn curl \
-      # Toolbox for advanced interactive use of WEC in container
-      parallel jq grep aha
-
-FROM alpine-with-dependencies AS build
+      npm
 
 WORKDIR /opt/website-evidence-collector/
 
@@ -59,10 +77,7 @@ RUN npm run build-ts    && \
     npm install --omit=dev && \
     chmod +x /opt/website-evidence-collector/build/bin/website-evidence-collector.js
 
-FROM zenika/alpine-chrome:with-puppeteer
-
-USER root
-RUN apk add --no-cache curl
+FROM chromium-base-image AS wec
 
 LABEL maintainer="Robert Riemann <robert.riemann@edps.europa.eu>"
 
@@ -73,14 +88,23 @@ LABEL org.label-schema.description="Website Evidence Collector running in a tiny
       org.label-schema.vendor="European Data Protection Supervisor (EDPS)" \
       org.label-schema.license="EUPL-1.2"
 
+USER root
+
+RUN apk add --no-cache curl \
+      nss \
+      freetype freetype-dev \
+      harfbuzz \
+      ca-certificates \
+      # Packages linked to testssl.sh
+      bash procps drill coreutils libidn curl \
+      # Toolbox for advanced interactive use of WEC in container
+      parallel jq grep aha
+
 ARG TESTSSL_VERSION
 ENV TESTSSL_VERSION=${TESTSSL_VERSION}
 
-# Add user so we don't need --no-sandbox and match first linux uid 1000
 RUN mkdir -p /output && chown -R chrome:chrome /output
 
-# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-# Let Puppeteer use system Chromium
 ENV PATH="/home/collector/wec/bin:/opt/testssl.sh-${TESTSSL_VERSION}:${PATH}"
 
 COPY --from=build  /opt/website-evidence-collector/build  /opt/website-evidence-collector
@@ -91,16 +115,11 @@ RUN curl -SL https://github.com/drwetter/testssl.sh/archive/refs/tags/v${TESTSSL
     mkdir -p /home/collector    && \
     chown -R chrome:chrome /home/collector
 
-# Run everything after as non-privileged user.
-# USER collector
 USER chrome
 
 RUN ln -s /opt/website-evidence-collector /home/collector/wec
 
-
-# Let website evidence collector run chrome without sandbox
 # ENV WEC_BROWSER_OPTIONS="--no-sandbox"
-# Configure default command in Docker container
 ENTRYPOINT ["website-evidence-collector.js"]
 CMD ["serve"]
 EXPOSE 8080
