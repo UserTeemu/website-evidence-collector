@@ -7,7 +7,7 @@
 
 import path from 'path';
 import tmp from 'tmp';
-import { createLogger, format, transports, Logger } from 'winston';
+import { createLogger, format, transports, Logger,Logform } from 'winston';
 
 tmp.setGracefulCleanup();
 
@@ -21,8 +21,24 @@ tmp.setGracefulCleanup();
 //   silly: 5
 // }
 
-const create = (options, args): Logger => {
-  const defaults = {
+
+interface CreateLoggerOptions {
+  console?:{
+    silent:boolean;
+    level:string;
+    stderrLevels:string[];
+    format: Logform.Format;
+  }
+  file?: {
+    enabled:boolean;
+    level: string;
+    format: Logform.Format;
+  }
+}
+
+
+const create = (options:CreateLoggerOptions, outputFilePath?:string,defaultMeta?:{}): Logger => {
+  const defaults:CreateLoggerOptions = {
     console: {
       silent: false,
       level: 'debug',
@@ -40,6 +56,7 @@ const create = (options, args): Logger => {
 
   const logger = createLogger({
     format: format.combine(format.timestamp()),
+    defaultMeta: defaultMeta,
     transports: [
       new transports.Console({
         level: config.console?.level,
@@ -52,8 +69,8 @@ const create = (options, args): Logger => {
 
   if (config.file?.enabled) {
     let filename: string;
-    if (args.output) {
-      filename = path.join(args.output, 'inspection-log.ndjson');
+    if (outputFilePath) {
+      filename = path.join(outputFilePath, 'inspection-log.ndjson');
     } else {
       filename = tmp.tmpNameSync({ postfix: '-log.ndjson' });
     }

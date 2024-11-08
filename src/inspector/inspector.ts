@@ -17,14 +17,12 @@ interface Beacon {
 class Inspector {
   private eventData: any;
   private logger: any;
-  private args: any;
   private output: any;
   private pageSession: any;
 
-  constructor(args: any, logger: any, pageSession: any, output: any) {
+  constructor(logger: any, pageSession: any, output: any) {
     this.eventData = null;
     this.logger = logger;
-    this.args = args;
     this.output = output;
     this.pageSession = pageSession;
   }

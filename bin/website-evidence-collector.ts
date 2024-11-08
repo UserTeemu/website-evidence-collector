@@ -20,19 +20,17 @@ import {
     REPORTER_COMMAND,
     SERVER_COMMAND
 } from "../src/lib/argv.js";
-import {create} from "../src/lib/logger.js";
 import localCollector from "../src/collectorCommand.js";
 import {reporterCommand} from "../src/reporter/reporterCommand.js";
 
 
 (async () => {
     let args: ParsedArgs = await parse();
-    const loggerInstance = create({}, args);
 
     switch (args.command) {
         case SERVER_COMMAND:
             args = args as ParsedArgsServe;
-            await server(args.port,args.browserOptions, loggerInstance);
+            await server(args.port,args.browserOptions);
             break;
         case REPORTER_COMMAND:
             args = args as ParsedArgsReporter;
@@ -40,6 +38,6 @@ import {reporterCommand} from "../src/reporter/reporterCommand.js";
             break;
         default:
             args = args as ParsedArgsCollector;
-            await localCollector(args, loggerInstance);
+            await localCollector(args);
     }
 })();

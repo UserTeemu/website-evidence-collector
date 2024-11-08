@@ -2,10 +2,16 @@ import express, {Application, Request, Response, NextFunction, Router} from 'exp
 import bodyParser from 'body-parser';
 import {startCollection} from './startCollection.js';
 import path from "path";
+import {create} from "../lib/logger.js";
+import crypto from "crypto";
+
 const __dirname = import.meta.dirname;
 const corsDefault = 'http://localhost:8080';
 
-async function run(port: number,browser_options:any[], logger: any) {
+async function run(port: number, browser_options: any[]) {
+    const logger = create({});
+
+
     process.on('SIGINT', handleShutdownSignal);
     process.on('SIGTERM', handleShutdownSignal);
 
@@ -16,7 +22,7 @@ async function run(port: number,browser_options:any[], logger: any) {
     if (basePath) {
         logger.info("The basePath is set as:" + basePath);
     } else {
-        basePath='/'
+        basePath = '/'
     }
 
     app.use(function (req, _, next) {
@@ -39,28 +45,30 @@ async function run(port: number,browser_options:any[], logger: any) {
         next();
     });
 
-    const router=configureRoutes(logger,browser_options)
+    const router = configureRoutes(browser_options)
 
-    app.use(basePath,router)
+    app.use(basePath, router)
 
     app.listen(port, () => {
         logger.info("Running website-evidence-collector in server mode");
-        logger.info("Connect by opening the following url in your browser: http://localhost:" + port+basePath);
+        logger.info("Connect by opening the following url in your browser: http://localhost:" + port + basePath);
     });
 }
 
 
-function configureRoutes(logger:any,browser_options:any[]) :Router {
+function configureRoutes(browser_options: any[]): Router {
     const jsonParser = bodyParser.json();
     const router: Router = express();
 
     router.use('/', express.static(path.resolve(__dirname, '../../static/')))
 
     router.post('/start-collection', jsonParser, async (req: Request<{}, {}, StartCollectionRequestBody>, res: Response) => {
+        let requestId = crypto.randomBytes(16).toString('hex');
+        let requestLogger = create({}, undefined, {"request_id": requestId});
 
         try {
             const website_url = req.body.website_url;
-            logger.info(`Received /start-collection request`, {
+            requestLogger.info(`Received /start-collection request`, {
                 website_url: req.body.website_url,
                 max_links_option: req.body.max_option_input,
                 sleep_option_input: req.body.sleep_option_input,
@@ -68,7 +76,7 @@ function configureRoutes(logger:any,browser_options:any[]) :Router {
                 first_party_uri_option_input: req.body.first_party_uri_option_input,
                 browse_link_option_input: req.body.browse_link_option_input,
                 seed_option_input: req.body.seed_option_input,
-                testssl_input_option:req.body.testssl_input_option,
+                testssl_input_option: req.body.testssl_input_option,
             });
 
             if (!URL.canParse(website_url)) {
@@ -76,26 +84,26 @@ function configureRoutes(logger:any,browser_options:any[]) :Router {
                 return;
             }
 
-            logger.log('info', `Running collection for: ${website_url}`);
+            requestLogger.log('info', `Running collection for: ${website_url}`);
 
-            const output = await startCollection(req.body,browser_options, logger);
+            const output = await startCollection(req.body, browser_options, requestLogger);
             res.send(output);
             console.log('Finished serving request');
         } catch (e: any) {
-            logger.log('error', e.message);
-            logger.log('error', e.stack);
+            requestLogger.log('error', e.message);
+            requestLogger.log('error', e.stack);
             res.status(500).send({reason: e.message});
         }
     });
 
     router.get('/health', (_, res: Response) => {
-        res.status(200).json({ status: 'OK' });
+        res.status(200).json({status: 'OK'});
     });
 
     return router;
 }
 
-function handleShutdownSignal(signal:string) {
+function handleShutdownSignal(signal: string) {
     console.log(`Received ${signal}. Shutting down.`);
     process.exit();
 }
@@ -109,7 +117,7 @@ export interface StartCollectionRequestBody {
     first_party_uri_option_input: string,
     browse_link_option_input: string,
     seed_option_input: string,
-    testssl_input_option:boolean,
+    testssl_input_option: boolean,
 }
 
 export default run;

@@ -1,5 +1,5 @@
 import {createOutputDirectory} from "./io.js";
-import {CreateOutputArgs, CollectorOutput, createOutputObject} from "./output.js";
+import {CreateOutputArgs, createOutputObject} from "./output.js";
 
 import {testSSL,testHttps} from './connection.js';
 import collector_inspect from './inspector.js';
@@ -145,7 +145,7 @@ export class Collector {
     private async collectScreenshots(): Promise<void> {
         // record screenshots
         if (this.args.screenshots) {
-            this.output.screenshots = await this.pageSession.screenshot();
+            this.output.screenshots = await this.pageSession.takeScreenshots();
         }
     }
 

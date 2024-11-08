@@ -10,14 +10,16 @@ import {Collector, CollectionResult} from './collector/index.js';
 import Inspector from './inspector/inspector.js';
 import { ParsedArgsCollector } from './lib/argv.js';
 import {Reporter, ReporterArguments} from './reporter/reporter.js';
+import {create} from "./lib/logger.js";
 
 
-async function run(args: ParsedArgsCollector, logger: any): Promise<any> {
+async function run(args: ParsedArgsCollector): Promise<any> {
+    const logger = create({}, args.output);
+
     const collector = new Collector(args, logger);
     const collectionResult: CollectionResult = await collector.run();
 
     const inspector = new Inspector(
-        args,
         logger,
         collectionResult.pageSession,
         collectionResult.output

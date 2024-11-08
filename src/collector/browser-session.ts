@@ -318,7 +318,7 @@ export class PageSession {
         return browsing_history;
     }
 
-    async screenshot() {
+    async takeScreenshots() {
         // record screenshots
         try {
             let screenshot_top = await this.page.screenshot({

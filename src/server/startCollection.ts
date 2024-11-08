@@ -2,6 +2,7 @@ import {Reporter, ReporterArguments} from "../reporter/reporter.js";
 import {Collector} from "../collector/index.js";
 import Inspector from "../inspector/inspector.js";
 import {StartCollectionRequestBody} from "./server.js";
+import {Logger} from "winston";
 
 
 function isEmptyString(input: string | null | undefined): boolean {
@@ -12,7 +13,9 @@ function isEmptyNumber(input: number | null | undefined): boolean {
     return input === null || input === undefined || isNaN(input) || input === 0;
 }
 
-export async function startCollection(args: StartCollectionRequestBody,browser_options:any[], logger: any): Promise<{  }> {
+export async function startCollection(args: StartCollectionRequestBody,browser_options:any[],logger:Logger): Promise<{  }> {
+
+
     let sleepOption = isEmptyNumber(args.sleep_option_input) ? 3000 : args.sleep_option_input
     let pageTimeout = isEmptyNumber(args.timeout_input_option) ? 0 : args.timeout_input_option
     let maxLinks = isEmptyNumber(args.max_option_input) ? 0 : args.max_option_input
@@ -73,7 +76,6 @@ export async function startCollection(args: StartCollectionRequestBody,browser_o
     const collectionResult = await collector.run();
 
     const inspector = new Inspector(
-        collectionArgs,
         logger,
         collectionResult.pageSession,
         collectionResult.output
