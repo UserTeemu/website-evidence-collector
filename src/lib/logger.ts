@@ -43,12 +43,12 @@ const create = (options:CreateLoggerOptions, outputFilePath?:string,defaultMeta?
       silent: false,
       level: 'debug',
       stderrLevels: ['error', 'debug', 'info', 'warn'],
-      format: process.stdout.isTTY ? format.combine(format.colorize(), format.simple()) : format.json(),
+      format: process.stdout.isTTY ? format.combine(format.colorize(), format.simple(),format.metadata()) : format.combine(format.json(),format.metadata())
     },
     file: {
       enabled: true,
       level: 'silly',
-      format: format.json(),
+      format: format.combine(format.json(),format.metadata())
     },
   };
 
