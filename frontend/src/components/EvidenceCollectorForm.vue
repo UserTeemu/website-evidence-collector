@@ -2,7 +2,7 @@
 <template>
   <div class="flex flex-col md:flex-row">
     <div class="w-full md:w-2/6 pl-4">
-      <div class="max-h-screen overflow-y-auto pr-2 py-3">
+      <div class="max-h-screen overflow-y-auto pr-4 py-3">
         <Vueform :endpoint=false @submit=handleSubmit validate-on="step|change" :display-errors="true"
                  add-class="vf-evidence-collection-form">
           <StaticElement name="title" class="border-b-2 pb-3" tag="h1" content="Start Evidence Collection"/>
@@ -138,6 +138,7 @@
               button-label="Start collection"
               :submits="true"
               :full="true"
+              class="m-1"
               align="center"
           />
         </Vueform>
