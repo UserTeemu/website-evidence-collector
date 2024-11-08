@@ -2,7 +2,14 @@ import {createOutputDirectory} from "./io.js";
 import {CreateOutputArgs, createOutputObject} from "./output.js";
 
 import {testSSL,testHttps} from './connection.js';
-import collector_inspect from './inspector.js';
+import {
+    filterKeywords,
+    filterSocialPlatforms,
+    mapLinksToParties,
+    collectLinks,
+    collectCookies,
+    unsafeWebforms
+} from './inspector.js';
 
 import {BrowserArgs, BrowserSession, PageSession} from './browser-session.js';
 import {  getLocalStorage } from '../lib/tools.js';
@@ -151,12 +158,12 @@ export class Collector {
 
     private async collectLinks(): Promise<void> {
         // get all links from page
-        const links = await collector_inspect.collectLinks(
+        const links = await collectLinks(
             this.pageSession.page,
             this.logger
         );
 
-        let mappedLinks = await collector_inspect.mapLinksToParties(
+        let mappedLinks = await mapLinksToParties(
             links,
             this.pageSession.hosts,
             this.pageSession.refs_regexp
@@ -165,16 +172,16 @@ export class Collector {
         this.output.links.firstParty = mappedLinks.firstParty;
         this.output.links.thirdParty = mappedLinks.thirdParty;
 
-        this.output.links.social = await collector_inspect.filterSocialPlatforms(
+        this.output.links.social = await filterSocialPlatforms(
             links
         );
 
         // prepare regexp to match links by their href or their caption
-        this.output.links.keywords = await collector_inspect.filterKeywords(links);
+        this.output.links.keywords = await filterKeywords(links);
     }
 
     private async collectCookies(): Promise<void> {
-        this.output.cookies = await collector_inspect.collectCookies(
+        this.output.cookies = await collectCookies(
             this.pageSession.page,
             this.output.start_time
         );
@@ -182,7 +189,7 @@ export class Collector {
 
     private async collectForms(): Promise<void> {
         // unsafe webforms
-        this.output.unsafeForms = await collector_inspect.unsafeWebforms(
+        this.output.unsafeForms = await unsafeWebforms(
             this.pageSession.page
         );
     }

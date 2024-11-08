@@ -209,7 +209,7 @@ class Inspector {
     });
 
     let beacons_summary = [];
-    for (const [key, beacon_group] of Object.entries(
+    for (const [_, beacon_group] of Object.entries(
         beacons_from_events_grouped
     )) {
       beacons_summary.push(
