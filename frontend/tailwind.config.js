@@ -44,6 +44,10 @@ export default {
         'eu-accent-40': '#FAFAFF',
 
         'eu-error':'#DA1E28',
+
+        'eu-background':'#FCFCFC',
+
+        'eu-neutral-100':'#B9C5E9',
       },
     },
 

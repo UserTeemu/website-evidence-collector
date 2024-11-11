@@ -114,8 +114,8 @@ export interface StartCollectionRequestBody {
     max_option_input: number
     sleep_option_input: number,
     timeout_input_option: number,
-    first_party_uri_option_input: string,
-    browse_link_option_input: string,
+    first_party_uri_option_input: string[],
+    browse_link_option_input: string[],
     seed_option_input: string,
     testssl_input_option: boolean,
 }
