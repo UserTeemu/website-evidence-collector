@@ -20,8 +20,9 @@ export async function startCollection(args: StartCollectionRequestBody,browser_o
     let pageTimeout = isEmptyNumber(args.timeout_input_option) ? 0 : args.timeout_input_option
     let maxLinks = isEmptyNumber(args.max_option_input) ? 0 : args.max_option_input
 
-    let browseLinks =  args.browse_link_option_input
-    let firstPartyUris =args.first_party_uri_option_input
+    // Links and URIs can be null when send by the backend. Therefore, we filter.
+    let browseLinks =  args.browse_link_option_input.filter(value => value!=null)
+    let firstPartyUris =args.first_party_uri_option_input.filter(value => value!=null)
 
     // Check that Links are URLs and FirstPartyUris only consist of domains.
     let allExtraLinksUrls = browseLinks.every((link: string) => URL.canParse(link))
