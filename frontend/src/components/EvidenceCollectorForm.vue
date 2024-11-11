@@ -159,22 +159,41 @@
         <!-- Right panel -->
         <div class="inline-block h-screen min-h-[2em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10"></div>
         <div class="w-full md:w-4/6 relative">
+
             <!-- Display sanitized HTML in the success case. -->
-            <div v-if="sanitizedHtml ">
-                <div id='downloadButtonBar'
-                     class="absolute top-0 left-0 right-0 h-12 bg-black flex items-center px-4 z-10 space-x-4">
+            <div v-if="sanitizedHtml">
+
+                <!-- Overlay bar -->
+                <div v-if="!isDownloadOverlayMinimized"
+                     class="fixed flex flex-col mr-6 space-y-2 top-3 right-0 z-10 p-3 space-x-2 items-end bg-eu-neutral-100/50 rounded-md border-2 border-gray-300">
+                    <button @click="toggleOverlayMinimization">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                             class="fill-gray-500"
+                        >
+                            <path d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
+                        </svg>
+                    </button>
                     <button class="bg-eu-primary hover:bg-eu-primary-80 text-white font-bold py-1 px-2  "
                             v-if="pdfUrl"
-                            @click="downloadPdf">Download PDF
+                            @click="downloadPdf">Download as PDF
                     </button>
                     <button class="bg-eu-primary hover:bg-eu-primary-80 text-white font-bold py-1 px-2  "
                             v-if="htmlUrl"
-                            @click="downloadHtml">Download HTML
+                            @click="downloadHtml">Download as HTML
                     </button>
                 </div>
+                <div v-else @click="toggleOverlayMinimization">
+                    <div class="fixed flex hover:scale-105 top-0 right-8 h-11 w-11 bg-eu-primary-100 rounded-br-full rounded-bl-full items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="35px"
+                             fill="#FFFFFF">
+                            <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/>
+                        </svg>
+                    </div>
+                </div>
+
                 <div class="max-h-screen overflow-y-auto">
                     <iframe :srcdoc="sanitizedHtml" ref="output-iframe"
-                            class="h-screen iframe-container pt-12"></iframe>
+                            class="h-screen iframe-container"></iframe>
                 </div>
             </div>
             <div v-else class="flex items-center justify-center min-h-screen">
@@ -219,6 +238,8 @@ const pdfUrl = ref<string | null>(null);
 const htmlUrl = ref<string | null>(null)
 const isRequestRunning = ref<boolean>(false)
 const iFrame = useTemplateRef('output-iframe')
+
+const isDownloadOverlayMinimized = ref(false);
 
 // Listen to chnages in the path from anchor links within the iFrame then scroll the corresponding element into view
 window.addEventListener('hashchange', () => {
@@ -288,6 +309,11 @@ async function handleSubmit(form$, _) {
 function base64ToBinary(base64: string): Uint8Array {
     return Uint8Array.from(atob(base64), (m) => m.charCodeAt(0));
 }
+
+function toggleOverlayMinimization() {
+    isDownloadOverlayMinimized.value = !isDownloadOverlayMinimized.value;
+}
+
 
 const createPdfUrl = (decodedBase64) => {
     const blob = new Blob([decodedBase64], {type: 'application/pdf'});
