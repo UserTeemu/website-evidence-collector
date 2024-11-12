@@ -1,6 +1,6 @@
 import express, {Application, Request, Response, NextFunction, Router} from 'express';
 import bodyParser from 'body-parser';
-import {startCollection} from './startCollection.js';
+import {generateHtmlAndPdf, runCollection} from './runCollection.js';
 import path from "path";
 import {create} from "../lib/logger.js";
 import crypto from "crypto";
@@ -86,8 +86,9 @@ function configureRoutes(browser_options: any[]): Router {
 
             requestLogger.log('info', `Running collection for: ${website_url}`);
 
-            const output = await startCollection(req.body, browser_options, requestLogger);
-            res.send(output);
+            let collectionOutput = await runCollection(req.body, browser_options, requestLogger);
+            let htmlAndPdf=await generateHtmlAndPdf(collectionOutput)
+            res.send(htmlAndPdf);
             console.log('Finished serving request');
         } catch (e: any) {
             requestLogger.log('error', e.message);

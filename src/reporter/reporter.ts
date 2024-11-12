@@ -149,7 +149,7 @@ export class Reporter {
         }
     }
 
-    async convertHtmlToPdfWithoutDisk(htmlContent: string): Promise<Uint8Array> {
+    async convertHtmlToPdfInMemory(htmlContent: string): Promise<Uint8Array> {
         const browser = await puppeteer.launch({});
         const page = await browser.newPage();
         await page.setContent(htmlContent, {waitUntil: 'networkidle0'});
