@@ -5,7 +5,6 @@ import {
 } from "@ghostery/adblocker-puppeteer";
 import path from "path";
 import { safeJSONParse } from "./tools.js";
-import { fileURLToPath } from "url";
 import fs from "fs";
 
 const __dirname = import.meta.dirname;
