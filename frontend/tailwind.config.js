@@ -13,6 +13,7 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      // EU colours according to the Europa Component Library: https://ec.europa.eu/component-library/ec/guidelines/colours/
       colors: {
         'eu-primary': '#3860ED',
         'eu-primary-20': '#D8E0FB',
@@ -35,6 +36,10 @@ export default {
         'eu-secondary-40': '#FFE5BE',
         'eu-secondary-20': '#FFF2DE',
 
+        'eu-dark-100':'#26324B',
+        'eu-dark-80':'#546FA6',
+        'eu-dark-60':'#99AACC',
+
         'eu-accent-160': '#887DE8',
         'eu-accent-140': '#978CF2',
         'eu-accent-120': '#A89EFA',
@@ -43,11 +48,25 @@ export default {
         'eu-accent-60': '#D1CCFF',
         'eu-accent-40': '#FAFAFF',
 
+        'eu-info':'#3860ED',
+        'eu-success':'#24A148',
+        'eu-warning':'#F39811',
         'eu-error':'#DA1E28',
 
-        'eu-background':'#FCFCFC',
-
+        'eu-neutral-180':'#6C85D1',
+        'eu-neutral-160':'#7F95D7',
+        'eu-neutral-140':'#92A5DD',
+        'eu-neutral-120':'#A6B5E3',
         'eu-neutral-100':'#B9C5E9',
+        'eu-neutral-80':'#CDD5EF',
+        'eu-neutral-60':'#E0E5F5',
+        'eu-neutral-40':'#F3F5FB',
+        'eu-neutral-20':'#F8F9FD',
+
+        'eu-background':'#FCFCFC',
+        'eu-branding':'#004494',
+        'eu-white':'#FFFFFF',
+
       },
     },
 
