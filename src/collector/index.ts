@@ -9,15 +9,16 @@ import {
   collectLinks,
   collectCookies,
   unsafeWebforms,
-} from "./inspector.js";
+} from "./collector_inspector.js";
 
-import { BrowserArgs, BrowserSession, PageSession } from "./browser-session.js";
+import { BrowserArgs, BrowserSession } from "./browser-session.js";
 import { getLocalStorage } from "../lib/tools.js";
 import { Logger } from "winston";
+import { PageSession } from "./page-session.js";
 
 export interface CollectionResult {
   output: any;
-  pageSession: any;
+  pageSession: PageSession;
   source: string;
 }
 

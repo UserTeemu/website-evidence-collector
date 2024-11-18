@@ -2,6 +2,10 @@ import flatten from "lodash/flatten.js";
 import groupBy from "lodash/groupBy.js";
 import url from "url";
 import { isFirstParty } from "../lib/tools.js";
+import { PageSession } from "../collector/page-session.js";
+import { Logger } from "winston";
+import { CollectedCookie } from "../lib/cookie-recorder.js";
+import { EnhancedCookie } from "../collector/collector_inspector.js";
 
 interface Beacon {
   url: string;
@@ -15,9 +19,9 @@ interface Beacon {
 
 class Inspector {
   private eventData: any;
-  private logger: any;
+  private logger: Logger;
   private output: any;
-  private pageSession: any;
+  private pageSession: PageSession;
 
   constructor(logger: any, pageSession: any, output: any) {
     this.eventData = null;
@@ -43,6 +47,7 @@ class Inspector {
           start: 0,
           order: "desc",
           limit: Infinity,
+          fields: undefined,
         },
         (err: Error | null, results: { file: [] }) => {
           if (err) return reject(err);
@@ -55,45 +60,47 @@ class Inspector {
   }
 
   private async inspectCookies(): Promise<void> {
+    let collectedCookies = this.pageSession.cookieRecorder.collectedCookies;
     // we get all cookies from the log, which can be both JS and http cookies
+    console.log(collectedCookies);
     let cookies_from_events = flatten(
-      this.eventData
-        .filter((event) => event.type.startsWith("Cookie"))
-        .map((event) => {
-          event.data.forEach((cookie) => {
-            cookie.log = {
-              stack: event.stack,
-              type: event.type,
-              timestamp: event.timestamp,
-              location: event.location,
-            };
-          });
-          return event.data;
-        }),
+      collectedCookies.map((event) => {
+        event.data.forEach((cookie) => {
+          cookie.event_meta_data = {
+            stack: event.stack,
+            type: event.type,
+            location: event.location,
+          };
+        });
+        return event.data;
+      }),
     ).filter((cookie: any) => cookie.value); // don't consider deletion events with no value defined
 
-    cookies_from_events.forEach((event_cookie: any) => {
+    cookies_from_events.forEach((event_cookie: CollectedCookie) => {
       // we compare the eventlog with what was collected
-      let matched_cookie = this.output.cookies.find((cookie) => {
-        return (
-          cookie.name == event_cookie.key &&
-          cookie.domain == event_cookie.domain &&
-          cookie.path == event_cookie.path
-        );
-      });
+      let matched_cookie = this.output.cookies.find(
+        (cookie: EnhancedCookie) => {
+          return (
+            cookie.name == event_cookie.key &&
+            cookie.domain == event_cookie.domain &&
+            cookie.path == event_cookie.path
+          );
+        },
+      );
 
       // if there is a match, we enrich with the log entry
       // else we add a new entry to the output.cookies array
       if (matched_cookie) {
-        matched_cookie.log = event_cookie.log;
+        matched_cookie.log = event_cookie.event_meta_data;
       } else {
         let cookie: any = {
+          // TODO use my cookie type
           name: event_cookie.key,
           domain: event_cookie.domain,
           path: event_cookie.path,
           value: event_cookie.value,
           expires: event_cookie.expires,
-          log: event_cookie.log,
+          log: event_cookie.event_meta_data,
         };
         // ToughCookie library defaults session cookies to infinity
         // https://github.com/salesforce/tough-cookie/blob/master/lib/cookie/cookie.ts#L406
@@ -132,9 +139,9 @@ class Inspector {
     });
 
     // finally we sort the cookies based on expire data - because ?
-    this.output.cookies = this.output.cookies.sort(function (a, b) {
-      return b.expires - a.expires;
-    });
+    this.output.cookies = this.output.cookies.sort(
+      (a, b) => b.expires - a.expires,
+    );
   }
 
   private async inspectLocalStorage(): Promise<void> {
