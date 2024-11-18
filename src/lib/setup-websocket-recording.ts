@@ -24,51 +24,75 @@ interface WebSocketLog {
   [requestId: string]: WebSocketLogEntry;
 }
 
-export function setup_websocket_recording(page: any, logger: Logger): WebSocketLog {
+export function setup_websocket_recording(
+  page: any,
+  logger: Logger,
+): WebSocketLog {
   // recording websockets
   // https://stackoverflow.com/a/54110660/1407622
   const webSocketLog: WebSocketLog = {};
   const client = page._client();
 
-  client.on("Network.webSocketCreated", ({ requestId, url }: { requestId: string; url: string }) => {
-    if (!webSocketLog[requestId]) {
-      webSocketLog[requestId] = {
-        timestamp: new Date(),
-        url: url,
-        messages: [],
-      };
-    }
-    logger.log("warn", `WebSocket opened with url ${url}`, {
-      type: "WebSocket",
-    });
-  });
-
-  client.on("Network.webSocketClosed", ({ requestId, timestamp }: { requestId: string; timestamp: number }) => {
-    // console.log('Network.webSocketClosed', requestId, timestamp);
-  });
-
   client.on(
-      "Network.webSocketFrameSent",
-      ({ requestId, timestamp, response }: { requestId: string; timestamp: number; response: { payloadData: string } }) => {
-        webSocketLog[requestId].messages.push({
-          timestamp: timestamp,
-          io: "out",
-          m: response.payloadData.split("\n").map(safeJSONParse),
-        });
+    "Network.webSocketCreated",
+    ({ requestId, url }: { requestId: string; url: string }) => {
+      if (!webSocketLog[requestId]) {
+        webSocketLog[requestId] = {
+          timestamp: new Date(),
+          url: url,
+          messages: [],
+        };
       }
+      logger.log("warn", `WebSocket opened with url ${url}`, {
+        type: "WebSocket",
+      });
+    },
   );
 
   client.on(
-      "Network.webSocketFrameReceived",
-      ({ requestId, timestamp, response }: { requestId: string; timestamp: number; response: { payloadData: string } }) => {
-        webSocketLog[requestId].messages.push({
-          timestamp: timestamp,
-          io: "in",
-          m: response.payloadData.split("\n").map(safeJSONParse),
-        });
-      }
+    "Network.webSocketClosed",
+    ({ requestId, timestamp }: { requestId: string; timestamp: number }) => {
+      // console.log('Network.webSocketClosed', requestId, timestamp);
+    },
+  );
+
+  client.on(
+    "Network.webSocketFrameSent",
+    ({
+      requestId,
+      timestamp,
+      response,
+    }: {
+      requestId: string;
+      timestamp: number;
+      response: { payloadData: string };
+    }) => {
+      webSocketLog[requestId].messages.push({
+        timestamp: timestamp,
+        io: "out",
+        m: response.payloadData.split("\n").map(safeJSONParse),
+      });
+    },
+  );
+
+  client.on(
+    "Network.webSocketFrameReceived",
+    ({
+      requestId,
+      timestamp,
+      response,
+    }: {
+      requestId: string;
+      timestamp: number;
+      response: { payloadData: string };
+    }) => {
+      webSocketLog[requestId].messages.push({
+        timestamp: timestamp,
+        io: "in",
+        m: response.payloadData.split("\n").map(safeJSONParse),
+      });
+    },
   );
 
   return webSocketLog;
 }
-

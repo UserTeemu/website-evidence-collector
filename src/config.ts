@@ -20,4 +20,3 @@ export function cfg(url) {
     screenshots: true,
   };
 }
-

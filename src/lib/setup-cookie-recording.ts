@@ -12,15 +12,15 @@ import fs from "fs";
 import groupBy from "lodash/groupBy.js";
 import url from "url";
 
-import {createRequire} from 'module';
+import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 
-export async function setup_cookie_recording (page, logger) {
+export async function setup_cookie_recording(page, logger) {
   // inject stacktraceJS https://www.stacktracejs.com/
   const stackTraceHelper = fs.readFileSync(
     require.resolve("stacktrace-js/dist/stacktrace.js"),
-    "utf8"
+    "utf8",
   );
 
   // https://chromedevtools.github.io/devtools-protocol/tot/Page#method-addScriptToEvaluateOnNewDocument
@@ -32,7 +32,7 @@ export async function setup_cookie_recording (page, logger) {
     // original object
     let origDescriptor = Object.getOwnPropertyDescriptor(
       Document.prototype,
-      "cookie"
+      "cookie",
     );
 
     // new method, which will log the cookie being set, and then pass it on
@@ -61,7 +61,7 @@ export async function setup_cookie_recording (page, logger) {
       configurable: true,
       enumerable: true,
       value: new Proxy(localStorage, {
-        set: function (ls:Storage, prop:string, value) {
+        set: function (ls: Storage, prop: string, value) {
           //console.log(`direct assignment: ${prop} = ${value}`);
           // @ts-ignore We are injecting this into the Browser
           let stack = StackTrace.getSync({ offline: true });
@@ -73,12 +73,12 @@ export async function setup_cookie_recording (page, logger) {
             "Storage.LocalStorage",
             stack,
             hash,
-            window.location
+            window.location,
           );
           ls[prop] = value;
           return true;
         },
-        get: function (ls:Storage, prop:string) {
+        get: function (ls: Storage, prop: string) {
           // The only property access we care about is setItem. We pass
           // anything else back without complaint. But using the proxy
           // fouls 'this', setting it to this {set: fn(), get: fn()}
@@ -99,7 +99,7 @@ export async function setup_cookie_recording (page, logger) {
               "Storage.LocalStorage",
               stack,
               hash,
-              window.location
+              window.location,
             );
             ls.setItem.apply(ls, args);
           };
@@ -121,7 +121,7 @@ export async function setup_cookie_recording (page, logger) {
 
     // construct the event object to log
     // include the stack
-    let event :any = {
+    let event: any = {
       type: type,
       stack: stack.slice(1, 3), // remove reference to Document.set (0) and keep two more elements (until 3)
       origin: location.origin,
@@ -144,12 +144,13 @@ export async function setup_cookie_recording (page, logger) {
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes
         // https://github.com/salesforce/tough-cookie#defaultpathpath
         // TODO How can be sure that browsedLocation corresponds to the JS execution context when cookie is set?
-        cookie.path = cookie.path || defaultPath(url.parse(browsedLocation).pathname);
+        cookie.path =
+          cookie.path || defaultPath(url.parse(browsedLocation).pathname);
 
         event.data = [cookie];
 
         message = `${
-          event.data[0].expires == 'Infinity' ? "Session" : "Persistant"
+          event.data[0].expires == "Infinity" ? "Session" : "Persistant"
         } Cookie (JS) set for host ${event.data[0].domain} with key ${
           event.data[0].key
         }.`;
@@ -157,7 +158,7 @@ export async function setup_cookie_recording (page, logger) {
 
       case "Storage.LocalStorage":
         message = `LocalStorage filled with key(s) ${Object.keys(
-          data
+          data,
         )} for origin ${location.origin}.`;
         event.raw = data;
         event.data = {};
@@ -202,15 +203,16 @@ export async function setup_cookie_recording (page, logger) {
           // what if the path is not set explicitly?
           // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes
           // https://github.com/salesforce/tough-cookie#defaultpathpath
-          cookie.path = cookie.path || defaultPath(new url.URL(response.url()).pathname);
+          cookie.path =
+            cookie.path || defaultPath(new url.URL(response.url()).pathname);
           return cookie;
         });
 
       const dataHasKey = groupBy(data, (cookie) => {
         return !!cookie.key;
       });
-      const valid = dataHasKey['true'] || [];
-      const invalid = dataHasKey['false'] || [];
+      const valid = dataHasKey["true"] || [];
+      const invalid = dataHasKey["false"] || [];
 
       const messages = [
         `${valid.length} Cookie(s) (HTTP) set for host ${domain}${
@@ -223,14 +225,14 @@ export async function setup_cookie_recording (page, logger) {
             invalid.length
           } invalid cookie header(s) set for host ${domain}: "${invalid
             .map((c) => c.value)
-            .join(", ")}".`
+            .join(", ")}".`,
         );
       }
 
       // find mainframe
       let location;
-      let frame = response.frame()
-      if(frame) {
+      let frame = response.frame();
+      if (frame) {
         while (frame.parentFrame()) {
           frame = frame.parentFrame();
         }

@@ -10,34 +10,33 @@
  * @example ./bin/website-evidence-collector.ts http://example.com
  */
 
-import server from '../src/server/server.js';
+import server from "../src/server/server.js";
 import {
-    parse,
-    ParsedArgs,
-    ParsedArgsCollector,
-    ParsedArgsReporter,
-    ParsedArgsServe,
-    REPORTER_COMMAND,
-    SERVER_COMMAND
+  parse,
+  ParsedArgs,
+  ParsedArgsCollector,
+  ParsedArgsReporter,
+  ParsedArgsServe,
+  REPORTER_COMMAND,
+  SERVER_COMMAND,
 } from "../src/lib/argv.js";
 import localCollector from "../src/collectorCommand.js";
-import {reporterCommand} from "../src/reporter/reporterCommand.js";
-
+import { reporterCommand } from "../src/reporter/reporterCommand.js";
 
 (async () => {
-    let args: ParsedArgs = await parse();
+  let args: ParsedArgs = await parse();
 
-    switch (args.command) {
-        case SERVER_COMMAND:
-            args = args as ParsedArgsServe;
-            await server(args.port,args.browserOptions);
-            break;
-        case REPORTER_COMMAND:
-            args = args as ParsedArgsReporter;
-            await reporterCommand(args);
-            break;
-        default:
-            args = args as ParsedArgsCollector;
-            await localCollector(args);
-    }
+  switch (args.command) {
+    case SERVER_COMMAND:
+      args = args as ParsedArgsServe;
+      await server(args.port, args.browserOptions);
+      break;
+    case REPORTER_COMMAND:
+      args = args as ParsedArgsReporter;
+      await reporterCommand(args);
+      break;
+    default:
+      args = args as ParsedArgsCollector;
+      await localCollector(args);
+  }
 })();

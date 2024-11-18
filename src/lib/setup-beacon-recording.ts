@@ -1,8 +1,11 @@
 import url from "url";
-import {PuppeteerBlocker, fromPuppeteerDetails} from "@ghostery/adblocker-puppeteer";
+import {
+  PuppeteerBlocker,
+  fromPuppeteerDetails,
+} from "@ghostery/adblocker-puppeteer";
 import path from "path";
-import {safeJSONParse} from "./tools.js";
-import { fileURLToPath } from 'url';
+import { safeJSONParse } from "./tools.js";
+import { fileURLToPath } from "url";
 import fs from "fs";
 
 const __dirname = import.meta.dirname;
@@ -34,14 +37,14 @@ const blockerOptions = {
 let blockers = {
   "easyprivacy.txt": PuppeteerBlocker.parse(
     fs.readFileSync(path.join(__dirname, "../assets/easyprivacy.txt"), "utf8"),
-    blockerOptions
+    blockerOptions,
   ),
   "fanboy-annoyance.txt": PuppeteerBlocker.parse(
     fs.readFileSync(
       path.join(__dirname, "../assets/fanboy-annoyance.txt"),
-      "utf8"
+      "utf8",
     ),
-    blockerOptions
+    blockerOptions,
   ),
 };
 
@@ -68,15 +71,12 @@ const decodeURLParams = (search) => {
   }, {});
 };
 
-export async function  setup_beacon_recording(page, logger) {
+export async function setup_beacon_recording(page, logger) {
   // prepare easyprivacy list matching
   // requires to call somewhere: await page.setRequestInterception(true);
   page.on("request", (request) => {
     Object.entries(blockers).forEach(([listName, blocker]) => {
-      const {
-        match,
-        filter,
-      } = blocker.match(fromPuppeteerDetails(request));
+      const { match, filter } = blocker.match(fromPuppeteerDetails(request));
 
       if (match) {
         let stack = [
@@ -110,4 +110,4 @@ export async function  setup_beacon_recording(page, logger) {
       }
     });
   });
-};
+}

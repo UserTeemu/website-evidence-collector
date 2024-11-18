@@ -17,6 +17,7 @@
     "build-frontend": "cd frontend && npm ci && npm run build",
     "build-ts": "tsc -p .",
     "copy-assets": "copyfiles src/assets/*  package.json build/ && copyfiles --up 2 frontend/dist/* frontend/dist/assets/* build/static",
+    "format": "prettier . --write",
     "start": "node build/bin/website-evidence-collector.js",
     "serve": "node build/bin/website-evidence-collector.js serve",
     "test": "jest --detectOpenHandles"
@@ -77,6 +78,7 @@
     "@types/yargs": "^17.0.33",
     "copyfiles": "  ^2.4.1",
     "jest": "^29.7.0",
+    "prettier": "3.3.3",
     "rimraf": "^5.0.10",
     "ts-node": "^10.9.2",
     "ts-standard": "^12.0.2",

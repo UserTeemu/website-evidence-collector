@@ -1,14 +1,14 @@
-import pickBy from 'lodash/pickBy.js';
-import { safeJSONParse } from '../lib/tools.js';
-import os from 'os';
-import url from 'url';
-import gitDescribe from 'git-describe';
+import pickBy from "lodash/pickBy.js";
+import { safeJSONParse } from "../lib/tools.js";
+import os from "os";
+import url from "url";
+import gitDescribe from "git-describe";
 
 const __dirname = import.meta.dirname;
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const packageJson = require('../../package.json');
+const packageJson = require("../../package.json");
 
 export interface CreateOutputArgs {
   url: string;
@@ -76,7 +76,7 @@ export interface CollectorOutput {
   end_time: Date | null;
 }
 
-export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
+export function createOutputObject(args: CreateOutputArgs): CollectorOutput {
   const uri_ins = args.url;
   const uri_ins_host = url.parse(uri_ins).hostname;
 
@@ -104,17 +104,19 @@ export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
     script: {
       host: os.hostname(),
       version: {
-        npm:packageJson.version ,
+        npm: packageJson.version,
         commit: null,
       },
-      config: pickBy(args, (_value, key) => key === '_' || (key.length > 1 &&
-          !key.includes('-'))),
-      cmd_args: process.argv.slice(2).join(' '),
+      config: pickBy(
+        args,
+        (_value, key) => key === "_" || (key.length > 1 && !key.includes("-")),
+      ),
+      cmd_args: process.argv.slice(2).join(" "),
       environment: pickBy(process.env, (_value, key) => {
         return (
-            key.startsWith('WEC') ||
-            key.startsWith('PUPPETEER') ||
-            key.startsWith('CHROM')
+          key.startsWith("WEC") ||
+          key.startsWith("PUPPETEER") ||
+          key.startsWith("CHROM")
         );
       }),
       node_version: process.version,
@@ -130,9 +132,9 @@ export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
     },
     unsafeForms: [],
     browser: {
-      name: 'Chromium',
-      version: '',
-      user_agent: '',
+      name: "Chromium",
+      version: "",
+      user_agent: "",
       platform: {
         name: os.type(),
         version: os.release(),
@@ -154,4 +156,3 @@ export function createOutputObject(args:CreateOutputArgs):CollectorOutput {
 
   return output;
 }
-

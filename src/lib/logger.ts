@@ -5,9 +5,9 @@
  * @license EUPL-1.2
  */
 
-import path from 'path';
-import tmp from 'tmp';
-import { createLogger, format, transports, Logger,Logform } from 'winston';
+import path from "path";
+import tmp from "tmp";
+import { createLogger, format, transports, Logger, Logform } from "winston";
 
 tmp.setGracefulCleanup();
 
@@ -21,34 +21,38 @@ tmp.setGracefulCleanup();
 //   silly: 5
 // }
 
-
 interface CreateLoggerOptions {
-  console?:{
-    silent:boolean;
-    level:string;
-    stderrLevels:string[];
+  console?: {
+    silent: boolean;
+    level: string;
+    stderrLevels: string[];
     format: Logform.Format;
-  }
+  };
   file?: {
-    enabled:boolean;
+    enabled: boolean;
     level: string;
     format: Logform.Format;
-  }
+  };
 }
 
-
-const create = (options:CreateLoggerOptions, outputFilePath?:string,defaultMeta?:{}): Logger => {
-  const defaults:CreateLoggerOptions = {
+const create = (
+  options: CreateLoggerOptions,
+  outputFilePath?: string,
+  defaultMeta?: {},
+): Logger => {
+  const defaults: CreateLoggerOptions = {
     console: {
       silent: false,
-      level: 'debug',
-      stderrLevels: ['error', 'debug', 'info', 'warn'],
-      format: process.stdout.isTTY ? format.combine(format.colorize(), format.simple(),format.metadata()) : format.combine(format.json(),format.metadata())
+      level: "debug",
+      stderrLevels: ["error", "debug", "info", "warn"],
+      format: process.stdout.isTTY
+        ? format.combine(format.colorize(), format.simple(), format.metadata())
+        : format.combine(format.json(), format.metadata()),
     },
     file: {
       enabled: true,
-      level: 'silly',
-      format: format.combine(format.json(),format.metadata())
+      level: "silly",
+      format: format.combine(format.json(), format.metadata()),
     },
   };
 
@@ -70,16 +74,16 @@ const create = (options:CreateLoggerOptions, outputFilePath?:string,defaultMeta?
   if (config.file?.enabled) {
     let filename: string;
     if (outputFilePath) {
-      filename = path.join(outputFilePath, 'inspection-log.ndjson');
+      filename = path.join(outputFilePath, "inspection-log.ndjson");
     } else {
-      filename = tmp.tmpNameSync({ postfix: '-log.ndjson' });
+      filename = tmp.tmpNameSync({ postfix: "-log.ndjson" });
     }
     logger.add(
-        new transports.File({
-          filename: filename,
-          level: config.file.level,
-          format: config.file.format,
-        })
+      new transports.File({
+        filename: filename,
+        level: config.file.level,
+        format: config.file.format,
+      }),
     );
   }
 

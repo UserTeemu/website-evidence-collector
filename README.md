@@ -2,7 +2,7 @@
 
 # Website Evidence Collector
 
-The tool *Website Evidence Collector* (WEC) automates the website evidence collection of storage and transfer of personal data. It is based on the browser Chromium/Chrome and its JavaScript software library for automation [puppeteer].
+The tool _Website Evidence Collector_ (WEC) automates the website evidence collection of storage and transfer of personal data. It is based on the browser Chromium/Chrome and its JavaScript software library for automation [puppeteer].
 
 [puppeteer]: https://developers.google.com/web/tools/puppeteer/
 
@@ -10,13 +10,12 @@ The tool *Website Evidence Collector* (WEC) automates the website evidence colle
 
 ![Screencast Installation](readme-assets/screencast-installation.svg "Screencast Installation")
 
-1. The Website Evidence Collector is a set of scripts written in JavaScript for execution by *Node.js*. Install Node.js and the *Node.js package manager* (NPM). The minimum version for Node.js is 16.0.
+1. The Website Evidence Collector is a set of scripts written in JavaScript for execution by _Node.js_. Install Node.js and the _Node.js package manager_ (NPM). The minimum version for Node.js is 16.0.
    1. Windows or Mac: Follow the guide on <https://nodejs.org/en/>.
    2. Linux: use the Linux package manager to install Node.js, e.g. `zypper in nodejs10` (check version) or `apt install nodejs` or use the node version manager and follow instructions on <https://nodejs.org/en/download/package-manager>
 2. Install the Website Evidence Collector from:
-   1. the tarball archive file (`*.tar.gz`) downloaded from the [EDPS Website](https://edps.europa.eu/press-publications/edps-inspection-software_en): `npm install --global ./website-evidence-collector-*.tar.gz` (with `*` to be replaced by the current release version),
-          2. Github with `npm install --global https://github.com/EU-EDPS/website-evidence-collector/tarball/latest`, or
-   3. Github with `npm install --global https://code.europa.eu/EDPS/website-evidence-collector/-/archive/master/website-evidence-collector-master.tar` to get a potentially broken testing version, which includes the latest changes.
+   1. the tarball archive file (`*.tar.gz`) downloaded from the [EDPS Website](https://edps.europa.eu/press-publications/edps-inspection-software_en): `npm install --global ./website-evidence-collector-*.tar.gz` (with `*` to be replaced by the current release version), 2. Github with `npm install --global https://github.com/EU-EDPS/website-evidence-collector/tarball/latest`, or
+   2. Github with `npm install --global https://code.europa.eu/EDPS/website-evidence-collector/-/archive/master/website-evidence-collector-master.tar` to get a potentially broken testing version, which includes the latest changes.
 3. Setup the Website Evidence collector by calling `npm run setup`
 
 The tool can be uninstalled with `npm uninstall --global website-evidence-collector`.
@@ -27,7 +26,6 @@ The tool can be uninstalled with `npm uninstall --global website-evidence-collec
 `npm config set prefix "${HOME}/.npm-packages"`
 
 Now repeat step 2.
-
 
 ## Run Website Evidence Collector
 
@@ -96,10 +94,10 @@ Please find a collection of frequently asked questions with answers in [FAQ.md](
 ## Setup of the Development Environment
 
 1. Install the dependencies according to the Installation Guide point 1.
-2. Install the version control system *Git* (<https://git-scm.com/>).
+2. Install the version control system _Git_ (<https://git-scm.com/>).
 3. Download the Website Evidence Collector
-  a. from the [EDPS Website](https://edps.europa.eu/press-publications/edps-inspection-software_en) and unpack the received folder with e.g. [7zip](https://www.7-zip.org), or
-  b. from Git repository with `git clone https://code.europa.eu/EDPS/website-evidence-collector.git`.
+   a. from the [EDPS Website](https://edps.europa.eu/press-publications/edps-inspection-software_en) and unpack the received folder with e.g. [7zip](https://www.7-zip.org), or
+   b. from Git repository with `git clone https://code.europa.eu/EDPS/website-evidence-collector.git`.
 4. Open the terminal and navigate to the folder `website-evidence-collector`.
 5. Install the dependencies and compile TypeScript using `npm run setup`
 6. Consider to use `npm link` to make the command `website-evidence-collector` outside of the project folder.
