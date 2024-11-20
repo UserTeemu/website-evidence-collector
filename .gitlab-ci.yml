@@ -6,6 +6,7 @@ cache:
 build:
   script:
     - whoami
+    - echo $PATH
     - npm install
     - npm run build
     - cd build/
