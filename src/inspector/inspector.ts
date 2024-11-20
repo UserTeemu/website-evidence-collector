@@ -133,10 +133,9 @@ class Inspector {
     );
   }
 
-  private async inspectLocalStorage(): Promise<void> {
-    let storage_from_events = this.eventData.filter((event) => {
-      return event.type.startsWith("Storage");
-    });
+  private inspectLocalStorage(): void {
+    let collectedLocalStorage =
+      this.pageSession.cookieRecorder.collectedLocalStorage;
 
     Object.keys(this.output.localStorage).forEach((origin) => {
       let hostname = new url.URL(origin).hostname;
@@ -157,11 +156,10 @@ class Inspector {
         // add if entry is linked to first-party host
         originStorage[key].firstPartyStorage = isFirstPartyStorage;
         // find log for a given key
-        let matched_event = storage_from_events.find((event) => {
-          return (
-            origin == event.origin && Object.keys(event.data).includes(key)
-          );
-        });
+        let matched_event = collectedLocalStorage.find(
+          (event) =>
+            origin == event.origin && Object.keys(event.data).includes(key),
+        );
 
         if (!!matched_event) {
           originStorage[key].log = {

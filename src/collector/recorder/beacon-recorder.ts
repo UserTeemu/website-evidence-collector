@@ -67,17 +67,8 @@ export class BeaconRecorder {
             timestamp: new Date().toUTCString(),
             stack: stack,
           });
-          let message = `Potential Tracking Beacon captured via ${listName} with endpoint ${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}.`;
-          this.logger.debug(message, {
-            type: "Request.Tracking",
-            stack: stack,
-            data: {
-              url: request.url(),
-              query: query,
-              filter: filter.toString(),
-              listName: listName,
-            },
-          });
+          let message = `Potential Tracking Beacon captured via ${listName} ${query != null ? "for query " + parsedUrl.query : ""} with endpoint ${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}.`;
+          this.logger.debug(message);
         }
       });
     });

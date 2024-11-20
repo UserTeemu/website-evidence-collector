@@ -7,7 +7,6 @@
 
 // The code contained in the functions like 'Object.defineProperty(window, localStorage' is passed to the browser and needs to be plain JS.
 // @ts-nocheck
-import { safeJSONParse } from "./tools.js";
 import { Cookie as cookieParser, defaultPath } from "tough-cookie";
 import fs from "fs";
 import groupBy from "lodash/groupBy.js";
@@ -42,12 +41,23 @@ export interface CollectedCookie {
   event_meta_data?: {};
 }
 
+export interface CollectedLocalStorage {
+  type: string;
+  data: {};
+  raw: {};
+  origin: string;
+  location: string;
+  stack: {}[];
+  timestamp: string;
+}
+
 export class CookieRecorder {
   constructor(
     private page: Page,
     private logger: Logger,
   ) {}
   public collectedCookies: CollectedCookieEvent[] = [];
+  public collectedLocalStorage: CollectedLocalStorage[] = [];
 
   async setup_cookie_recording() {
     // inject stacktraceJS https://www.stacktracejs.com/
@@ -123,15 +133,16 @@ export class CookieRecorder {
             for (const key of Object.keys(data)) {
               event.data[key] = safeJSONParse(data[key]);
             }
+            this.collectedLocalStorage.push(event);
             break;
 
           default:
-            message = "";
+            message = "Unknown Event";
 
             event.data = data;
         }
 
-        this.logger.debug(message, event);
+        this.logger.info(message);
       },
     );
 
@@ -152,16 +163,15 @@ export class CookieRecorder {
         const domain = new url.URL(response.url()).hostname;
         const data = cookieHTTP
           .split("\n")
-          .map((c) => {
-            return (
+          .map(
+            (c) =>
               cookieParser.parse(c) || {
                 value: c,
                 domain: undefined,
                 path: undefined,
                 key: undefined,
-              }
-            );
-          })
+              },
+          )
           .map((cookie) => {
             // what is the domain if not set explicitly?
             // https://stackoverflow.com/a/5258477/1407622
@@ -175,9 +185,7 @@ export class CookieRecorder {
             return cookie;
           });
 
-        const dataHasKey = groupBy(data, (cookie) => {
-          return !!cookie.key;
-        });
+        const dataHasKey = groupBy(data, (cookie) => !!cookie.key);
         const valid = dataHasKey["true"] || [];
         const invalid = dataHasKey["false"] || [];
 
@@ -217,13 +225,7 @@ export class CookieRecorder {
             raw: cookieHTTP,
             data: valid,
           });
-          this.logger.debug(message, {
-            type: "Cookie.HTTP",
-            stack: stack,
-            location: location,
-            raw: cookieHTTP,
-            data: valid,
-          });
+          this.logger.debug(message);
         });
       }
     });
