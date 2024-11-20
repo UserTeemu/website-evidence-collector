@@ -107,7 +107,7 @@ function configureRoutes(browser_options: any[]): Router {
         );
         let htmlAndPdf = await generateHtmlAndPdf(collectionOutput);
         res.send(htmlAndPdf);
-        console.log("Finished serving request");
+        requestLogger.info("Finished serving request");
       } catch (e: any) {
         requestLogger.log("error", e.message);
         requestLogger.log("error", e.stack);
