@@ -7,16 +7,6 @@ import { Logger } from "winston";
 import { CollectedCookie } from "../lib/cookie-recorder.js";
 import { EnhancedCookie } from "../collector/collector_inspector.js";
 
-interface Beacon {
-  url: string;
-  listName: string;
-  log: {
-    stack: string;
-    timestamp: string;
-  };
-  occurrances?: number;
-}
-
 class Inspector {
   private eventData: any;
   private logger: Logger;
