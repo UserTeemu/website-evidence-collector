@@ -5,8 +5,8 @@
  * @license EUPL-1.2
  */
 
-import { safeJSONParse } from "./tools.js";
 import { Logger } from "winston";
+import { safeJSONParse } from "../../lib/tools.js";
 
 interface WebSocketLogEntry {
   timestamp: Date;

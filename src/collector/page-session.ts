@@ -1,9 +1,9 @@
 import { Page } from "puppeteer";
 import url from "url";
 import escapeRegExp from "lodash/escapeRegExp.js";
-import { CookieRecorder } from "../lib/cookie-recorder.js";
-import { BeaconRecorder } from "../lib/beacon-recorder.js";
-import { setup_websocket_recording } from "../lib/setup-websocket-recording.js";
+import { CookieRecorder } from "./recorder/cookie-recorder.js";
+import { BeaconRecorder } from "./recorder/beacon-recorder.js";
+import { setup_websocket_recording } from "./recorder/setup-websocket-recording.js";
 import { set_cookies } from "../lib/set-cookies.js";
 import PuppeteerHar from "puppeteer-har";
 import path from "path";

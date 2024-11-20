@@ -4,10 +4,10 @@ import {
   fromPuppeteerDetails,
 } from "@ghostery/adblocker-puppeteer";
 import path from "path";
-import { safeJSONParse } from "./tools.js";
 import fs from "fs";
 import { Page } from "puppeteer";
 import { Logger } from "winston";
+import { safeJSONParse } from "../../lib/tools.js";
 
 const __dirname = import.meta.dirname;
 
@@ -134,14 +134,14 @@ export class BeaconRecorder {
     return {
       "easyprivacy.txt": PuppeteerBlocker.parse(
         fs.readFileSync(
-          path.join(__dirname, "../assets/easyprivacy.txt"),
+          path.join(__dirname, "../../assets/easyprivacy.txt"),
           "utf8",
         ),
         blockerOptions,
       ),
       "fanboy-annoyance.txt": PuppeteerBlocker.parse(
         fs.readFileSync(
-          path.join(__dirname, "../assets/fanboy-annoyance.txt"),
+          path.join(__dirname, "../../assets/fanboy-annoyance.txt"),
           "utf8",
         ),
         blockerOptions,

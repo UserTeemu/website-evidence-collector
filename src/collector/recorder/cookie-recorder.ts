@@ -16,6 +16,8 @@ import url from "url";
 import { createRequire } from "module";
 import { Page } from "puppeteer";
 import { Logger } from "winston";
+import { cookieLogger, localStorageLogger } from "./web-api-logger.js";
+import { safeJSONParse } from "../../lib/tools.js";
 
 const require = createRequire(import.meta.url);
 
@@ -57,84 +59,8 @@ export class CookieRecorder {
     // https://chromedevtools.github.io/devtools-protocol/tot/Page#method-addScriptToEvaluateOnNewDocument
     await this.page.evaluateOnNewDocument(stackTraceHelper);
 
-    // this modifies the document.cookie object, so when a site tries to set a cookie
-    // this code will intercept it, log it, and then set the cookie
-    await this.page.evaluateOnNewDocument(() => {
-      // original object
-      origDescriptor = Object.getOwnPropertyDescriptor(
-        Document.prototype,
-        "cookie",
-      );
-
-      // new method, which will log the cookie being set, and then pass it on
-      // to the original object
-      Object.defineProperty(document, "cookie", {
-        get() {
-          return origDescriptor.get.call(this);
-        },
-        set(value) {
-          // https://www.stacktracejs.com/#!/docs/stacktrace-js
-          let stack = StackTrace.getSync({ offline: true });
-
-          // inside our wrapper we execute the .reportEvent from within the browser
-          // reportEvent is defined further down
-          window.reportEvent("Cookie.JS", stack, value, window.location);
-          return origDescriptor.set.call(this, value);
-        },
-        enumerable: true,
-        configurable: true,
-      });
-
-      // inject storage set recorder
-      // https://stackoverflow.com/a/49093643/1407622
-      Object.defineProperty(window, "localStorage", {
-        configurable: true,
-        enumerable: true,
-        value: new Proxy(localStorage, {
-          set: function (ls, prop, value) {
-            //console.log(`direct assignment: ${prop} = ${value}`);
-            let stack = StackTrace.getSync({ offline: true });
-            let hash = {};
-            hash[prop] = value;
-
-            // reportEvent is called within the browser context - this is defined further down
-            window.reportEvent(
-              "Storage.LocalStorage",
-              stack,
-              hash,
-              window.location,
-            );
-            ls[prop] = value;
-            return true;
-          },
-          get: function (ls, prop) {
-            // The only property access we care about is setItem. We pass
-            // anything else back without complaint. But using the proxy
-            // fouls 'this', setting it to this {set: fn(), get: fn()}
-            // object.
-            if (prop !== "setItem") {
-              if (typeof ls[prop] === "function") {
-                return ls[prop].bind(ls);
-              } else {
-                return ls[prop];
-              }
-            }
-            return (...args) => {
-              let stack = StackTrace.getSync({ offline: true });
-              let hash = {};
-              hash[args[0]] = args[1];
-              window.reportEvent(
-                "Storage.LocalStorage",
-                stack,
-                hash,
-                window.location,
-              );
-              ls.setItem.apply(ls, args);
-            };
-          },
-        }),
-      });
-    });
+    await this.page.evaluateOnNewDocument(cookieLogger);
+    await this.page.evaluateOnNewDocument(localStorageLogger);
 
     // we modify the browser window and expose the function reportEvent on window
     // this is used to pull out browser-context data and sending it our logger

@@ -4,7 +4,7 @@ import url from "url";
 import { isFirstParty } from "../lib/tools.js";
 import { PageSession } from "../collector/page-session.js";
 import { Logger } from "winston";
-import { CollectedCookie } from "../lib/cookie-recorder.js";
+import { CollectedCookie } from "../collector/recorder/cookie-recorder.js";
 import { EnhancedCookie } from "../collector/collector_inspector.js";
 
 class Inspector {
