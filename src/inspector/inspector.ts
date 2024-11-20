@@ -3,50 +3,25 @@ import groupBy from "lodash/groupBy.js";
 import url from "url";
 import { isFirstParty } from "../lib/tools.js";
 import { PageSession } from "../collector/page-session.js";
-import { Logger } from "winston";
 import { CollectedCookie } from "../collector/recorder/cookie-recorder.js";
 import { EnhancedCookie } from "../collector/collector_inspector.js";
 
 class Inspector {
-  private eventData: any;
-  private logger: Logger;
   private output: any;
   private pageSession: PageSession;
 
-  constructor(logger: any, pageSession: any, output: any) {
-    this.eventData = null;
-    this.logger = logger;
+  constructor(pageSession: PageSession, output: any) {
     this.output = output;
     this.pageSession = pageSession;
   }
 
-  async run(): Promise<any> {
-    await this.init();
+  run() {
     this.inspectCookies();
     this.inspectLocalStorage();
     this.inspectBeacons();
     this.inspectHosts();
 
     return this.output;
-  }
-
-  private async init(): Promise<void> {
-    let event_data_all = await new Promise<any[]>((resolve, reject) => {
-      this.logger.query(
-        {
-          start: 0,
-          order: "desc",
-          limit: Infinity,
-          fields: undefined,
-        },
-        (err: Error | null, results: { file: [] }) => {
-          if (err) return reject(err);
-          return resolve(results.file);
-        },
-      );
-    });
-
-    this.eventData = event_data_all.filter((event) => !!event.type);
   }
 
   private inspectCookies(): void {

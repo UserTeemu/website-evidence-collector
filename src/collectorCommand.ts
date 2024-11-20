@@ -19,12 +19,11 @@ async function run(args: ParsedArgsCollector): Promise<any> {
   const collectionResult: CollectionResult = await collector.run();
 
   const inspector = new Inspector(
-    logger,
     collectionResult.pageSession,
     collectionResult.output,
   );
 
-  const inspectionResult: any = await inspector.run();
+  const inspectionResult: any = inspector.run();
 
   let reporterArgs: ReporterArguments = {
     outputPath: args.output,

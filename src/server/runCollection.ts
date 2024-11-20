@@ -18,12 +18,11 @@ export async function runCollection(
   const collectionResult = await collector.run();
 
   const inspector = new Inspector(
-    logger,
     collectionResult.pageSession,
     collectionResult.output,
   );
 
-  return await inspector.run();
+  return inspector.run();
 }
 
 export async function generateHtmlAndPdf(inspectionOutput) {
