@@ -22,10 +22,10 @@ class Inspector {
 
   async run(): Promise<any> {
     await this.init();
-    await this.inspectCookies();
-    await this.inspectLocalStorage();
-    await this.inspectBeacons();
-    await this.inspectHosts();
+    this.inspectCookies();
+    this.inspectLocalStorage();
+    this.inspectBeacons();
+    this.inspectHosts();
 
     return this.output;
   }
@@ -49,7 +49,7 @@ class Inspector {
     this.eventData = event_data_all.filter((event) => !!event.type);
   }
 
-  private async inspectCookies(): Promise<void> {
+  private inspectCookies(): void {
     let collectedCookies = this.pageSession.cookieRecorder.collectedCookies;
     // we get all cookies from the log, which can be both JS and http cookies
     let cookies_from_events = flatten(
@@ -175,7 +175,7 @@ class Inspector {
     });
   }
 
-  private async inspectBeacons() {
+  private inspectBeacons() {
     let beacons = this.pageSession.beaconRecorder.collectedBeacons;
     for (const beacon of beacons) {
       const l = url.parse(beacon.url);
@@ -211,7 +211,7 @@ class Inspector {
     this.output.beacons = beacons_summary;
   }
 
-  private async inspectHosts(): Promise<void> {
+  private inspectHosts(): void {
     // Hosts Inspection
     let arrayFromParties = function (array) {
       return {
