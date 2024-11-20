@@ -5,6 +5,7 @@ cache:
 
 build:
   script:
+    - whoami
     - npm install
     - npm run build
     - cd build/
