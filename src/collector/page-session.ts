@@ -2,7 +2,7 @@ import { Page } from "puppeteer";
 import url from "url";
 import escapeRegExp from "lodash/escapeRegExp.js";
 import { CookieRecorder } from "../lib/cookie-recorder.js";
-import { setup_beacon_recording } from "../lib/setup-beacon-recording.js";
+import { BeaconRecorder } from "../lib/beacon-recorder.js";
 import { setup_websocket_recording } from "../lib/setup-websocket-recording.js";
 import { set_cookies } from "../lib/set-cookies.js";
 import PuppeteerHar from "puppeteer-har";
@@ -23,6 +23,7 @@ export class PageSession {
   private output: any;
   public refs_regexp: RegExp;
   public cookieRecorder: CookieRecorder;
+  public beaconRecorder: BeaconRecorder;
 
   constructor(browserSession: BrowserSession, output) {
     this.browserSession = browserSession;
@@ -83,7 +84,14 @@ export class PageSession {
 
     this.cookieRecorder = cookieRecorder;
 
-    await setup_beacon_recording(this.page, this.browserSession.logger);
+    let beaconRecorder = new BeaconRecorder(
+      this.page,
+      this.browserSession.logger,
+    );
+
+    await beaconRecorder.setup_beacon_recording();
+
+    this.beaconRecorder = beaconRecorder;
 
     this.browserSession.webSocketLog = setup_websocket_recording(
       this.page,

@@ -62,7 +62,6 @@ class Inspector {
   private async inspectCookies(): Promise<void> {
     let collectedCookies = this.pageSession.cookieRecorder.collectedCookies;
     // we get all cookies from the log, which can be both JS and http cookies
-    console.log(collectedCookies);
     let cookies_from_events = flatten(
       collectedCookies.map((event) => {
         event.data.forEach((cookie) => {
@@ -186,24 +185,9 @@ class Inspector {
     });
   }
 
-  private async inspectBeacons(): Promise<void> {
-    let beacons_from_events: Beacon[] = flatten(
-      this.eventData
-        .filter((event) => {
-          return event.type.startsWith("Request.Tracking");
-        })
-        .map((event) => {
-          return Object.assign({}, event.data, {
-            log: {
-              stack: event.stack,
-              // type: event.type,
-              timestamp: event.timestamp,
-            },
-          });
-        }),
-    );
-
-    for (const beacon of beacons_from_events) {
+  private async inspectBeacons() {
+    let beacons = this.pageSession.beaconRecorder.collectedBeacons;
+    for (const beacon of beacons) {
       const l = url.parse(beacon.url);
 
       if (beacon.listName === "easyprivacy.txt") {
@@ -216,7 +200,7 @@ class Inspector {
     }
 
     // make now a summary for the beacons (one of every hostname+pathname and their occurrance)
-    let beacons_from_events_grouped = groupBy(beacons_from_events, (beacon) => {
+    let beacons_from_events_grouped = groupBy(beacons, (beacon) => {
       let url_parsed = url.parse(beacon.url);
       return `${url_parsed.hostname}${url_parsed.pathname.replace(/\/$/, "")}`;
     });
@@ -232,9 +216,7 @@ class Inspector {
       );
     }
 
-    beacons_summary.sort((b1, b2) => {
-      return b2.occurances - b1.occurances;
-    });
+    beacons_summary.sort((b1, b2) => b2.occurances - b1.occurances);
 
     this.output.beacons = beacons_summary;
   }

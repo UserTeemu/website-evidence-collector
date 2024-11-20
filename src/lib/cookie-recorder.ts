@@ -205,7 +205,7 @@ export class CookieRecorder {
             event.data = data;
         }
 
-        this.logger.log("warn", message, event);
+        this.logger.debug(message, event);
       },
     );
 
@@ -291,7 +291,7 @@ export class CookieRecorder {
             raw: cookieHTTP,
             data: valid,
           });
-          this.logger.log("warn", message, {
+          this.logger.debug(message, {
             type: "Cookie.HTTP",
             stack: stack,
             location: location,
