@@ -9,10 +9,11 @@ build:
   script:
     - npm install
     - npm run build
+    - mkdir artifacts/
     - cd build/
-    - npm pack
+    - npm pack --pack-destination='../artifacts'
   artifacts:
     paths:
-      - build/
+      - build/artifacts
     expire_in: 1 week
     untracked: true
