@@ -1,3 +1,5 @@
+image: node:20
+
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
@@ -5,8 +7,6 @@ cache:
 
 build:
   script:
-    - whoami
-    - echo $PATH
     - npm install
     - npm run build
     - cd build/
