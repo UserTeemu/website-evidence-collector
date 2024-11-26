@@ -14,7 +14,7 @@ build-job:
   stage: build
   script:
     - echo BUILD_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
-    - export PACKAGE_VERSION=$(npm pkg get version |  sed 's/^"\(.*\)"$/\1/')
+    - export PACKAGE_VERSION=$(npm pkg get version --workspaces=false | tr -d \")
     - npm install
     - npm run build
     - mkdir artifacts/
