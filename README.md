@@ -152,6 +152,8 @@ A Docker/Podman container is available as a `Containerfile` for easy deployment:
   podman run -v /path/on/your/system:/output:z --userns=keep-id localhost/website-evidence-collector collect https://example.com
   ```
 
+- The container accepts the version of testssl.sh used throught the environment variable `TESTSSL_VERSION`.
+
 ## Frequently Asked Questions
 
 Please find a collection of frequently asked questions with answers in [FAQ.md](FAQ.md)
