@@ -126,28 +126,9 @@ export class Reporter {
     pdffilename = "inspection.pdf",
   ) {
     if (this.args.pdf && this.args.outputPath) {
-      const browser = await puppeteer.launch({});
-      const pages = await browser.pages();
-      await pages[0].goto(
-        "file://" + path.resolve(path.join(this.args.outputPath, htmlfilename)),
-        { waitUntil: "networkidle0" },
-      );
-      await pages[0].pdf({
-        path: path.resolve(path.join(this.args.outputPath, pdffilename)),
-        format: "A4",
-        printBackground: true,
-        displayHeaderFooter: true,
-        headerTemplate: `
-                      <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
-                          <div style="bottom: 5px; text-align: center;"><span class="title"></span></div>
-                      </div>`,
-        footerTemplate: `
-                      <div style="width: 100%; font-size: 11px; padding: 5px 5px 0; position: relative;">
-                          <div style="top: 5px; text-align: center;"><span class="pageNumber"></span>/<span class="totalPages"></span></div>
-                      </div>`,
-        margin: { top: "1.5cm", bottom: "1cm" },
-      });
-      await browser.close();
+      let content = fs.readFileSync(path.resolve(path.join(this.args.outputPath, htmlfilename)), "utf8");
+      let pdfBuffer = await this.convertHtmlToPdfInMemory(content);
+      fs.writeFileSync(path.resolve(path.join(this.args.outputPath, pdffilename)), pdfBuffer);
     }
   }
 
