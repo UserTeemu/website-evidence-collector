@@ -5,7 +5,7 @@
   "homepage": "https://edps.europa.eu/press-publications/edps-inspection-software_en",
   "repository": {
     "type": "git",
-    "url": "https://github.com/EU-EDPS/website-evidence-collector.git"
+    "url": "https://code.europa.eu/EDPS/website-evidence-collector.git"
   },
   "type": "module",
   "engines": {
