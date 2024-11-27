@@ -12,11 +12,13 @@
     "node": ">=20.0"
   },
   "scripts": {
-    "build": "npm run clean && npm run build-frontend && npm run build-ts && npm run copy-assets",
+    "build": "npm run clean  && npm run install-frontend-dependencies && npm run build-frontend && npm run build-ts && npm run copy-assets",
     "clean": "rimraf build/ && rimraf frontend/dist/",
-    "build-frontend": "cd frontend && npm ci && npm run build",
+    "build-frontend": "cd frontend && npm run build",
+    "install-frontend-dependencies": "cd frontend && npm install ",
     "build-ts": "tsc -p .",
     "copy-assets": "copyfiles src/assets/*  package.json build/ && copyfiles --up 2 frontend/dist/* frontend/dist/assets/* build/static",
+
     "format": "prettier . --write",
     "test": "jest --detectOpenHandles",
 
