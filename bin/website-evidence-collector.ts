@@ -1,42 +1,30 @@
 #!/usr/bin/env node
-
 /**
- * @file Collects evidence from websites on processed data in transit and at
- rest.
+ * @file Setup command line arguments
  * @author Robert Riemann <robert.riemann@edps.europa.eu>
  * @copyright European Data Protection Supervisor (2019)
  * @license EUPL-1.2
- *
- * @example ./bin/website-evidence-collector.ts http://example.com
  */
 
-import server from "../src/server/server.js";
-import {
-  parse,
-  ParsedArgs,
-  ParsedArgsCollector,
-  ParsedArgsReporter,
-  ParsedArgsServe,
-  REPORTER_COMMAND,
-  SERVER_COMMAND,
-} from "../src/lib/argv.js";
-import localCollector from "../src/collectorCommand.js";
-import { reporterCommand } from "../src/reporter/reporterCommand.js";
+import yargs from "yargs";
+import serverCommand from "../src/commands/serverCommand.js";
+import reporterCommand from "../src/commands/reporterCommand.js";
+import collectorCommand from "../src/commands/collectorCommand.js";
 
-(async () => {
-  let args: ParsedArgs = await parse();
-
-  switch (args.command) {
-    case SERVER_COMMAND:
-      args = args as ParsedArgsServe;
-      await server(args.port, args.browserOptions);
-      break;
-    case REPORTER_COMMAND:
-      args = args as ParsedArgsReporter;
-      await reporterCommand(args);
-      break;
-    default:
-      args = args as ParsedArgsCollector;
-      await localCollector(args);
-  }
-})();
+await yargs(process.argv.slice(2))
+  .parserConfiguration({ "populate--": true })
+  .scriptName("website-evidence-collector")
+  .usage("Usage: $0 <URI> [options] [-- [browser options]]")
+  .example([
+    [
+      "$0 http://example.com/about -f http://example.com -f http://cdn.ex.com -l http://example.com/contact",
+    ],
+  ])
+  // allow for shell variables such as WEC_DNT=true
+  .env("WEC")
+  .command([collectorCommand, serverCommand, reporterCommand])
+  .help("help")
+  .epilog(
+    "Copyright European Union 2019, licensed under EUPL-1.2 (see LICENSE.txt)",
+  )
+  .parseAsync();

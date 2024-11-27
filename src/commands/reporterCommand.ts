@@ -1,6 +1,3 @@
-#!/usr/bin/env node
-// jshint esversion: 8
-
 /**
  * @file Produces an html output documenting evidence from websites on processed data in transit and at rest.
  * @author Robert Riemann <robert.riemann@edps.europa.eu>
@@ -10,20 +7,19 @@
  * @example while inotifywait -e modify assets/template.pug; do ./create-html.js output/inspection.json > output/inspection.html; done
  */
 
+import yaml from "js-yaml";
 import fs from "fs";
 import path from "path";
-import pug from "pug";
-import HTMLtoDOCX from "html-to-docx";
-import puppeteer from "puppeteer";
-import { spawnSync } from "node:child_process";
-import yaml from "js-yaml";
 import { marked } from "marked";
-import { ParsedArgsReporter } from "../lib/argv.js";
 import { markedSmartypants } from "marked-smartypants";
+import pug from "pug";
 import groupBy from "lodash/groupBy.js";
-import { all as unsafe } from "js-yaml-js-types-esm";
+import { spawnSync } from "node:child_process";
+import puppeteer from "puppeteer";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
+import { all as unsafe } from "js-yaml-js-types-esm";
+import HTMLtoDOCX from "html-to-docx";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,8 +27,81 @@ const require = createRequire(import.meta.url);
 
 yaml.DEFAULT_SCHEMA = yaml.DEFAULT_SCHEMA.extend(unsafe);
 
+export default {
+  command: "report",
+  desc: "Generate reports from collected data",
+  builder: (yargs) => {
+    return yargs
+      .usage("Usage: $0 [options] <JSON file>")
+      .example([["$0 /home/user/inspection.json"]])
+      .describe("html-template", "Custom pug template to generate HTML output")
+      .nargs("html-template", 1)
+      .alias("html-template", "t")
+      .string("html-template")
+      .describe(
+        "office-template",
+        "Custom pug template to generate DOCX with NPM html-to-docx or DOCX/ODT with pandoc",
+      )
+      .nargs("office-template", 1)
+      .string("office-template")
+      .describe(
+        "use-pandoc",
+        "Conversion to DOCX/ODT with pandoc instead of NPM",
+      )
+      .boolean("use-pandoc")
+      .default("use-pandoc", false)
+      .describe(
+        "extra-file",
+        "Loads other JSON/YAML files in the template array 'extra'",
+      )
+      .nargs("extra-file", 1)
+      .alias("extra-file", "e")
+      .array("extra-file")
+      .coerce("extra-file", (files) => {
+        return files.map((file) => {
+          if (
+            file.toLowerCase().endsWith(".yaml") ||
+            file.toLowerCase().endsWith(".yml")
+          ) {
+            return yaml.load(fs.readFileSync(file, "utf8"));
+          } else {
+            return JSON.parse(fs.readFileSync(file, "utf8"));
+          }
+        });
+      })
+      .describe(
+        "output-file",
+        "Write HTML/PDF/DOCX/ODT output to file according to file extension",
+      )
+      .nargs("output-file", 1)
+      .alias("output-file", "o")
+      .string("output-file")
+      .check((argv: ParsedArgsReporter) => {
+        if (!argv._[1]) {
+          return "Error: You must provide a file name or path";
+        }
+        return true;
+      });
+  },
+  handler: async (argv: ParsedArgsReporter) =>
+    await runReporter(transformArgsToObject(argv)),
+};
+
+function transformArgsToObject(parsingResult): ParsedArgsReporter {
+  return {
+    _: parsingResult._ as string[],
+    inspectionJsonPath: parsingResult._[1] as string,
+    outputFile: parsingResult["output"] as string,
+    htmlTemplate: parsingResult["htmlTemplate"] as string | undefined,
+    officeTemplate: parsingResult["officeTemplate"] as string | undefined,
+    extraFile: parsingResult["extraFile"] as string | undefined,
+    usePandoc: parsingResult["usePandoc"] as boolean | undefined,
+    command: parsingResult["command"] as string,
+  };
+}
+
 /// Code that gets called when invoking the reporter command using the CLI
-export async function reporterCommand(args: ParsedArgsReporter) {
+async function runReporter(args: ParsedArgsReporter) {
   let output = JSON.parse(fs.readFileSync(args.inspectionJsonPath, "utf8"));
 
   let html_template =
@@ -188,4 +257,15 @@ async function generatePdf(outputFile: string, html_dump: string) {
     margin: { top: "1.5cm", bottom: "1cm" },
   });
   await browser.close();
+}
+
+interface ParsedArgsReporter {
+  _: (string | number)[];
+  command: string;
+  inspectionJsonPath: string;
+  outputFile?: string;
+  htmlTemplate?: string;
+  officeTemplate?: string;
+  extraFile?: string;
+  usePandoc?: boolean;
 }
