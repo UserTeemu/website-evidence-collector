@@ -1,4 +1,4 @@
-const StandardConfig = require("../config.js");
+const StandardConfig = require("../config.ts");
 const wec = require("../index");
 const logger = require("../lib/logger");
 const fs = require("fs-extra");

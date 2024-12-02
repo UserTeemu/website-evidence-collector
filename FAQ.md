@@ -6,31 +6,31 @@
 
 #### How can I install the website evidence collector if I do not have root/administrator permission or do not want to employ root/administrator permission?
 
-The website evidence collector is a bundled as a *node package* and is installed
-using the *node package manager* (NPM). NPM installs by default packages to a
+The website evidence collector is a bundled as a _node package_ and is installed
+using the _node package manager_ (NPM). NPM installs by default packages to a
 system directory and requires for this root/administrator permission. NPM can be configured to install packages in other directories that do not require special permission.
 
 For Linux or Mac, NPM provides [a guide in its documentation](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally):
 
 1. On the command line, in your home directory, create a directory for global installations:
 
-       mkdir ~/.npm-global
+   mkdir ~/.npm-global
 
 2. Configure npm to use the new directory path:
 
-       npm config set prefix '~/.npm-global'
+   npm config set prefix '~/.npm-global'
 
 3. In your preferred text editor, open or create a `~/.profile` file and add this line:
 
-       export PATH=~/.npm-global/bin:$PATH
+   export PATH=~/.npm-global/bin:$PATH
 
 4. On the command line, update your system variables:
 
-       source ~/.profile
+   source ~/.profile
 
 5. With this new configuration, install the website evidence collector globally without special permissions, e.g. from GitHub:
 
-       npm install --global https://github.com/EU-EDPS/website-evidence-collector/tarball/latest
+   npm install --global https://github.com/EU-EDPS/website-evidence-collector/tarball/latest
 
 Instead of steps 1-3, you can use the corresponding ENV variable (e.g. if you don’t want to modify ~/.profile):
 
@@ -137,7 +137,7 @@ The configuration is compatible with the cookie option (`--cookie` or `-b`) of t
 
 #### How do I change the `User-Agent` request header?
 
-The website evidence collector uses a user agent header of Chrome that is defined in the top of the file `website-evidence-collector.js`. However, the value can be overwritten any other value, e.g. `WEC`:
+The website evidence collector uses a user agent header of Chrome that is defined in the top of the file `website-evidence-collector.ts`. However, the value can be overwritten any other value, e.g. `WEC`:
 
 1. `WEC_BROWSER_OPTIONS="--user-agent=WEC" website-evidence-collector https://example.com`
 2. `website-evidence-collector https://example.com -- --user-agent=WEC`
@@ -171,7 +171,7 @@ The website evidence collector stores a number of files in an output directory u
   - the equipment, time and configuration of the evidence collection,
   - beacons,
   - cookies and localstorage,
-  - links in categories *internal*, *external*, *social media*, and
+  - links in categories _internal_, _external_, _social media_, and
   - hosts.
 - The `inspection.json` has the same content as `inspection.yml`, but in JSON format.
 - The `inspection.html` can be open in the browser to print a report or safe a PDF version it with the most relevant information from `inspection.yml`. The option `--html-template` allows to switch to a custom [pug template](https://pugjs.org). Please ensure that the screenshot images are the same folder as the HTML file.
@@ -182,9 +182,10 @@ The website evidence collector stores a number of files in an output directory u
 - The `cookies.yml` contains the subset on cookies from `inspection.yml`.
 - The `local-storage.yml` contains the subset on [localStorage](https://en.wikipedia.org/wiki/LocalStorage) from `inspection.yml`
 - The `websockets-log.json` contains data transferred via websockets.
-- The `requests.har` in [HTTP Archive Format](https://en.wikipedia.org/wiki/HAR_(file_format) ) contains occurred HTTP requests and answers.
+- The `requests.har` in [HTTP Archive Format](<https://en.wikipedia.org/wiki/HAR_(file_format)>) contains occurred HTTP requests and answers.
 
   Note that websocket connections are not captured and the completeness and accuracy of the file has not yet been verified.
+
 - The `inspection-log.ndjson` is line-delimited JSON file with all log messages that the website evidence collector produced during operation.
 - The screenshot files are captured from the first visited page.
 - The directory `browser-profile` contains the browser profile used during evidence collection.
@@ -197,25 +198,27 @@ The tool [jq](https://stedolan.github.io/jq/) for Linux, OS X and Windows allows
 
 1. coloured output of the inspection data:
 
-       jq . output/inspection.json
+   jq . output/inspection.json
 
-2. coloured output with paging and search using [less](https://en.wikipedia.org/wiki/Less_(Unix)) (Linux and OS X only)
+2. coloured output with paging and search using [less](<https://en.wikipedia.org/wiki/Less_(Unix)>) (Linux and OS X only)
 
-       jq -C . output/inspection.json | less -R
+   jq -C . output/inspection.json | less -R
 
 3. extract all third-party hosts
 
-       jq '.hosts | map_values(.thirdParty)' output/inspection.json
+   jq '.hosts | map_values(.thirdParty)' output/inspection.json
 
 4. extract cookies with an expiration of one day or more
 
-       jq '.cookies[] | select(.expiresDays >= 1)'  output/inspection.json
-       # or
-       jq '.cookies | map(select(.expiresDays >= 1)) | map({domain,name,value})' output/inspection.json
+   jq '.cookies[] | select(.expiresDays >= 1)' output/inspection.json
+
+   # or
+
+   jq '.cookies | map(select(.expiresDays >= 1)) | map({domain,name,value})' output/inspection.json
 
 5. list cookies with name, domain, web page and source
 
-       jq '.cookies | map({name, domain, location: .log.location?, source: (.log.stack | first).fileName})' output/inspection.json
+   jq '.cookies | map({name, domain, location: .log.location?, source: (.log.stack | first).fileName})' output/inspection.json
 
 For a quick overview, the website evidence collector data can feed JSON data on Linux and OS X directly to `jq` without storing files in between.
 
@@ -225,24 +228,23 @@ For extraction across multiple files, the file structure in output folders `job_
 
 1. display all unique cookie hosts in a sorted flat list
 
-       jq -s 'map(.hosts.cookies[]) | flatten | unique | sort' job_*/inspection.json
+   jq -s 'map(.hosts.cookies[]) | flatten | unique | sort' job\_\*/inspection.json
 
 2. display all cookie hosts with their inspection URL and task description
 
-       jq -s 'map({uri_ins, details: .task_description, cookie_hosts: .hosts.cookies})' job_*/inspection.json
+   jq -s 'map({uri*ins, details: .task_description, cookie_hosts: .hosts.cookies})' job*\*/inspection.json
 
 3. display cookie names with and sorted by their occurance
 
-       jq -s 'map({uri_ins, cookie: (.cookies | map(.name))[]}) | group_by(.cookie) | sort_by(-length) | map({name: first.cookie, occurance: length})' job_*/inspection.json
+   jq -s 'map({uri*ins, cookie: (.cookies | map(.name))[]}) | group_by(.cookie) | sort_by(-length) | map({name: first.cookie, occurance: length})' job*\*/inspection.json
 
 4. display which cookie has been found how often, by which website and sort results by occurrence
 
-       jq -s 'map({uri_ins, details: .task_description, cookie: (.cookies | map({name,expiresDays,domain,value,log}))[]}) | group_by(.cookie.name) | sort_by(-length) | map({name: first.cookie.name, occurance: length, example: first.cookie, websites: map({uri_ins,details})})' job_*/inspection.json
+   jq -s 'map({uri*ins, details: .task_description, cookie: (.cookies | map({name,expiresDays,domain,value,log}))[]}) | group_by(.cookie.name) | sort_by(-length) | map({name: first.cookie.name, occurance: length, example: first.cookie, websites: map({uri_ins,details})})' job*\*/inspection.json
 
 5. display which website connects to a particular domain `example.com` and its subdomains
 
-       jq -s 'map(select(.hosts.requests | add | any(contains("example.com")))) | map({uri_ins,task_description})' job_*/inspection.json
-
+   jq -s 'map(select(.hosts.requests | add | any(contains("example.com")))) | map({uri*ins,task_description})' job*\*/inspection.json
 
 Afterwards, the output may be converted with [json2csv](https://www.npmjs.com/package/json2csv) from JSON to CSV to use any spreadsheet application to produce printable tables and e.g. bar charts.
 

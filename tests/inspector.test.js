@@ -1,4 +1,4 @@
-const StandardConfig = require("../config.js");
+const StandardConfig = require("../config.ts");
 const logger = require("../lib/logger");
 const collector = require("../collector/index");
 const inspector = require("../inspector/index");
@@ -10,7 +10,7 @@ jest.setTimeout(50000);
 
 beforeAll(async () => {
   args = StandardConfig("http://localhost");
-  args.browserOptions.push('--allow-file-access-from-files');
+  args.browserOptions.push("--allow-file-access-from-files");
   args.overwrite = true;
   args.pageTimeout = 3000;
 

@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./build",
+    "allowJs": true,
+    "target": "es2020",
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
+  },
+  "include": ["./src/**/*", "./bin/**/*"],
+  "exclude": ["./src/assets/frontend/**/*"]
+}
