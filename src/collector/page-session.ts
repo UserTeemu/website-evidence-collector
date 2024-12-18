@@ -253,14 +253,17 @@ export class PageSession {
     page: Page,
     localStorage,
     root_uri,
+    // All links collected from the website and filtered for those that are considered first-party
     firstPartyLinks,
-    userSet,
+    // Links provided by the user which have to be browsed
+    userSetLinks,
   ) {
-    const preset_links = [page.url(), ...userSet];
+    const preset_links = [page.url(), ...userSetLinks];
     const extra_links = firstPartyLinks
       .map((l) => l.href)
       .filter((l) => !preset_links.includes(l));
-    const random_links = this.browserSession.browserArgs.seed
+
+    const randomLinks = this.browserSession.browserArgs.seed
       ? sampleSizeSeeded(
           extra_links,
           this.browserSession.browserArgs.linkLimit - preset_links.length,
@@ -271,11 +274,13 @@ export class PageSession {
           this.browserSession.browserArgs.linkLimit - preset_links.length,
         ); // can be empty!
 
-    const browsing_history = [root_uri, ...userSet, ...random_links];
+    let linksToBrowse = [...userSetLinks, ...randomLinks];
+
+    let linksBrowsed = [];
 
     let proxyConfig = getGotProxyConfiguration(this.browserSession.logger);
 
-    for (const link of browsing_history.slice(1)) {
+    for (const link of linksToBrowse) {
       // can have zero iterations!
       if (await this.shouldSkipLink(link, proxyConfig)) {
         continue;
@@ -284,6 +289,8 @@ export class PageSession {
       this.browserSession.logger.log("info", `browsing now to ${link}`, {
         type: "Browser",
       });
+
+      linksBrowsed.push(link);
 
       try {
         await page.goto(link, {
@@ -307,7 +314,7 @@ export class PageSession {
       );
     }
 
-    return browsing_history;
+    return [root_uri, ...linksBrowsed];
   }
 
   async takeScreenshots() {
