@@ -14,7 +14,10 @@ import {
 } from "../lib/tools.js";
 import parseContentSecurityPolicy from "content-security-policy-parser";
 import sampleSize from "lodash/sampleSize.js";
-import { getGotProxyConfiguration } from "../lib/proxy_config.js";
+import {
+  getGotProxyConfiguration,
+  GotProxyConfiguration,
+} from "../lib/proxy_config.js";
 import got from "got";
 import { BrowserSession, Hosts } from "./browser-session.js";
 
@@ -199,6 +202,53 @@ export class PageSession {
     }
   }
 
+  async shouldSkipLink(
+    link: string,
+    proxyConfig: undefined | GotProxyConfiguration,
+  ): Promise<boolean> {
+    if (this.browserSession.browserArgs.skipHeadRequest) {
+      return false;
+    }
+
+    try {
+      // check mime-type and skip if not html
+      const head = await got(link, {
+        method: "HEAD",
+        throwHttpErrors: false,
+        // ignore Error: unable to verify the first certificate (https://stackoverflow.com/a/36194483)
+        // certificate errors should be checked in the context of the browsing and not during the mime-type check
+        https: {
+          rejectUnauthorized: false,
+        },
+        ...(proxyConfig && { agent: proxyConfig }),
+      });
+
+      if (!head.ok) {
+        this.browserSession.logger
+          .warn(`Fetching the HEAD for ${link} unexpectedly returned HTTP status code ${head.statusCode}.
+            The page will be skipped. Use --skip-head-request option to disable the check.`);
+        return true;
+      }
+
+      if (!head.headers["content-type"].startsWith("text/html")) {
+        this.browserSession.logger.log(
+          "info",
+          `skipping now ${link} of mime-type ${head["content-type"]}`,
+          { type: "Browser" },
+        );
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      this.browserSession.logger.error(
+        `An error occurred while checking if ${link} should be skipped.`,
+        error.message,
+      );
+      return true;
+    }
+  }
+
   async browseSamples(
     page: Page,
     localStorage,
@@ -227,31 +277,15 @@ export class PageSession {
 
     for (const link of browsing_history.slice(1)) {
       // can have zero iterations!
+      if (await this.shouldSkipLink(link, proxyConfig)) {
+        continue;
+      }
+
+      this.browserSession.logger.log("info", `browsing now to ${link}`, {
+        type: "Browser",
+      });
+
       try {
-        // check mime-type and skip if not html
-        const head = await got(link, {
-          method: "HEAD",
-          // ignore Error: unable to verify the first certificate (https://stackoverflow.com/a/36194483)
-          // certificate errors should be checked in the context of the browsing and not during the mime-type check
-          https: {
-            rejectUnauthorized: false,
-          },
-          ...(proxyConfig && { agent: proxyConfig }),
-        });
-
-        if (!head.headers["content-type"].startsWith("text/html")) {
-          this.browserSession.logger.log(
-            "info",
-            `skipping now ${link} of mime-type ${head["content-type"]}`,
-            { type: "Browser" },
-          );
-          continue;
-        }
-
-        this.browserSession.logger.log("info", `browsing now to ${link}`, {
-          type: "Browser",
-        });
-
         await page.goto(link, {
           timeout: this.browserSession.browserArgs.pageLoadTimeout,
           waitUntil: "networkidle2",
