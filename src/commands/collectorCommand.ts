@@ -153,6 +153,12 @@ export default {
       .number("page-timeout")
       .default("page-timeout", 0)
       .nargs("page-timeout", 1)
+      .boolean("skip-head-request")
+      .describe(
+        "skip-head-request",
+        "Skip the initial HEAD request and directly attempt to access the resource. Useful when HEAD requests are blocked but the resource is still accessible.",
+      )
+      .default("skip-head-request", false)
       .check((argv) => {
         let invokedAsDefaultCommand = argv._[0] !== collectorCommand;
         let urlPosition = invokedAsDefaultCommand ? 0 : 1;

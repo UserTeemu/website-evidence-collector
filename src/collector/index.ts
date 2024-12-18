@@ -107,6 +107,7 @@ export class Collector {
       sleep: this.args.sleep,
       cookies: this.args.setCookie,
       seed: this.args.seed,
+      skipHeadRequest: this.args.skipHeadRequest,
     };
     this.browserSession = new BrowserSession(browserArgs, this.logger);
 
