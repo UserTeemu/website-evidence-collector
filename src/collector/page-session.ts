@@ -1,4 +1,4 @@
-import { Page } from "puppeteer";
+import { HTTPResponse, Page } from "puppeteer";
 import url from "url";
 import escapeRegExp from "lodash/escapeRegExp.js";
 import { CookieRecorder } from "./recorder/cookie-recorder.js";
@@ -179,17 +179,18 @@ export class PageSession {
     });
   }
 
-  async gotoPage(u) {
-    this.browserSession.logger.log("info", `browsing now to ${u}`, {
+  async gotoPage(url): Promise<HTTPResponse | null> {
+    this.browserSession.logger.log("info", `browsing now to ${url}`, {
       type: "Browser",
     });
 
     try {
-      let page_response = await this.page.goto(u, {
+      let page_response = await this.page.goto(url, {
         timeout: this.browserSession.browserArgs.pageLoadTimeout,
         waitUntil: "networkidle2",
       });
       if (page_response === null) {
+        // https://github.com/puppeteer/puppeteer/issues/2479#issuecomment-408263504
         page_response = await this.page.waitForResponse(() => true);
       }
 
@@ -198,7 +199,8 @@ export class PageSession {
       this.browserSession.logger.log("error", error.message, {
         type: "Browser",
       });
-      process.exit(2);
+
+      return null;
     }
   }
 
@@ -292,15 +294,8 @@ export class PageSession {
 
       linksBrowsed.push(link);
 
-      try {
-        await page.goto(link, {
-          timeout: this.browserSession.browserArgs.pageLoadTimeout,
-          waitUntil: "networkidle2",
-        });
-      } catch (error) {
-        this.browserSession.logger.log("warn", error.message, {
-          type: "Browser",
-        });
+      let response = await this.gotoPage(link);
+      if (response == null) {
         continue;
       }
 

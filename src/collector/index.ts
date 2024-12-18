@@ -131,6 +131,10 @@ export class Collector {
 
     const response = await this.pageSession.gotoPage(url);
 
+    if (response == null) {
+      process.exit(2);
+    }
+
     // log redirects
     this.output.uri_redirects = response
       .request()
