@@ -134,6 +134,9 @@
             :add-class="{ button_enabled: ['hover:bg-eu-primary-80'] }"
           />
         </Vueform>
+        <p class="text-0.5sm text-gray-600 text-center pt-2">
+          Version {{ version == null ? "not fetched" : version }}
+        </p>
       </div>
     </div>
     <!-- Right panel -->
@@ -256,7 +259,7 @@ const pdfUrl = ref<string | null>(null);
 const htmlUrl = ref<string | null>(null);
 const isRequestRunning = ref<boolean>(false);
 const iFrame = useTemplateRef("output-iframe");
-
+const version = ref<string | null>(null);
 const isDownloadOverlayMinimized = ref(true);
 
 // Listen to chnages in the path from anchor links within the iFrame then scroll the corresponding element into view
@@ -275,12 +278,25 @@ function reset() {
   sanitizedHtml.value = null;
 }
 
+function getUrl(slug) {
+  return isViteDevEnv
+    ? `http://localhost:8080/${slug}`
+    : new URL(slug, document.location.toString()).href;
+}
+
+window.onload = async (_) => {
+  version.value = await fetchVersion();
+};
+
+async function fetchVersion() {
+  let url = getUrl("version");
+  const response = await fetch(url);
+  const json = await response.json();
+  return json.version;
+}
+
 async function handleSubmit(form$, _) {
   reset();
-
-  const WEC_ENDPOINT = isViteDevEnv
-    ? "http://localhost:8080/start-collection"
-    : new URL("start-collection", document.location.toString()).href;
 
   // Using FormData will EXCLUDE conditional elements and it
   // will submit the form as "Content-Type: multipart/form-data".
@@ -302,9 +318,13 @@ async function handleSubmit(form$, _) {
 
   try {
     // Sending the request
-    response = await form$.$vueform.services.axios.post(WEC_ENDPOINT, data, {
-      cancelToken: form$.cancelToken.token,
-    });
+    response = await form$.$vueform.services.axios.post(
+      getUrl("/start-collection"),
+      data,
+      {
+        cancelToken: form$.cancelToken.token,
+      },
+    );
 
     sanitizedHtml.value = response.data.html;
 

@@ -21,7 +21,7 @@ build-job:
     - cd build/
     - npm pack --pack-destination='../artifacts'
     - cd ../artifacts
-    - mv website-evidence-collector-$(PACKAGE_VERSION).tgz website-evidence-collector.tgz
+    - mv website-evidence-collector-$PACKAGE_VERSION.tgz website-evidence-collector.tgz
   artifacts:
     paths:
       - build/artifacts
