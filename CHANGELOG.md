@@ -1,3 +1,7 @@
+## HEAD
+- **Added option --skip-head-request**. When surfing additional links, the software checks the MIME type using a HEAD request to skip PDFs, videos, etc. With this new option enabled,the HEAD request is skipped. This option is intended for cases where a HEAD request fails (e.g., when blocked) but a normal request would succeed.
+- The browsing history in the report now only includes sites actually visited by the software. Previously, it also included sites that were filtered out due to their MIME type.
+
 ## 3.0.0 / 2024-11-27
 - BREAKING CHANGES:
   - Delete `reporter` script and move functionality to subcommand of WEC reachable under `website-evidence-collector reporter`

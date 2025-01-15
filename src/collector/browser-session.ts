@@ -49,6 +49,7 @@ export interface BrowserArgs {
   sleep: number;
   cookies: string;
   seed?: string;
+  skipHeadRequest: boolean;
 }
 
 export class BrowserSession {

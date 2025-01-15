@@ -107,6 +107,7 @@ export class Collector {
       sleep: this.args.sleep,
       cookies: this.args.setCookie,
       seed: this.args.seed,
+      skipHeadRequest: this.args.skipHeadRequest,
     };
     this.browserSession = new BrowserSession(browserArgs, this.logger);
 
@@ -129,6 +130,10 @@ export class Collector {
     }
 
     const response = await this.pageSession.gotoPage(url);
+
+    if (response == null) {
+      process.exit(2);
+    }
 
     // log redirects
     this.output.uri_redirects = response

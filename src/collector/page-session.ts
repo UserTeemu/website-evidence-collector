@@ -1,4 +1,4 @@
-import { Page } from "puppeteer";
+import { HTTPResponse, Page } from "puppeteer";
 import url from "url";
 import escapeRegExp from "lodash/escapeRegExp.js";
 import { CookieRecorder } from "./recorder/cookie-recorder.js";
@@ -14,7 +14,10 @@ import {
 } from "../lib/tools.js";
 import parseContentSecurityPolicy from "content-security-policy-parser";
 import sampleSize from "lodash/sampleSize.js";
-import { getGotProxyConfiguration } from "../lib/proxy_config.js";
+import {
+  getGotProxyConfiguration,
+  GotProxyConfiguration,
+} from "../lib/proxy_config.js";
 import got from "got";
 import { BrowserSession, Hosts } from "./browser-session.js";
 
@@ -176,17 +179,18 @@ export class PageSession {
     });
   }
 
-  async gotoPage(u) {
-    this.browserSession.logger.log("info", `browsing now to ${u}`, {
+  async gotoPage(url): Promise<HTTPResponse | null> {
+    this.browserSession.logger.log("info", `browsing now to ${url}`, {
       type: "Browser",
     });
 
     try {
-      let page_response = await this.page.goto(u, {
+      let page_response = await this.page.goto(url, {
         timeout: this.browserSession.browserArgs.pageLoadTimeout,
         waitUntil: "networkidle2",
       });
       if (page_response === null) {
+        // https://github.com/puppeteer/puppeteer/issues/2479#issuecomment-408263504
         page_response = await this.page.waitForResponse(() => true);
       }
 
@@ -195,7 +199,55 @@ export class PageSession {
       this.browserSession.logger.log("error", error.message, {
         type: "Browser",
       });
-      process.exit(2);
+
+      return null;
+    }
+  }
+
+  async shouldSkipLink(
+    link: string,
+    proxyConfig: undefined | GotProxyConfiguration,
+  ): Promise<boolean> {
+    if (this.browserSession.browserArgs.skipHeadRequest) {
+      return false;
+    }
+
+    try {
+      // check mime-type and skip if not html
+      const head = await got(link, {
+        method: "HEAD",
+        throwHttpErrors: false,
+        // ignore Error: unable to verify the first certificate (https://stackoverflow.com/a/36194483)
+        // certificate errors should be checked in the context of the browsing and not during the mime-type check
+        https: {
+          rejectUnauthorized: false,
+        },
+        ...(proxyConfig && { agent: proxyConfig }),
+      });
+
+      if (!head.ok) {
+        this.browserSession.logger
+          .warn(`Fetching the HEAD for ${link} unexpectedly returned HTTP status code ${head.statusCode}.
+            The page will be skipped. Use --skip-head-request option to disable the check.`);
+        return true;
+      }
+
+      if (!head.headers["content-type"].startsWith("text/html")) {
+        this.browserSession.logger.log(
+          "info",
+          `skipping now ${link} of mime-type ${head["content-type"]}`,
+          { type: "Browser" },
+        );
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      this.browserSession.logger.error(
+        `An error occurred while checking if ${link} should be skipped.`,
+        error.message,
+      );
+      return true;
     }
   }
 
@@ -203,14 +255,17 @@ export class PageSession {
     page: Page,
     localStorage,
     root_uri,
+    // All links collected from the website and filtered for those that are considered first-party
     firstPartyLinks,
-    userSet,
+    // Links provided by the user which have to be browsed
+    userSetLinks,
   ) {
-    const preset_links = [page.url(), ...userSet];
+    const preset_links = [page.url(), ...userSetLinks];
     const extra_links = firstPartyLinks
       .map((l) => l.href)
       .filter((l) => !preset_links.includes(l));
-    const random_links = this.browserSession.browserArgs.seed
+
+    const randomLinks = this.browserSession.browserArgs.seed
       ? sampleSizeSeeded(
           extra_links,
           this.browserSession.browserArgs.linkLimit - preset_links.length,
@@ -221,45 +276,26 @@ export class PageSession {
           this.browserSession.browserArgs.linkLimit - preset_links.length,
         ); // can be empty!
 
-    const browsing_history = [root_uri, ...userSet, ...random_links];
+    let linksToBrowse = [...userSetLinks, ...randomLinks];
+
+    let linksBrowsed = [];
 
     let proxyConfig = getGotProxyConfiguration(this.browserSession.logger);
 
-    for (const link of browsing_history.slice(1)) {
+    for (const link of linksToBrowse) {
       // can have zero iterations!
-      try {
-        // check mime-type and skip if not html
-        const head = await got(link, {
-          method: "HEAD",
-          // ignore Error: unable to verify the first certificate (https://stackoverflow.com/a/36194483)
-          // certificate errors should be checked in the context of the browsing and not during the mime-type check
-          https: {
-            rejectUnauthorized: false,
-          },
-          ...(proxyConfig && { agent: proxyConfig }),
-        });
+      if (await this.shouldSkipLink(link, proxyConfig)) {
+        continue;
+      }
 
-        if (!head.headers["content-type"].startsWith("text/html")) {
-          this.browserSession.logger.log(
-            "info",
-            `skipping now ${link} of mime-type ${head["content-type"]}`,
-            { type: "Browser" },
-          );
-          continue;
-        }
+      this.browserSession.logger.log("info", `browsing now to ${link}`, {
+        type: "Browser",
+      });
 
-        this.browserSession.logger.log("info", `browsing now to ${link}`, {
-          type: "Browser",
-        });
+      linksBrowsed.push(link);
 
-        await page.goto(link, {
-          timeout: this.browserSession.browserArgs.pageLoadTimeout,
-          waitUntil: "networkidle2",
-        });
-      } catch (error) {
-        this.browserSession.logger.log("warn", error.message, {
-          type: "Browser",
-        });
+      let response = await this.gotoPage(link);
+      if (response == null) {
         continue;
       }
 
@@ -273,7 +309,7 @@ export class PageSession {
       );
     }
 
-    return browsing_history;
+    return [root_uri, ...linksBrowsed];
   }
 
   async takeScreenshots() {
