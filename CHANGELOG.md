@@ -1,14 +1,16 @@
 ## HEAD
+
+- Updated list of social media sites recognized by the software
 - **Added option --skip-head-request**. When surfing additional links, the software checks the MIME type using a HEAD request to skip PDFs, videos, etc. With this new option enabled,the HEAD request is skipped. This option is intended for cases where a HEAD request fails (e.g., when blocked) but a normal request would succeed.
 - The browsing history in the report now only includes sites actually visited by the software. Previously, it also included sites that were filtered out due to their MIME type.
 
 ## 3.0.0 / 2024-11-27
+
 - BREAKING CHANGES:
   - Delete `reporter` script and move functionality to subcommand of WEC reachable under `website-evidence-collector reporter`
   - Migrate all code to Typescript, requiring build step
 - add `--seed` option to the collect command. Enables users to provide a seed which makes the selection of links to browse (see `--max` option) deterministic.
 - Add `serve` command starting a webserver exposing a website which enables users to run a scan without using the CLI 
-
 - refactor: WEC does not use the logger anymore to communicate collected Cookies and LocalStorage between different parts of the code
 - fix: WEC failed to extract links from some websites, error: Cannot read properties of undefined (reading 'startsWith')
 - dependencies: overwrite the dependency of `puppeteer-har` to address `npm audit` warnings
