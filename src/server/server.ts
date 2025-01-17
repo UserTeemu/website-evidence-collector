@@ -10,7 +10,7 @@ import { generateHtmlAndPdf, runCollection } from "./runCollection.js";
 import path from "path";
 import { create } from "../lib/logger.js";
 import crypto from "crypto";
-import { version } from "../../package.json";
+import packageConfig from "../../package.json" with { type: "json" };
 
 const __dirname = import.meta.dirname;
 const corsDefault = "http://localhost:8080";
@@ -123,6 +123,7 @@ function configureRoutes(browser_options: any[]): Router {
 
   router.get("/version", (_, res: Response) => {
     try {
+      const version = packageConfig.version;
       res.status(200).json({ version });
     } catch (error) {
       res.status(500).json({ error: "Unable to retrieve version information" });
