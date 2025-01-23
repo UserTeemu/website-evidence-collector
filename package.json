@@ -18,10 +18,8 @@
     "install-frontend-dependencies": "cd frontend && npm install ",
     "build-ts": "tsc -p .",
     "copy-assets": "copyfiles src/assets/*  package.json build/ && copyfiles --up 2 frontend/dist/* frontend/dist/assets/* build/static",
-
     "format": "prettier . --write",
     "test": "jest --detectOpenHandles",
-
     "collect": "node build/bin/website-evidence-collector.js collect",
     "serve": "node build/bin/website-evidence-collector.js serve",
     "report": "node build/bin/website-evidence-collector.js report"

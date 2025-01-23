@@ -1,9 +1,5 @@
 ## HEAD
 
-- Updated list of social media sites recognized by the software
-- **Added option --skip-head-request**. When surfing additional links, the software checks the MIME type using a HEAD request to skip PDFs, videos, etc. With this new option enabled,the HEAD request is skipped. This option is intended for cases where a HEAD request fails (e.g., when blocked) but a normal request would succeed.
-- The browsing history in the report now only includes sites actually visited by the software. Previously, it also included sites that were filtered out due to their MIME type.
-
 ## 3.0.0 / 2024-11-27
 
 - BREAKING CHANGES:
@@ -21,6 +17,9 @@
 - fix: for deduplication of links, consider only the `href` attribute (truncated from anchor) and not `inner_text` or `inner_html`
 - node version: bump minimum required node version to v20, which is the active LTS (long term support) version
 - fix: avoid rescanning of start page when scanning random subset of links with `--max`
+- Updated list of social media sites recognized by the software
+- **Added option --skip-head-request**. When surfing additional links, the software checks the MIME type using a HEAD request to skip PDFs, videos, etc. With this new option enabled,the HEAD request is skipped. This option is intended for cases where a HEAD request fails (e.g., when blocked) but a normal request would succeed.
+- The browsing history in the report now only includes sites actually visited by the software. Previously, it also included sites that were filtered out due to their MIME type.
 
 ## 2.1.2 / 2024-04-25
 
