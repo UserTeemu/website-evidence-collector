@@ -92,6 +92,7 @@ function configureRoutes(browser_options: any[]): Router {
           browse_link_option_input: req.body.browse_link_option_input,
           seed_option_input: req.body.seed_option_input,
           testssl_input_option: req.body.testssl_input_option,
+          cookie_input: req.body.cookie_input,
         });
 
         if (!URL.canParse(website_url)) {
@@ -147,6 +148,12 @@ export interface StartCollectionRequestBody {
   browse_link_option_input: string[];
   seed_option_input: string;
   testssl_input_option: boolean;
+  cookie_input: Cookie[];
+}
+
+export interface Cookie {
+  key: string;
+  value: string;
 }
 
 export default run;

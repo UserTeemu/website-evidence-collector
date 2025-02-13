@@ -1,7 +1,7 @@
 import { Reporter, ReporterArguments } from "../reporter/reporter.js";
 import { Collector } from "../collector/index.js";
 import Inspector from "../inspector/inspector.js";
-import { StartCollectionRequestBody } from "./server.js";
+import { Cookie, StartCollectionRequestBody } from "./server.js";
 import { Logger } from "winston";
 
 export async function runCollection(
@@ -81,6 +81,33 @@ function sanitizeInputAndConstructCollectionArgs(
     throw new Error("Not all extra links are invalid.");
   }
 
+  let sanitizedCookies = args.cookie_input
+    .filter((cookie: Cookie) => cookie.value != null && cookie.key != null)
+    .filter(
+      (cookie: Cookie) =>
+        !cookie.value.includes(";") &&
+        !cookie.value.includes(",") &&
+        !cookie.value.includes(" "),
+    )
+    .filter(
+      (cookie: Cookie) =>
+        !cookie.key.includes(";") &&
+        !cookie.key.includes(",") &&
+        !cookie.key.includes(" "),
+    );
+
+  /*
+  [set-cookies.ts] expects a string of cookies in the form of
+    key1=value1;key2=value2;
+  */
+
+  let cookieString =
+    sanitizedCookies.length >= 1
+      ? sanitizedCookies
+          .map((cookie: Cookie) => `${cookie.key}=${cookie.value}`)
+          .join(";")
+      : "";
+
   return {
     _: [args.website_url],
     url: args.website_url,
@@ -91,6 +118,7 @@ function sanitizeInputAndConstructCollectionArgs(
     pageTimeout: pageTimeout,
     testssl: args.testssl_input_option,
     seed: args.seed_option_input,
+    setCookie: cookieString,
     headless: true,
     screenshots: true,
     dnt: false,

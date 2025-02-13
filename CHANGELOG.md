@@ -1,5 +1,7 @@
 ## HEAD
 
+- add support to add cookies in web ui
+
 ## 3.0.0 / 2024-11-27
 
 - BREAKING CHANGES:
