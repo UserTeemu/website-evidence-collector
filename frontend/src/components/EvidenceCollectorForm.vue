@@ -122,6 +122,36 @@
               />
             </template>
           </ListElement>
+          <GroupElement
+            name="cookies"
+            :add-class="{ container: ['bg-slate-50', 'p-2', 'rounded-md'] }"
+          >
+            <MatrixElement
+              name="cookie_input"
+              :cols="[
+                {
+                  label: 'Key',
+                  value: 'key',
+                  inputType: {
+                    type: 'text',
+                  },
+                },
+                {
+                  label: 'Value',
+                  value: 'value',
+                  inputType: {
+                    type: 'text',
+                  },
+                },
+              ]"
+              :rows="1"
+              :input-type="{
+                type: 'text',
+              }"
+              add-text="+ Add Cookie"
+              label="Cookies"
+            />
+          </GroupElement>
           <StaticElement name="divider_1" tag="hr" />
           <ButtonElement
             name="submit"
