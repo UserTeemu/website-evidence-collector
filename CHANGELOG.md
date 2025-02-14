@@ -1,5 +1,7 @@
 ## HEAD
 
+## 3.1.0 / 2025-02-14
+
 - add support to add cookies in web ui
 
 ## 3.0.0 / 2024-11-27
