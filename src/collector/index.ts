@@ -132,7 +132,7 @@ export class Collector {
     const response = await this.pageSession.gotoPage(url);
 
     if (response == null) {
-      process.exit(2);
+      throw new Error("The collector was not able to access the page.");
     }
 
     // log redirects

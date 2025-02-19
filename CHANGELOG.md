@@ -1,5 +1,9 @@
 ## HEAD
 
+## 3.1.1 / 2025-02-19
+
+- WEC will throw an error instead of killing the process when the site can't be surfed 
+
 ## 3.1.0 / 2025-02-14
 
 - add support to add cookies in web ui
