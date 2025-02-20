@@ -89,7 +89,7 @@
   "overrides": {
     "marked": "8.0.1",
     "puppeteer-har": {
-      "chrome-har": "^0.13.1"
+      "chrome-har": "^1.0.1"
     }
   },
   "author": "Robert Riemann <robert.riemann@edps.europa.eu>",
