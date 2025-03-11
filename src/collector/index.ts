@@ -19,6 +19,7 @@ import { PageSession } from "./page-session.js";
 export interface CollectionResult {
   output: any;
   pageSession: PageSession;
+  source: string;
 }
 
 export class Collector {
@@ -27,6 +28,7 @@ export class Collector {
   private pageSession: PageSession;
   private logger: Logger;
   private args: any;
+  private source?: string;
 
   constructor(args, logger) {
     // create the root folder structure
@@ -87,6 +89,7 @@ export class Collector {
     return {
       output: this.output,
       pageSession: this.pageSession,
+      source: this.source,
     };
   }
 
@@ -142,6 +145,7 @@ export class Collector {
 
     // log the destination uri after redirections
     this.output.uri_dest = this.pageSession.page.url();
+    this.source = await this.pageSession.page.content();
 
     return response;
   }
