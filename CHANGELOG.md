@@ -1,4 +1,6 @@
-## 3.1.0 / 2025-02-14
+## HEAD
+
+- Changes are introduced to avoid the "Execution context was destroyed" error
 
 ## 3.1.1 / 2025-02-19
 
