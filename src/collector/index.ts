@@ -135,6 +135,8 @@ export class Collector {
       throw new Error("The collector was not able to access the page.");
     }
 
+    await new Promise((resolve) => setTimeout(resolve, this.args.sleep)); // in ms
+
     // log redirects
     this.output.uri_redirects = response
       .request()
@@ -144,8 +146,6 @@ export class Collector {
     // log the destination uri after redirections
     this.output.uri_dest = this.pageSession.page.url();
     this.source = await this.pageSession.page.content();
-
-    await new Promise((resolve) => setTimeout(resolve, this.args.sleep)); // in ms
 
     return response;
   }
