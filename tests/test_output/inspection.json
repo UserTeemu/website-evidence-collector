@@ -2,9 +2,7 @@
   "title": "Website Evidence Collection",
   "task_description": null,
   "uri_ins": "http://localhost:8000/testpage.html",
-  "uri_refs": [
-    "http://localhost:8000/testpage.html"
-  ],
+  "uri_refs": ["http://localhost:8000/testpage.html"],
   "uri_dest": "http://localhost:8000/testpage.html",
   "uri_redirects": [],
   "secure_connection": {
@@ -26,9 +24,7 @@
       "commit": "v2.1.2-3-g2befb74"
     },
     "config": {
-      "_": [
-        "http://localhost:8000/testpage.html"
-      ],
+      "_": ["http://localhost:8000/testpage.html"],
       "overwrite": true,
       "max": 0,
       "sleep": 3000,
@@ -472,14 +468,10 @@
     },
     "preset_cookies": {}
   },
-  "browsing_history": [
-    "http://localhost:8000/testpage.html"
-  ],
+  "browsing_history": ["http://localhost:8000/testpage.html"],
   "hosts": {
     "requests": {
-      "firstParty": [
-        "localhost"
-      ],
+      "firstParty": ["localhost"],
       "thirdParty": [
         "getbootstrap.com",
         "code.jquery.com",
@@ -509,25 +501,15 @@
     },
     "cookies": {
       "firstParty": [],
-      "thirdParty": [
-        "localhost",
-        "youtube.com"
-      ]
+      "thirdParty": ["localhost", "youtube.com"]
     },
     "localStorage": {
       "firstParty": [],
       "thirdParty": []
     },
     "links": {
-      "firstParty": [
-        "localhost"
-      ],
-      "thirdParty": [
-        "localhost",
-        "facebook.com",
-        "google.com",
-        "instagram.com"
-      ]
+      "firstParty": ["localhost"],
+      "thirdParty": ["localhost", "facebook.com", "google.com", "instagram.com"]
     },
     "contentSecurityPolicy": {
       "firstParty": [],
