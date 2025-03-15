@@ -10,6 +10,9 @@ The tool _Website Evidence Collector_ (WEC) automates the website evidence colle
 
 </div>
 
+# Fork notice
+This repository is a fork of WEC found at https://code.europa.eu/EDPS/website-evidence-collector.
+
 ## Table of Contents
 
 - [Quick Start](#-quick-start)
