@@ -110,11 +110,6 @@ async function runReporter(args: ParsedArgsReporter) {
     args.officeTemplate ||
     path.join(__dirname, "../assets/template-office.pug");
 
-  let jsondir = path.relative(
-    args.outputFile ? path.dirname(args.outputFile) : process.cwd(),
-    path.dirname(args.inspectionJsonPath),
-  ); // path of the inspection.json
-
   // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
   // source of this call: https://github.com/markedjs/marked-custom-heading-id/blob/main/src/index.js (MIT License, Copyright (c) 2021 @markedjs)
   marked.use({
@@ -143,7 +138,6 @@ async function runReporter(args: ParsedArgsReporter) {
     Object.assign({}, output, {
       pretty: true,
       basedir: path.resolve(path.join(__dirname, "../assets")), // determines root director for pug
-      jsondir: jsondir || ".",
       // expose some libraries to pug templates
       groupBy: groupBy,
       marked: marked, // we need to pass the markdown engine to template for access at render-time (as opposed to comile time), see https://github.com/pugjs/pug/issues/1171

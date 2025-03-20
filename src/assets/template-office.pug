@@ -60,20 +60,18 @@ html(xmlns="http://www.w3.org/1999/xhtml", xml:lang="en", lang="en")
     if script.config.screenshots
       figure
         img(id="fig:screenshot-top",
-          src=`${jsondir}/screenshot-top.png`,
+          src=`data:image/png;base64,${screenshots.screenshot_top}`,
           alt="Web page top screenshot",
           style="width: 100%"
         )
-        figcaption Web page top screenshot
-
+      p Web page top screenshot
       figure
         img(id="fig:screenshot-bottom",
-          src=`${jsondir}/screenshot-bottom.png`,
+          src=`data:image/png;base64,${screenshots.screenshot_bottom}`,
           alt="Web page bottom screenshot",
           style="width: 100%"
         )
-        figcaption Web page bottom screenshot
-
+      p Web page bottom screenshot
     h2(id="sec:use-of-httpsssl") Use of HTTPS/SSL
 
     p HTTP (Hypertext Transfer Protocol) is a communication standard that transmits data between a website and a user’s browser in an unencrypted format, making it vulnerable to interception and eavesdropping. In contrast, HTTPS (Hypertext Transfer Protocol Secure) extends HTTP by adding an extra layer of security through encryption, which protects the confidentiality and integrity of the data exchanged between a website and a user’s browser.
