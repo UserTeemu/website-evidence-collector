@@ -289,8 +289,8 @@ html(xmlns="http://www.w3.org/1999/xhtml", xml:lang="en", lang="en")
     else
       if hosts.contentSecurityPolicy.firstParty.length > 0
         ol
+          // check if host looks like a host (instead of e.g blob: data: etc.)
           each host in hosts.contentSecurityPolicy.firstParty
-            // check if host looks like a host (instead of e.g blob: data: etc.)
             if host.match(/[^\.]+\.[^\.]+/)
               li: a(href=`http://${host}`)= host
             else
