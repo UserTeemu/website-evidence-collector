@@ -97,7 +97,6 @@ export class Reporter {
       Object.assign({}, data, {
         pretty: true,
         basedir: path.join(__dirname, "../assets"),
-        jsondir: ".", // images in the folder of the inspection.json
         groupBy: groupBy,
         marked: marked, // we need to pass the markdown engine to template for access at render-time (as opposed to comile time), see https://github.com/pugjs/pug/issues/1171
         fs: fs,
@@ -126,9 +125,15 @@ export class Reporter {
     pdffilename = "inspection.pdf",
   ) {
     if (this.args.pdf && this.args.outputPath) {
-      let content = fs.readFileSync(path.resolve(path.join(this.args.outputPath, htmlfilename)), "utf8");
+      let content = fs.readFileSync(
+        path.resolve(path.join(this.args.outputPath, htmlfilename)),
+        "utf8",
+      );
       let pdfBuffer = await this.convertHtmlToPdfInMemory(content);
-      fs.writeFileSync(path.resolve(path.join(this.args.outputPath, pdffilename)), pdfBuffer);
+      fs.writeFileSync(
+        path.resolve(path.join(this.args.outputPath, pdffilename)),
+        pdfBuffer,
+      );
     }
   }
 

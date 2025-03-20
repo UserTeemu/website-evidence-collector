@@ -57,8 +57,8 @@ export default {
       .nargs("extra-file", 1)
       .alias("extra-file", "e")
       .array("extra-file")
-      .coerce("extra-file", (files) => {
-        return files.map((file) => {
+      .coerce("extra-file", (files: string[]) => {
+        return files.map((file: string) => {
           if (
             file.toLowerCase().endsWith(".yaml") ||
             file.toLowerCase().endsWith(".yml")
@@ -83,24 +83,9 @@ export default {
         return true;
       });
   },
-  handler: async (argv: ParsedArgsReporter) =>
-    await runReporter(transformArgsToObject(argv)),
+  handler: async (argv: any) => await runReporter(transformArgsToObject(argv)),
 };
 
-function transformArgsToObject(parsingResult): ParsedArgsReporter {
-  return {
-    _: parsingResult._ as string[],
-    inspectionJsonPath: parsingResult._[1] as string,
-    outputFile: parsingResult["output"] as string,
-    htmlTemplate: parsingResult["htmlTemplate"] as string | undefined,
-    officeTemplate: parsingResult["officeTemplate"] as string | undefined,
-    extraFile: parsingResult["extraFile"] as string | undefined,
-    usePandoc: parsingResult["usePandoc"] as boolean | undefined,
-    command: parsingResult["command"] as string,
-  };
-}
-
-/// Code that gets called when invoking the reporter command using the CLI
 async function runReporter(args: ParsedArgsReporter) {
   let output = JSON.parse(fs.readFileSync(args.inspectionJsonPath, "utf8"));
 
@@ -109,11 +94,6 @@ async function runReporter(args: ParsedArgsReporter) {
   let office_template =
     args.officeTemplate ||
     path.join(__dirname, "../assets/template-office.pug");
-
-  let jsondir = path.relative(
-    args.outputFile ? path.dirname(args.outputFile) : process.cwd(),
-    path.dirname(args.inspectionJsonPath),
-  ); // path of the inspection.json
 
   // it is surprising that https://github.com/jstransformers/jstransformer-marked picks up this object (undocumented API)
   // source of this call: https://github.com/markedjs/marked-custom-heading-id/blob/main/src/index.js (MIT License, Copyright (c) 2021 @markedjs)
@@ -143,7 +123,6 @@ async function runReporter(args: ParsedArgsReporter) {
     Object.assign({}, output, {
       pretty: true,
       basedir: path.resolve(path.join(__dirname, "../assets")), // determines root director for pug
-      jsondir: jsondir || ".",
       // expose some libraries to pug templates
       groupBy: groupBy,
       marked: marked, // we need to pass the markdown engine to template for access at render-time (as opposed to comile time), see https://github.com/pugjs/pug/issues/1171
@@ -155,7 +134,7 @@ async function runReporter(args: ParsedArgsReporter) {
         "utf8",
       ),
       inspection: output,
-      extra: args.extraFile,
+      extra: args.extraFiles,
       filterOptions: { marked: {} },
     }),
   );
@@ -258,14 +237,23 @@ async function generatePdf(outputFile: string, html_dump: string) {
   });
   await browser.close();
 }
-
+function transformArgsToObject(parsingResult: any): ParsedArgsReporter {
+  return {
+    _: parsingResult._ as string[],
+    inspectionJsonPath: parsingResult._[1] as string,
+    outputFile: parsingResult["outputFile"] as string,
+    htmlTemplate: parsingResult["htmlTemplate"] as string | undefined,
+    officeTemplate: parsingResult["officeTemplate"] as string | undefined,
+    extraFiles: parsingResult["extraFile"] as string[] | undefined,
+    usePandoc: parsingResult["usePandoc"] as boolean | undefined,
+  };
+}
 interface ParsedArgsReporter {
   _: (string | number)[];
-  command: string;
   inspectionJsonPath: string;
   outputFile?: string;
   htmlTemplate?: string;
   officeTemplate?: string;
-  extraFile?: string;
+  extraFiles?: string[];
   usePandoc?: boolean;
 }
