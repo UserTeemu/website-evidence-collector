@@ -57,8 +57,8 @@ export default {
       .nargs("extra-file", 1)
       .alias("extra-file", "e")
       .array("extra-file")
-      .coerce("extra-file", (files) => {
-        return files.map((file) => {
+      .coerce("extra-file", (files: string[]) => {
+        return files.map((file: string) => {
           if (
             file.toLowerCase().endsWith(".yaml") ||
             file.toLowerCase().endsWith(".yml")
@@ -83,24 +83,9 @@ export default {
         return true;
       });
   },
-  handler: async (argv: ParsedArgsReporter) =>
-    await runReporter(transformArgsToObject(argv)),
+  handler: async (argv: any) => await runReporter(transformArgsToObject(argv)),
 };
 
-function transformArgsToObject(parsingResult): ParsedArgsReporter {
-  return {
-    _: parsingResult._ as string[],
-    inspectionJsonPath: parsingResult._[1] as string,
-    outputFile: parsingResult["output"] as string,
-    htmlTemplate: parsingResult["htmlTemplate"] as string | undefined,
-    officeTemplate: parsingResult["officeTemplate"] as string | undefined,
-    extraFile: parsingResult["extraFile"] as string | undefined,
-    usePandoc: parsingResult["usePandoc"] as boolean | undefined,
-    command: parsingResult["command"] as string,
-  };
-}
-
-/// Code that gets called when invoking the reporter command using the CLI
 async function runReporter(args: ParsedArgsReporter) {
   let output = JSON.parse(fs.readFileSync(args.inspectionJsonPath, "utf8"));
 
@@ -149,7 +134,7 @@ async function runReporter(args: ParsedArgsReporter) {
         "utf8",
       ),
       inspection: output,
-      extra: args.extraFile,
+      extra: args.extraFiles,
       filterOptions: { marked: {} },
     }),
   );
@@ -252,14 +237,23 @@ async function generatePdf(outputFile: string, html_dump: string) {
   });
   await browser.close();
 }
-
+function transformArgsToObject(parsingResult: any): ParsedArgsReporter {
+  return {
+    _: parsingResult._ as string[],
+    inspectionJsonPath: parsingResult._[1] as string,
+    outputFile: parsingResult["outputFile"] as string,
+    htmlTemplate: parsingResult["htmlTemplate"] as string | undefined,
+    officeTemplate: parsingResult["officeTemplate"] as string | undefined,
+    extraFiles: parsingResult["extraFile"] as string[] | undefined,
+    usePandoc: parsingResult["usePandoc"] as boolean | undefined,
+  };
+}
 interface ParsedArgsReporter {
   _: (string | number)[];
-  command: string;
   inspectionJsonPath: string;
   outputFile?: string;
   htmlTemplate?: string;
   officeTemplate?: string;
-  extraFile?: string;
+  extraFiles?: string[];
   usePandoc?: boolean;
 }
