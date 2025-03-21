@@ -1,11 +1,24 @@
 import { Reporter, ReporterArguments } from "../reporter/reporter.js";
 import { Collector } from "../collector/index.js";
 import Inspector from "../inspector/inspector.js";
-import { Cookie, StartCollectionRequestBody } from "./server.js";
+import { Cookie } from "./server.js";
 import { Logger } from "winston";
 
+export interface RunCollectionArguments {
+  website_url: string;
+  max_additional_links: number;
+  post_page_load_delay_milliseconds: number;
+  timeout_milliseconds: number;
+  first_party_uris: string[];
+  links_to_include: string[];
+  link_selection_seed: string;
+  run_testSSL: boolean;
+  cookies: Cookie[];
+  use_DNT: boolean;
+}
+
 export async function runCollection(
-  args: StartCollectionRequestBody,
+  args: RunCollectionArguments,
   browser_options: any[],
   logger: Logger,
 ): Promise<{}> {
@@ -25,7 +38,7 @@ export async function runCollection(
   return inspector.run();
 }
 
-export async function generateHtmlAndPdf(inspectionOutput) {
+export async function generateHtmlAndPdf(inspectionOutput, extraOuptut?) {
   let reporterArgs: ReporterArguments = {
     html: true,
     pdf: true,
@@ -36,7 +49,13 @@ export async function generateHtmlAndPdf(inspectionOutput) {
   };
 
   const reporter = new Reporter(reporterArgs);
-  let html = reporter.generateHtml(inspectionOutput, "inspection.html", false);
+  let html = reporter.generateHtml(
+    inspectionOutput,
+    "inspection.html",
+    false,
+    extraOuptut ? "path/to/alternative/template" : undefined,
+    extraOuptut,
+  );
   let pdfBuffer = await reporter.convertHtmlToPdfInMemory(html);
   return {
     html: html,
@@ -44,27 +63,26 @@ export async function generateHtmlAndPdf(inspectionOutput) {
   };
 }
 
+/**
+ * Constructs a JSON object containing all Arguments as it is expected by the underlying implementation.
+ */
 function sanitizeInputAndConstructCollectionArgs(
-  args: StartCollectionRequestBody,
+  args: RunCollectionArguments,
   browser_options: any[],
 ): {} {
-  let sleepOption = isEmptyNumber(args.sleep_option_input)
+  let sleepOption = isEmptyNumber(args.post_page_load_delay_milliseconds)
     ? 3000
-    : args.sleep_option_input;
-  let pageTimeout = isEmptyNumber(args.timeout_input_option)
+    : args.post_page_load_delay_milliseconds;
+  let pageTimeout = isEmptyNumber(args.timeout_milliseconds)
     ? 0
-    : args.timeout_input_option;
-  let maxLinks = isEmptyNumber(args.max_option_input)
+    : args.timeout_milliseconds;
+  let maxLinks = isEmptyNumber(args.max_additional_links)
     ? 0
-    : args.max_option_input;
+    : args.max_additional_links;
 
   // Links and URIs can be null when send by the backend. Therefore, we filter.
-  let browseLinks = args.browse_link_option_input.filter(
-    (value) => value != null,
-  );
-  let firstPartyUris = args.first_party_uri_option_input.filter(
-    (value) => value != null,
-  );
+  let browseLinks = args.links_to_include.filter((value) => value != null);
+  let firstPartyUris = args.first_party_uris.filter((value) => value != null);
 
   // Check that Links are URLs and FirstPartyUris only consist of domains.
   let areAllExtraLinksUrls = browseLinks.every((link: string) =>
@@ -81,7 +99,7 @@ function sanitizeInputAndConstructCollectionArgs(
     throw new Error("Not all extra links are invalid.");
   }
 
-  let sanitizedCookies = args.cookie_input
+  let sanitizedCookies = args.cookies
     .filter((cookie: Cookie) => cookie.value != null && cookie.key != null)
     .filter(
       (cookie: Cookie) =>
@@ -116,12 +134,12 @@ function sanitizeInputAndConstructCollectionArgs(
     sleep: sleepOption,
     firstPartyUri: firstPartyUris,
     pageTimeout: pageTimeout,
-    testssl: args.testssl_input_option,
-    seed: args.seed_option_input,
+    testssl: args.run_testSSL,
+    seed: args.link_selection_seed,
     setCookie: cookieString,
     headless: true,
     screenshots: true,
-    dnt: false,
+    dnt: args.use_DNT,
     dntJs: false,
     output: undefined,
     overwrite: false,

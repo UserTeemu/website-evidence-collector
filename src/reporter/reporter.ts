@@ -88,6 +88,7 @@ export class Reporter {
     filename = "inspection.html",
     log = true,
     template = "../assets/template.pug",
+    extraData?,
   ) {
     const html_template =
       this.args["html-template"] || path.join(__dirname, template);
@@ -106,6 +107,7 @@ export class Reporter {
           require.resolve("github-markdown-css/github-markdown.css"),
         ),
         filterOptions: { marked: {} },
+        extra: extraData,
       }),
     );
 

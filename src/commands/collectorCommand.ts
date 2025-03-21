@@ -173,7 +173,7 @@ export default {
   handler: async (argv) => await runCollector(argv),
 };
 
-async function runCollector(args: ParsedArgsCollector): Promise<any> {
+async function runCollector(args: CollectorCommandArguments): Promise<any> {
   const logger = create({}, args.output);
 
   const collector = new Collector(args, logger);
@@ -215,7 +215,7 @@ async function runCollector(args: ParsedArgsCollector): Promise<any> {
   return inspectionResult;
 }
 
-interface ParsedArgsCollector {
+interface CollectorCommandArguments {
   _: (string | number)[];
   command: string;
   max: number;

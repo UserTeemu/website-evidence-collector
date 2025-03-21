@@ -18,11 +18,15 @@
           />
           <TextElement
             name="website_url"
-            :rules="['required']"
+            field-name="url"
+            :rules="['required', 'url']"
             input-type="url"
+            :debounce="500"
             placeholder="http://example.com"
+            :floating="false"
             :columns="{ lg: { container: 12 } }"
-            label="Website to scan"
+            label="Website for collection (mandatory)"
+            info="Enter the URL of the website you want to collect evidence from, e.g., `http://example.com`"
           />
           <GroupElement name="container2_1">
             <GroupElement
@@ -30,15 +34,16 @@
               :columns="{ default: { container: 8 } }"
             >
               <TextElement
-                name="max_option_input"
+                name="max_additional_links"
                 input-type="number"
-                :rules="['nullable', 'min:0', 'max:150', 'integer']"
+                onkeydown="return (!(event.key === 'e' || event.key === '+' || event.key === '.'))"
+                :rules="['required', 'nullable', 'min:0', 'max:150', 'integer']"
                 label="Maximum additional links to browse"
                 autocomplete="off"
                 placeholder="0"
                 default="0"
                 :floating="false"
-                info="The maximum number of links that will be browsed."
+                info="Set the maximum number of additional links to browse beyond the specified URLs"
               />
             </GroupElement>
             <GroupElement
@@ -46,8 +51,10 @@
               :columns="{ default: { container: 4 } }"
             >
               <ToggleElement
-                label="Run with TestSSL"
-                name="testssl_input_option"
+                label="Check the security of the encrypted connection"
+                name="run_testSSL"
+                info="Enable this option to assess the website's SSL/TLS configuration"
+                info-position="left"
               />
             </GroupElement>
           </GroupElement>
@@ -55,46 +62,56 @@
           <GroupElement name="container2">
             <GroupElement name="column1" :columns="{ container: 6 }">
               <TextElement
-                name="sleep_option_input"
+                name="post_page_load_delay_seconds"
                 input-type="number"
-                label="Delay After Page Load"
-                :rules="['nullable', 'min:0', 'integer']"
+                label="Delay after page load"
+                onkeydown="return (!(event.key === 'e' || event.key === '+' || event.key === '.'))"
+                :rules="['nullable', 'min:1', 'integer']"
+                :messages="{
+                  min: 'A minimum delay of 1 second is necessary to ensure the program has enough time to load the page',
+                }"
                 autocomplete="off"
-                info="Amount of sleep in milliseconds after a page load"
-                placeholder="3000"
-                default="3000"
+                info="Specify the time (in seconds) to wait after each page load"
+                placeholder="3"
+                default="3"
                 :floating="false"
-                :addons="{ after: 'milliseconds' }"
+                :addons="{ after: 'seconds' }"
               />
             </GroupElement>
             <GroupElement name="column2" :columns="{ container: 6 }">
               <TextElement
-                name="timout_input_option"
-                label="Page Load Timeout"
+                name="timeout_seconds"
+                label="Page load timeout"
                 input-type="number"
+                onkeydown="return (!(event.key === 'e' || event.key === '+' || event.key === '.'))"
                 :rules="['nullable', 'min:0', 'integer']"
                 autocomplete="off"
-                info="Page load imeout in milliseconds "
+                info="Set the timeout (in seconds) for page loads. Set to 0 to disable the timeout"
+                info-position="left"
                 placeholder="0"
                 :floating="false"
                 default="0"
-                :addons="{ after: 'milliseconds' }"
+                :addons="{ after: 'seconds' }"
                 :attrs="{ 'hide-spin-buttons': 'true' }"
               />
             </GroupElement>
           </GroupElement>
           <TextElement
-            name="seed_option_input"
+            name="link_selection_seed"
             label="Seed for deterministic link selection"
+            info="The software randomly samples links from the website. Setting a seed value ensures you get the same random sample each time – useful for reproducible results."
             placeholder="no seed"
             autocomplete="off"
             :floating="false"
           />
           <ListElement
-            :add-class="{ container: ['bg-slate-50', 'p-2', 'rounded-md'] }"
-            name="first_party_uri_option_input"
+            :add-class="{
+              container: ['bg-eu-neutral-40', 'p-2', 'rounded-md'],
+            }"
+            name="first_party_uris"
             add-text="+ Add URI"
-            label="URIs considered First-Party"
+            label="URIs considered first party"
+            info="Add URIs that should be considered as first-party for the collected website"
           >
             <!-- @vue-ignore -->
             <template #default="{ index }">
@@ -102,21 +119,30 @@
                 :name="index"
                 input-type="url"
                 placeholder="http://www.example.com"
+                :debounce="500"
+                :floating="false"
+                field-name="uri"
                 :rules="['url', 'nullable']"
               />
             </template>
           </ListElement>
           <ListElement
-            :add-class="{ container: ['bg-slate-50', 'p-2', 'rounded-md'] }"
-            name="browse_link_option_input"
-            label="Links to include in collection"
-            add-text="+ Add Link"
+            :add-class="{
+              container: ['bg-eu-neutral-40', 'p-2', 'rounded-md'],
+            }"
+            name="links_to_include"
+            label="Web pages to include in collection"
+            add-text="+ Add web page"
+            info="Add specific pages to include in the collection process"
           >
             <!-- @vue-ignore -->
             <template #default="{ index }">
               <TextElement
                 :name="index"
                 input-type="url"
+                field-name="link"
+                :debounce="500"
+                :floating="false"
                 placeholder="http://example.com/test.html"
                 :rules="['url', 'nullable']"
               />
@@ -124,10 +150,13 @@
           </ListElement>
           <GroupElement
             name="cookies"
-            :add-class="{ container: ['bg-slate-50', 'p-2', 'rounded-md'] }"
+            :add-class="{
+              container: ['bg-eu-neutral-40', 'p-2', 'rounded-md'],
+            }"
           >
             <MatrixElement
-              name="cookie_input"
+              name="cookies"
+              info="Set cookies that will be used by the browser during the evidence collection process"
               :cols="[
                 {
                   label: 'Key',
@@ -148,7 +177,7 @@
               :input-type="{
                 type: 'text',
               }"
-              add-text="+ Add Cookie"
+              add-text="+ Add cookie"
               label="Cookies"
             />
           </GroupElement>
@@ -427,7 +456,7 @@ const downloadHtml = () => {
   --vf-primary: #3860ed;
   --vf-primary-darker: #0a1f6c;
   --vf-color-on-primary: #ffffff;
-  --vf-danger: #ffffff;
+  --vf-danger: #da1e28;
   --vf-danger-lighter: #da1e28;
   --vf-success: #ffffff;
   --vf-success-lighter: #24a148;
@@ -594,7 +623,7 @@ const downloadHtml = () => {
   --vf-bg-checkbox-success: #ffffff;
   --vf-bg-disabled: var(--vf-gray-200);
   --vf-bg-selected: #1118270d;
-  --vf-bg-passive: var(--vf-gray-300);
+  --vf-bg-passive: var(--vf-gray-400);
   --vf-bg-icon: var(--vf-gray-500);
   --vf-bg-danger: var(--vf-danger-lighter);
   --vf-bg-success: var(--vf-success-lighter);
