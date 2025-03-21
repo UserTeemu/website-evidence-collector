@@ -74,6 +74,12 @@ export interface CollectorOutput {
   websockets: any;
   start_time: Date;
   end_time: Date | null;
+  websocketLog?: any;
+  screenshots?: {
+    screenshot_top: string;
+    screenshot_bottom: string;
+    screenshot_full: string;
+  };
 }
 
 export function createOutputObject(args: CreateOutputArgs): CollectorOutput {

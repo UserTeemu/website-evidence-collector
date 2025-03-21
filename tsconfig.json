@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./build",
+    "declaration": true,
     "allowJs": true,
     "target": "es2020",
     "moduleResolution": "nodenext",
