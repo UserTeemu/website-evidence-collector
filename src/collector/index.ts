@@ -1,5 +1,9 @@
 import { createOutputDirectory } from "./io.js";
-import { CreateOutputArgs, createOutputObject } from "./output.js";
+import {
+  CollectorOutput,
+  CreateOutputArgs,
+  createOutputObject,
+} from "./output.js";
 
 import { testSSL, testHttps } from "./connection.js";
 import {
@@ -17,13 +21,13 @@ import { Logger } from "winston";
 import { PageSession } from "./page-session.js";
 
 export interface CollectionResult {
-  output: any;
+  output: CollectorOutput;
   pageSession: PageSession;
   source: string;
 }
 
 export class Collector {
-  private output: any;
+  private output: CollectorOutput;
   private browserSession: BrowserSession;
   private pageSession: PageSession;
   private logger: Logger;

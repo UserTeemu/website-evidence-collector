@@ -6,7 +6,11 @@ import express, {
   Router,
 } from "express";
 import bodyParser from "body-parser";
-import { generateHtmlAndPdf, runCollection } from "./runCollection.js";
+import {
+  generateHtmlAndPdf,
+  runCollection,
+  RunCollectionArguments,
+} from "./runCollection.js";
 import path from "path";
 import { create } from "../lib/logger.js";
 import crypto from "crypto";
@@ -81,32 +85,42 @@ function configureRoutes(browser_options: any[]): Router {
       let requestId = crypto.randomBytes(16).toString("hex");
       let requestLogger = create({}, undefined, { request_id: requestId });
 
+      const runCollectionArgs: RunCollectionArguments = {
+        website_url: req.body.website_url,
+        max_additional_links: req.body.max_additional_links,
+        post_page_load_delay_milliseconds: Math.floor(
+          req.body.post_page_load_delay_seconds / 1000,
+        ),
+        timeout_milliseconds: Math.floor(req.body.timeout_seconds / 1000),
+        first_party_uris: req.body.first_party_uris,
+        links_to_include: req.body.links_to_include,
+        link_selection_seed: req.body.link_selection_seed,
+        run_testSSL: req.body.run_testSSL,
+        cookies: req.body.cookies,
+        use_DNT: false,
+      };
+
       try {
-        const website_url = req.body.website_url;
         requestLogger.info(`Received /start-collection request`, {
-          website_url: req.body.website_url,
-          max_links_option: req.body.max_option_input,
-          sleep_option_input: req.body.sleep_option_input,
-          timeout_input_option: req.body.timeout_input_option,
-          first_party_uri_option_input: req.body.first_party_uri_option_input,
-          browse_link_option_input: req.body.browse_link_option_input,
-          seed_option_input: req.body.seed_option_input,
-          testssl_input_option: req.body.testssl_input_option,
-          cookie_input: req.body.cookie_input,
+          ...runCollectionArgs,
         });
 
-        if (!URL.canParse(website_url)) {
+        if (!URL.canParse(runCollectionArgs.website_url)) {
           res.status(400).send({ reason: "malformatted_url" });
           return;
         }
 
-        requestLogger.log("info", `Running collection for: ${website_url}`);
+        requestLogger.log(
+          "info",
+          `Running collection for: ${runCollectionArgs.website_url}`,
+        );
 
         let collectionOutput = await runCollection(
-          req.body,
+          runCollectionArgs,
           browser_options,
           requestLogger,
         );
+
         let htmlAndPdf = await generateHtmlAndPdf(collectionOutput);
         res.send(htmlAndPdf);
         requestLogger.info("Finished serving request");
@@ -141,14 +155,14 @@ function handleShutdownSignal(signal: string) {
 
 export interface StartCollectionRequestBody {
   website_url: string;
-  max_option_input: number;
-  sleep_option_input: number;
-  timeout_input_option: number;
-  first_party_uri_option_input: string[];
-  browse_link_option_input: string[];
-  seed_option_input: string;
-  testssl_input_option: boolean;
-  cookie_input: Cookie[];
+  max_additional_links: number;
+  post_page_load_delay_seconds: number;
+  timeout_seconds: number;
+  first_party_uris: string[];
+  links_to_include: string[];
+  link_selection_seed: string;
+  run_testSSL: boolean;
+  cookies: Cookie[];
 }
 
 export interface Cookie {

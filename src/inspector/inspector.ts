@@ -5,12 +5,13 @@ import { isFirstParty } from "../lib/tools.js";
 import { PageSession } from "../collector/page-session.js";
 import { CollectedCookie } from "../collector/recorder/cookie-recorder.js";
 import { EnhancedCookie } from "../collector/collector_inspector.js";
+import { CollectorOutput } from "../collector/output.js";
 
 class Inspector {
   private output: any;
   private pageSession: PageSession;
 
-  constructor(pageSession: PageSession, output: any) {
+  constructor(pageSession: PageSession, output: CollectorOutput) {
     this.output = output;
     this.pageSession = pageSession;
   }
