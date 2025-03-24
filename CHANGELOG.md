@@ -1,6 +1,10 @@
 ## HEAD
 
-- Changes are introduced to avoid the "Execution context was destroyed" error
+## 3.2.0 / 2025-03-24
+
+- Changes are introduced to avoid the "Execution context was destroyed" error when surfing to a website
+- Update reporting templates
+- Update dependencies
 
 ## 3.1.1 / 2025-02-19
 
