@@ -10,6 +10,7 @@ import { create } from "../lib/logger.js";
 import { CollectionResult, Collector } from "../collector/index.js";
 import Inspector from "../inspector/inspector.js";
 import { Reporter, ReporterArguments } from "../reporter/reporter.js";
+import {Logger} from "winston";
 
 let collectorCommand = "collect";
 
@@ -172,12 +173,10 @@ export default {
         return "Error: You must provide a valid URI with protocol HTTP, HTTPS or FILE.";
       });
   },
-  handler: async (argv) => await runCollector(argv),
+  handler: async (argv) => await runCollector(argv, create({}, argv.output)),
 };
 
-async function runCollector(args: CollectorCommandArguments): Promise<any> {
-  const logger = create({}, args.output);
-
+export async function runCollector(args: CollectorCommandArguments, logger: Logger): Promise<any> {
   const collector = new Collector(args, logger);
   const collectionResult: CollectionResult = await collector.run();
 
