@@ -13,6 +13,7 @@ import {
 interface TestSslArgs {
   testssl?: boolean;
   testsslExecutable?: string;
+  testsslOs: "system" | "posix" | "win32";
   output?: string;
   testsslFile?: string;
 }
@@ -42,6 +43,8 @@ export async function testSSL(
     let uri_ins_https = new url.URL(uri);
     uri_ins_https.protocol = "https:";
 
+    let pathOS = getPathOS(args);
+
     let testsslExecutable = args.testsslExecutable || "testssl.sh";
     let testsslArgs = [
       "--ip one",
@@ -64,15 +67,24 @@ export async function testSSL(
       );
     }
 
+    let outputDir = args.output;
+    if (args.testsslOs !== "system" && outputDir) {
+      // If testssl.sh should be formatted for some other system,
+      // the path is made relative (mainly just to remove any Windows drive letters causing issues on Linux)
+      // and the directory separators are changed.
+      // A simple .replace won't work here because all occurrences need to be changed and we aren't yet using ES2021 so there is no .replaceAll.
+      outputDir = path.relative(process.cwd(), outputDir).split(path.sep).join(pathOS.sep);
+    }
+
     let json_file: string;
 
-    if (args.output) {
-      let output_testssl = path.join(args.output, "testssl");
+    if (outputDir) {
+      let output_testssl = pathOS.join(outputDir, "testssl");
       fs.mkdirSync(output_testssl);
 
-      json_file = `${output_testssl}/testssl.json`;
-      testsslArgs.push(`--htmlfile ${output_testssl}/testssl.html`);
-      testsslArgs.push(`--logfile ${output_testssl}/testssl.log`);
+      json_file = pathOS.join(output_testssl, "testssl.json");
+      testsslArgs.push(`--htmlfile ${pathOS.join(output_testssl, "testssl.html")}`);
+      testsslArgs.push(`--logfile ${pathOS.join(output_testssl, "testssl.log")}`);
     } else {
       json_file = path.join(os.tmpdir(), `testssl.${Date.now()}.json`);
     }
@@ -160,5 +172,16 @@ export async function testHttps(
     logger.error(`testHttps: ${error.toString()}`);
     logger.error("testHttps:", { error });
     output.secure_connection.http_error = error.toString();
+  }
+}
+
+function getPathOS(args: TestSslArgs) {
+  switch (args.testsslOs) {
+    case "posix":
+      return path.posix;
+    case "win32":
+      return path.win32;
+    case "system":
+      return path;
   }
 }

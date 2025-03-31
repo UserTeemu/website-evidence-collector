@@ -139,11 +139,21 @@ export default {
       )
       .nargs("testssl-executable", 1)
       .string("testssl-executable")
+      .describe(
+          "testssl-os",
+          "Override the OS for which the testssl.sh arguments containing file paths will be formatted. " +
+          "This option is not applied if there is no output directory. " +
+          "Useful when testssl.sh is ran in a different environment than WEC."
+      )
+      .nargs("testssl-os", 1)
+      .choices("testssl-os", ["system", "posix", "win32"])
+      .default("testssl-os", "system")
       .describe("testssl-file", "include [JSON FILE] from TestSSL.sh in output")
       .string("testssl-file")
       .nargs("testssl-file", 1)
       .conflicts("testssl-file", "testssl")
       .conflicts("testssl-file", "testssl-executable")
+      .conflicts("testssl-file", "testssl-fs-platform")
       .describe("lang", "Change the browser language")
       .default("lang", "en")
       .describe(
