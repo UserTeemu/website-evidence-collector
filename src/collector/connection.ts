@@ -83,13 +83,13 @@ export async function testSSL(
       fs.mkdirSync(output_testssl);
 
       json_file = pathOS.join(output_testssl, "testssl.json");
-      testsslArgs.push(`--htmlfile ${pathOS.join(output_testssl, "testssl.html")}`);
-      testsslArgs.push(`--logfile ${pathOS.join(output_testssl, "testssl.log")}`);
+      testsslArgs.push(`--htmlfile "${pathOS.join(output_testssl, "testssl.html")}"`);
+      testsslArgs.push(`--logfile "${pathOS.join(output_testssl, "testssl.log")}"`);
     } else {
       json_file = path.join(os.tmpdir(), `testssl.${Date.now()}.json`);
     }
 
-    testsslArgs.push(`--jsonfile-pretty ${json_file}`);
+    testsslArgs.push(`--jsonfile-pretty "${json_file}"`);
     testsslArgs.push(uri_ins_https.toString());
 
     try {
