@@ -148,6 +148,10 @@ export default {
       .nargs("testssl-os", 1)
       .choices("testssl-os", ["system", "posix", "win32"])
       .default("testssl-os", "system")
+      .describe("testssl-extra-args", "a string of extra arguments (delimited by spaces) that will be passed to testssl.sh")
+      .nargs("testssl-extra-args", 1)
+      .string("testssl-extra-args") // TODO: maybe `array` should be used here instead?
+      .default("testssl-extra-args", "")
       .describe("testssl-file", "include [JSON FILE] from TestSSL.sh in output")
       .string("testssl-file")
       .nargs("testssl-file", 1)
