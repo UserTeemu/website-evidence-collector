@@ -14,7 +14,7 @@ interface TestSslArgs {
   testssl?: boolean;
   testsslExecutable?: string;
   testsslOs: "system" | "posix" | "win32";
-  testsslExtraArgs: string;
+  testsslExtraArgs: string | string[];
   output?: string;
   testsslFile?: string;
 }
@@ -91,7 +91,11 @@ export async function testSSL(
     }
 
     testsslArgs.push(`--jsonfile-pretty "${json_file}"`);
-    testsslArgs.push(...args.testsslExtraArgs.split(" "));
+    if (typeof(args.testsslExtraArgs) === "string") {
+      testsslArgs.push(...args.testsslExtraArgs.split(" "));
+    } else {
+      testsslArgs.push(...args.testsslExtraArgs);
+    }
     testsslArgs.push(uri_ins_https.toString());
 
     try {
